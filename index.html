@@ -45,7 +45,8 @@
             flex-direction: column;
         }
         .btn-agregar-registro,
-        .btn-agregar-parada-op {
+        .btn-agregar-parada-op,
+        .btn-borrar-todo { /* 👈 Estilo para el nuevo botón */
             background-color: #001855;
             color: white;
             border: none;
@@ -57,7 +58,8 @@
             font-weight: bold;
         }
         .btn-agregar-registro:hover,
-        .btn-agregar-parada-op:hover {
+        .btn-agregar-parada-op:hover,
+        .btn-borrar-todo:hover { /* 👈 Hover para el nuevo botón */
             background-color: #0056b3;
         }
         label {
@@ -155,19 +157,20 @@
         <input type="hidden" name="form-name" value="formulario-pepsico" />
 
         <label for="lugar">Lugar de operación:</label>
-        <select name="lugar" id="lugar" required onchange="actualizarCampos()">
+        <select name="lugar" id="lugar" required onchange="actualizarCampos(); guardarEnLocalStorage()">
             <option value="">Seleccione una opción</option>
             <option value="Funza">Pepsico Funza</option>
         </select>
 
         <label for="lider">Líder Asignado:</label>
-        <input type="text" name="lider_asignado" id="lider" required placeholder="Primer Nombre y Primer Apellido">
+        <input type="text" name="lider_asignado" id="lider" required placeholder="Primer Nombre y Primer Apellido"
+            oninput="guardarEnLocalStorage()">
 
         <label for="coordinador">Coordinador Asignado:</label>
         <input type="text" name="coordinador" id="coordinador" readonly required>
 
         <label for="lider_pepsico">Líder De Pepsico:</label>
-        <select name="lider_pepsico" id="lider_pepsico" required>
+        <select name="lider_pepsico" id="lider_pepsico" required onchange="guardarEnLocalStorage()">
             <option value="">Seleccione un líder</option>
             <option value="Alejandro Ariza">Alejandro Ariza</option>
             <option value="Alejandro Monroy">Alejandro Monroy</option>
@@ -175,10 +178,10 @@
         </select>
 
         <label for="fecha">Fecha:</label>
-        <input type="date" name="fecha" id="fecha" required>
+        <input type="date" name="fecha" id="fecha" required onchange="guardarEnLocalStorage()">
 
         <label for="turno">Turno Asignado:</label>
-        <select name="turno" id="turno" required>
+        <select name="turno" id="turno" required onchange="guardarEnLocalStorage()">
             <option value="">Seleccione un turno</option>
             <option value="Manana">Mañana</option>
             <option value="Tarde">Tarde</option>
@@ -203,14 +206,19 @@
         <h3 style="text-align:center; font-size:1.1em; color:#296097;">TOTALES DE TURNO</h3>
         <label for="total_personas">Total Personas En El Turno:</label>
         <input type="number" name="total_personas" id="total_personas" min="1" required
-            placeholder="Total de empleados en el turno">
+            placeholder="Total de empleados en el turno" oninput="guardarEnLocalStorage()">
         <label for="cajas_totales">Total Cajas Movidas:</label>
         <input type="number" name="cajas_totales" id="cajas_totales" min="0" required
-            placeholder="Cantidad total de cajas movidas" oninput="actualizarTotalCajas()">
+            placeholder="Cantidad total de cajas movidas" oninput="actualizarTotalCajas(); guardarEnLocalStorage()">
         
         <!-- Campos ocultos para JSON -->
         <input type="hidden" name="datos_vehiculos" id="datos_vehiculos" value="">
         <input type="hidden" name="datos_paradas_operacion" id="datos_paradas_operacion" value="">
+        
+        <!-- 👇 BOTÓN "BORRAR TODO" -->
+        <button type="button" class="btn-borrar-todo" onclick="borrarTodo()">
+            🗑️ Borrar Todo
+        </button>
         
         <button type="submit">Enviar</button>
     </form>
@@ -218,6 +226,167 @@
     <script>
         let vehiculosData = [];
         let paradasOperacionData = [];
+        const STORAGE_KEY = 'formulario_pepsico_data';
+
+        // === UTILIDAD: convertir a mayúsculas si es texto ===
+        function toUpperCaseIfNeeded(value) {
+            if (typeof value === 'string') {
+                return value.toUpperCase();
+            }
+            return value;
+        }
+
+        // === GUARDAR EN LOCALSTORAGE ===
+        function guardarEnLocalStorage() {
+            try {
+                const formData = {
+                    lugar: document.getElementById('lugar').value,
+                    lider_asignado: document.getElementById('lider').value,
+                    coordinador: document.getElementById('coordinador').value,
+                    lider_pepsico: document.getElementById('lider_pepsico').value,
+                    fecha: document.getElementById('fecha').value,
+                    turno: document.getElementById('turno').value,
+                    total_personas: document.getElementById('total_personas').value,
+                    cajas_totales: document.getElementById('cajas_totales').value,
+                    vehiculos: vehiculosData,
+                    paradas: paradasOperacionData
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+            } catch (e) {
+                console.warn('No se pudo guardar en localStorage:', e);
+            }
+        }
+
+        // === CARGAR DE LOCALSTORAGE ===
+        function cargarDeLocalStorage() {
+            try {
+                const data = localStorage.getItem(STORAGE_KEY);
+                if (!data) return false;
+                const formData = JSON.parse(data);
+
+                // Restaurar campos fijos
+                document.getElementById('lugar').value = formData.lugar || '';
+                document.getElementById('lider').value = formData.lider_asignado || '';
+                document.getElementById('coordinador').value = formData.coordinador || '';
+                document.getElementById('lider_pepsico').value = formData.lider_pepsico || '';
+                document.getElementById('fecha').value = formData.fecha || '';
+                document.getElementById('turno').value = formData.turno || '';
+                document.getElementById('total_personas').value = formData.total_personas || '';
+                document.getElementById('cajas_totales').value = formData.cajas_totales || '';
+
+                // Restaurar vehículos
+                if (formData.vehiculos && Array.isArray(formData.vehiculos)) {
+                    vehiculosData = formData.vehiculos;
+                    renderizarVehiculos();
+                }
+
+                // Restaurar paradas
+                if (formData.paradas && Array.isArray(formData.paradas)) {
+                    paradasOperacionData = formData.paradas;
+                    renderizarParadas();
+                }
+
+                // Actualizar campos derivados
+                actualizarCampos();
+                actualizarTotalCajas();
+
+                return true;
+            } catch (e) {
+                console.warn('Error al cargar de localStorage:', e);
+                return false;
+            }
+        }
+
+        // 👇 === FUNCIÓN "BORRAR TODO" ===
+        function borrarTodo() {
+            if (!confirm("¿Está seguro de borrar todo el formulario?")) return;
+
+            // Resetear datos
+            vehiculosData = [];
+            paradasOperacionData = [];
+
+            // Limpiar campos generales
+            document.getElementById('lugar').value = '';
+            document.getElementById('lider').value = '';
+            document.getElementById('coordinador').value = '';
+            document.getElementById('lider_pepsico').value = '';
+            document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+            document.getElementById('turno').value = '';
+            document.getElementById('total_personas').value = '';
+            document.getElementById('cajas_totales').value = '';
+
+            // Limpiar contenedores
+            document.getElementById('vehiculos-contenedor').innerHTML = '';
+            document.getElementById('operacion-contenedor').innerHTML = '';
+
+            // Borrar de localStorage
+            localStorage.removeItem(STORAGE_KEY);
+
+            // Reiniciar con 1 vehículo y 1 parada
+            agregarRegistroVehiculo();
+            agregarCampoParada('operacion');
+
+            alert("✅ Todo ha sido borrado.");
+        }
+
+        // === RENDERIZAR PARADAS DESDE PARADASOPERACIONDATA ===
+        function renderizarParadas() {
+            const contenedor = document.getElementById('operacion-contenedor');
+            contenedor.innerHTML = '';
+            paradasOperacionData.forEach((data, index) => {
+                const div = document.createElement('div');
+                div.className = 'parada-group';
+                div.dataset.index = index;
+
+                const botonEliminar = document.createElement('button');
+                botonEliminar.type = 'button';
+                botonEliminar.className = 'btn-eliminar';
+                botonEliminar.textContent = 'Eliminar';
+                botonEliminar.onclick = function() {
+                    div.remove();
+                    // Actualizar índice visual
+                    const spans = contenedor.querySelectorAll('.numero-parada');
+                    spans.forEach((span, i) => span.textContent = i + 1);
+                };
+
+                const dInicio = `operacion-inicio-${index}`;
+                const dFin = `operacion-fin-${index}`;
+
+                div.innerHTML = `
+                    <p style="font-weight:bold; margin-top:0; color:#555;">🛑 Parada #<span class="numero-parada">${index + 1}</span> (Operación)</p>
+                    <div class="time-row">
+                        <div>
+                            <label class="time-label">Hora Inicio (HH:MM):</label>
+                            <input type="tel" name="parada_inicio_operacion_${index}" class="time-input-masked" 
+                                placeholder="HH:MM" maxlength="5" value="${data.inicio || ''}"
+                                onblur="applyTimeMask(this, '${dInicio}')">
+                            <span id="${dInicio}" class="time-display"></span>
+                        </div>
+                        <div>
+                            <label class="time-label">Hora Final (HH:MM):</label>
+                            <input type="tel" name="parada_fin_operacion_${index}" class="time-input-masked" 
+                                placeholder="HH:MM" maxlength="5" value="${data.fin || ''}"
+                                onblur="applyTimeMask(this, '${dFin}')">
+                            <span id="${dFin}" class="time-display"></span>
+                        </div>
+                    </div>
+                    <label style="margin-top:5px;">Motivo:</label>
+                    <select name="parada_motivo_operacion_${index}" onchange="manejarOtroCampo(this)">
+                        <option value="">Seleccione</option>
+                        <option value="pausas_activas" ${data.motivo === 'PAUSAS_ACTIVAS' ? 'selected' : ''}>Pausas Activas y/o Charla</option>
+                        <option value="liberacion_calidad" ${data.motivo === 'LIBERACION_CALIDAD' ? 'selected' : ''}>Liberacion De Calidad</option>
+                        <option value="desayuno_almuerzo_cena" ${data.motivo === 'DESAYUNO_ALMUERZO_CENA' ? 'selected' : ''}>Desayuno/Almuerzo/Cena</option>
+                        <option value="aseo" ${data.motivo === 'ASEO' ? 'selected' : ''}>Aseo</option>
+                        <option value="faltante_insumos" ${data.motivo === 'FALTANTE_INSUMOS' ? 'selected' : ''}>Faltante (Canastillas, vinipel, estibas, etc)</option>
+                        <option value="danos_equipo" ${data.motivo === 'DANOS_EQUIPO' ? 'selected' : ''}>Daños (Electricos, montacargas, etc)</option>
+                        <option value="otro" ${data.motivo === 'OTRO' ? 'selected' : ''}>Otro</option>
+                    </select>
+                    <input type="text" name="parada_otro_motivo_operacion_${index}" placeholder="Especifique" class="otro-input" value="${data.otro_motivo || ''}">
+                `;
+                div.appendChild(botonEliminar);
+                contenedor.appendChild(div);
+            });
+        }
 
         // === FUNCIONES DE VALIDACIÓN DE HORARIO ===
 
@@ -292,7 +461,7 @@
             ];
             fields.forEach(field => {
                 const el = element.querySelector(`[name="vehiculo_${index}_${field}"]`);
-                if (el) data[field] = el.value;
+                if (el) data[field] = toUpperCaseIfNeeded(el.value);
             });
             return data;
         }
@@ -305,6 +474,7 @@
             vehiculosData.splice(index, 1);
             renderizarVehiculos();
             actualizarTotalCajas();
+            guardarEnLocalStorage();
         }
 
         function renderizarVehiculos() {
@@ -319,6 +489,7 @@
             vehiculosData.push(datosIniciales || {});
             renderizarVehiculos();
             actualizarTotalCajas();
+            guardarEnLocalStorage();
         }
 
         function crearVehiculoHTML(contenedor, vIndex, datos = {}) {
@@ -357,9 +528,9 @@
                     <label style="margin-top:5px;">Motivo:</label>
                     <select id="${motivoSelectId}" name="vehiculo_${vIndex}_motivo" required>
                         <option value="">Seleccione</option>
-                        <option value="cargue" ${datos.motivo === 'cargue' ? 'selected' : ''}>Cargue</option>
-                        <option value="descargue" ${datos.motivo === 'descargue' ? 'selected' : ''}>Descargue</option>
-                        <option value="otro" ${datos.motivo === 'otro' ? 'selected' : ''}>Otro</option>
+                        <option value="cargue" ${datos.motivo === 'CARGUE' ? 'selected' : ''}>Cargue</option>
+                        <option value="descargue" ${datos.motivo === 'DESCARGUE' ? 'selected' : ''}>Descargue</option>
+                        <option value="otro" ${datos.motivo === 'OTRO' ? 'selected' : ''}>Otro</option>
                     </select>
                     <input type="text" name="vehiculo_${vIndex}_otro_motivo" placeholder="Especifique otro motivo" class="otro-input" value="${datos.otro_motivo || ''}">
                 </div>
@@ -378,65 +549,65 @@
                     <option value="18" ${datos.muelle === '18' ? 'selected' : ''}>18</option>
                     <option value="19" ${datos.muelle === '19' ? 'selected' : ''}>19</option>
                     <option value="20" ${datos.muelle === '20' ? 'selected' : ''}>20</option>
-                    <option value="otro" ${datos.muelle === 'otro' ? 'selected' : ''}>Otro</option>
+                    <option value="otro" ${datos.muelle === 'OTRO' ? 'selected' : ''}>Otro</option>
                 </select>
                 <input type="number" name="vehiculo_${vIndex}_otro_muelle_num" id="otro_muelle_${vIndex}" class="otro-input" placeholder="N° muelle" min="1" max="999" value="${datos.otro_muelle_num || ''}">
 
                 <label>Placa:</label>
                 <input type="text" name="vehiculo_${vIndex}_placa" required placeholder="Ej: ABC123, 123ABC o A12345" maxlength="6"
                     value="${datos.placa || ''}"
-                    oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0,6)">
+                    oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0,6); guardarEnLocalStorage()">
 
                 <label>Tipo De Vehiculo:</label>
                 <select name="vehiculos[${vIndex}][tipo_vehi]" required>
                     <option value="">Seleccione</option>
-                    <option value="Van extralargo" ${datos['tipo_vehi'] === 'Van extralargo' ? 'selected' : ''}>Van extralargo</option>
-                    <option value="Camion sencillo furgonado" ${datos['tipo_vehi'] === 'Camion sencillo furgonado' ? 'selected' : ''}>Camión sencillo furgonado</option>
-                    <option value="Camabaja furgonado" ${datos['tipo_vehi'] === 'Camabaja furgonado' ? 'selected' : ''}>Camabaja furgonado</option>
-                    <option value="Tractomula furgonado" ${datos['tipo_vehi'] === 'Tractomula furgonado' ? 'selected' : ''}>Tractomula furgonado</option>
-                    <option value="Exportacion 35" ${datos['tipo_vehi'] === 'Exportacion 35' ? 'selected' : ''}>Exportacion 35</option>
-                    <option value="Exportacion 40" ${datos['tipo_vehi'] === 'Exportacion 40' ? 'selected' : ''}>Exportacion 40</option>
-                    <option value="Cama baja con topes" ${datos['tipo_vehi'] === 'Cama baja con topes' ? 'selected' : ''}>Cama baja con topes</option>
-                    <option value="Camion sencillo carpado" ${datos['tipo_vehi'] === 'Camion sencillo carpado' ? 'selected' : ''}>Camión Sencillo Carpado</option>
-                    <option value="Camabaja estandar" ${datos['tipo_vehi'] === 'Camabaja estandar' ? 'selected' : ''}>Camabaja estandar</option>
-                    <option value="otro" ${datos['tipo_vehi'] === 'otro' ? 'selected' : ''}>Otro</option>
+                    <option value="Van extralargo" ${datos['tipo_vehi'] === 'VAN EXTRALARGO' ? 'selected' : ''}>Van extralargo</option>
+                    <option value="Camion sencillo furgonado" ${datos['tipo_vehi'] === 'CAMION SENCILLO FURGONADO' ? 'selected' : ''}>Camión sencillo furgonado</option>
+                    <option value="Camabaja furgonado" ${datos['tipo_vehi'] === 'CAMABAJA FURGONADO' ? 'selected' : ''}>Camabaja furgonado</option>
+                    <option value="Tractomula furgonado" ${datos['tipo_vehi'] === 'TRACTOMULA FURGONADO' ? 'selected' : ''}>Tractomula furgonado</option>
+                    <option value="Exportacion 35" ${datos['tipo_vehi'] === 'EXPORTACION 35' ? 'selected' : ''}>Exportacion 35</option>
+                    <option value="Exportacion 40" ${datos['tipo_vehi'] === 'EXPORTACION 40' ? 'selected' : ''}>Exportacion 40</option>
+                    <option value="Cama baja con topes" ${datos['tipo_vehi'] === 'CAMA BAJA CON TOPES' ? 'selected' : ''}>Cama baja con topes</option>
+                    <option value="Camion sencillo carpado" ${datos['tipo_vehi'] === 'CAMION SENCILLO CARPADO' ? 'selected' : ''}>Camión Sencillo Carpado</option>
+                    <option value="Camabaja estandar" ${datos['tipo_vehi'] === 'CAMABAJA ESTANDAR' ? 'selected' : ''}>Camabaja estandar</option>
+                    <option value="otro" ${datos['tipo_vehi'] === 'OTRO' ? 'selected' : ''}>Otro</option>
                 </select>
                 <input type="text" name="vehiculo_${vIndex}_otro_tipo" id="otro_tipo_${vIndex}" class="otro-input" placeholder="Especifique tipo" value="${datos.otro_tipo || ''}">
 
-                <div class="form-group-custom" id="destino-group-${vIndex}" style="${(datos.motivo === 'cargue') ? 'display:block;' : 'display:none;'}">
+                <div class="form-group-custom" id="destino-group-${vIndex}" style="${(datos.motivo === 'CARGUE') ? 'display:block;' : 'display:none;'}">
                     <label style="margin-top:0;">Destino:</label>
                     <select id="destino-select-${vIndex}" name="vehiculo_${vIndex}_destino">
                         <option value="">Seleccione Destino</option>
-                        <option value="guarner_medellin" ${datos.destino === 'guarner_medellin' ? 'selected' : ''}>Guarne/Medellin</option>
-                        <option value="cali" ${datos.destino === 'cali' ? 'selected' : ''}>Cali</option>
-                        <option value="barranquilla" ${datos.destino === 'barranquilla' ? 'selected' : ''}>Barranquilla</option>
-                        <option value="pereira" ${datos.destino === 'pereira' ? 'selected' : ''}>Pereira</option>
-                        <option value="bucaramanga" ${datos.destino === 'bucaramanga' ? 'selected' : ''}>Bucaramanga</option>
-                        <option value="monteria" ${datos.destino === 'monteria' ? 'selected' : ''}>Montería</option>
-                        <option value="peru" ${datos.destino === 'peru' ? 'selected' : ''}>Perú</option>
-                        <option value="otro" ${datos.destino === 'otro' ? 'selected' : ''}>Otro</option>
+                        <option value="guarner_medellin" ${datos.destino === 'GUARNER_MEDELLIN' ? 'selected' : ''}>Guarne/Medellin</option>
+                        <option value="cali" ${datos.destino === 'CALI' ? 'selected' : ''}>Cali</option>
+                        <option value="barranquilla" ${datos.destino === 'BARRANQUILLA' ? 'selected' : ''}>Barranquilla</option>
+                        <option value="pereira" ${datos.destino === 'PEREIRA' ? 'selected' : ''}>Pereira</option>
+                        <option value="bucaramanga" ${datos.destino === 'BUCARAMANGA' ? 'selected' : ''}>Bucaramanga</option>
+                        <option value="monteria" ${datos.destino === 'MONTERIA' ? 'selected' : ''}>Montería</option>
+                        <option value="peru" ${datos.destino === 'PERU' ? 'selected' : ''}>Perú</option>
+                        <option value="otro" ${datos.destino === 'OTRO' ? 'selected' : ''}>Otro</option>
                     </select>
                     <input type="text" name="vehiculo_${vIndex}_otro_destino" id="otro_destino_${vIndex}" class="otro-input" placeholder="Especifique otro destino" value="${datos.otro_destino || ''}">
                 </div>
 
-                <div class="form-group-custom" id="remitente-group-${vIndex}" style="${(datos.motivo === 'descargue') ? 'display:block;' : 'display:none;'}">
+                <div class="form-group-custom" id="remitente-group-${vIndex}" style="${(datos.motivo === 'DESCARGUE') ? 'display:block;' : 'display:none;'}">
                     <label style="margin-top:0;">Origen / Remitente:</label>
                     <input type="text" id="remitente-input-${vIndex}" name="vehiculo_${vIndex}_origen" placeholder="Ej: Zona Franca" value="${datos.origen || ''}">
                 </div>
 
                 <label>Total De Personas:</label>
-                <input type="number" name="vehiculo_${vIndex}_personas" min="1" required value="${datos.personas || ''}">
+                <input type="number" name="vehiculo_${vIndex}_personas" min="1" required value="${datos.personas || ''}" oninput="guardarEnLocalStorage()">
 
                 <label>Cajas Movidas:</label>
                 <input type="number" name="vehiculo_${vIndex}_cajas" class="cajas-input-js" min="0" required 
                     value="${datos.cajas || ''}"
-                    oninput="actualizarTotalCajas()">
+                    oninput="actualizarTotalCajas(); guardarEnLocalStorage()">
 
                 <label>Justificación del retraso o incidencia:</label>
-                <select name="vehiculo_${vIndex}_justificacion" onchange="manejarOtroCampo(this, 'otro_justificacion_${vIndex}')">
+                <select name="vehiculo_${vIndex}_justificacion" onchange="manejarOtroCampo(this, 'otro_justificacion_${vIndex}'); guardarEnLocalStorage()">
                     <option value="">Seleccione motivo</option>
-                    <option value="faltante_producto" ${datos.justificacion === 'faltante_producto' ? 'selected' : ''}>Faltante de producto</option>
-                    <option value="otro" ${datos.justificacion === 'otro' ? 'selected' : ''}>Otro</option>
+                    <option value="faltante_producto" ${datos.justificacion === 'FALTANTE_PRODUCTO' ? 'selected' : ''}>Faltante de producto</option>
+                    <option value="otro" ${datos.justificacion === 'OTRO' ? 'selected' : ''}>Otro</option>
                 </select>
                 <input type="text" name="vehiculo_${vIndex}_otro_justificacion" id="otro_justificacion_${vIndex}" class="otro-input" placeholder="Especifique la incidencia" value="${datos.otro_justificacion || ''}">
 
@@ -451,16 +622,18 @@
             `;
             contenedor.appendChild(registro);
 
-            if (datos.muelle === 'otro') document.getElementById(`otro_muelle_${vIndex}`).style.display = 'block';
-            if (datos['tipo_vehi'] === 'otro') document.getElementById(`otro_tipo_${vIndex}`).style.display = 'block';
-            if (datos.destino === 'otro') document.getElementById(`otro_destino_${vIndex}`).style.display = 'block';
-            if (datos.justificacion === 'otro') document.getElementById(`otro_justificacion_${vIndex}`).style.display = 'block';
-            if (datos.motivo === 'otro' && datos.otro_motivo) registro.querySelector('.otro-input').style.display = 'block';
+            if (datos.muelle === 'OTRO') document.getElementById(`otro_muelle_${vIndex}`).style.display = 'block';
+            if (datos['tipo_vehi'] === 'OTRO') document.getElementById(`otro_tipo_${vIndex}`).style.display = 'block';
+            if (datos.destino === 'OTRO') document.getElementById(`otro_destino_${vIndex}`).style.display = 'block';
+            if (datos.justificacion === 'OTRO') document.getElementById(`otro_justificacion_${vIndex}`).style.display = 'block';
+            if (datos.motivo === 'OTRO' && datos.otro_motivo) registro.querySelector('.otro-input').style.display = 'block';
 
+            // Eventos
             const motivoSelect = document.getElementById(motivoSelectId);
             motivoSelect.addEventListener('change', () => {
                 alternarDestinoRemitente(motivoSelect, vIndex);
                 manejarOtroCampo(motivoSelect, null);
+                guardarEnLocalStorage();
             });
             alternarDestinoRemitente(motivoSelect, vIndex);
             setupFotoPreview(fotoInputId, previewFotoId);
@@ -482,6 +655,10 @@
             botonEliminar.textContent = 'Eliminar';
             botonEliminar.onclick = function() {
                 div.remove();
+                // Actualizar números
+                const spans = contenedor.querySelectorAll('.numero-parada');
+                spans.forEach((span, i) => span.textContent = i + 1);
+                guardarEnLocalStorage();
             };
 
             const dInicio = `operacion-inicio-${index}`;
@@ -493,20 +670,20 @@
                     <div>
                         <label class="time-label">Hora Inicio (HH:MM):</label>
                         <input type="tel" name="parada_inicio_operacion_${index}" class="time-input-masked" 
-                            placeholder="HH:MM" maxlength="5"
+                            placeholder="HH:MM" maxlength="5" value=""
                             onblur="applyTimeMask(this, '${dInicio}')">
                         <span id="${dInicio}" class="time-display"></span>
                     </div>
                     <div>
                         <label class="time-label">Hora Final (HH:MM):</label>
                         <input type="tel" name="parada_fin_operacion_${index}" class="time-input-masked" 
-                            placeholder="HH:MM" maxlength="5"
+                            placeholder="HH:MM" maxlength="5" value=""
                             onblur="applyTimeMask(this, '${dFin}')">
                         <span id="${dFin}" class="time-display"></span>
                     </div>
                 </div>
                 <label style="margin-top:5px;">Motivo:</label>
-                <select name="parada_motivo_operacion_${index}" onchange="manejarOtroCampo(this)">
+                <select name="parada_motivo_operacion_${index}" onchange="manejarOtroCampo(this); guardarEnLocalStorage()">
                     <option value="">Seleccione</option>
                     <option value="pausas_activas">Pausas Activas y/o Charla</option>
                     <option value="liberacion_calidad">Liberacion De Calidad</option>
@@ -556,7 +733,10 @@
                     if (data.success) {
                         const imageUrl = data.data.url;
                         const urlInput = document.getElementById(`foto_url_${inputId.replace('foto_vehiculo_', '').replace('_foto', '')}`);
-                        if (urlInput) urlInput.value = imageUrl;
+                        if (urlInput) {
+                            urlInput.value = imageUrl;
+                            guardarEnLocalStorage();
+                        }
                         alert("✅ Foto subida con éxito. URL guardada.");
                     } else {
                         throw new Error(data.error.message || 'Error al subir la foto');
@@ -593,6 +773,7 @@
             }
 
             actualizarTotalCajas();
+            guardarEnLocalStorage();
         }
 
         function manejarOtroCampo(select, otroId) {
@@ -606,6 +787,7 @@
                 otro.required = false;
                 otro.value = '';
             }
+            guardarEnLocalStorage();
         }
         
         function alternarDestinoRemitente(selectMotivo, vIndex) {
@@ -627,6 +809,7 @@
                 destinoSelect.removeAttribute('required');
                 remitenteInput.removeAttribute('required');
             }
+            guardarEnLocalStorage();
         }
 
         function applyTimeMask(input, displayId) {
@@ -644,6 +827,7 @@
             value.substring(0,2) + ':' + (value.length > 2 ? value.substring(2,4) : '00') : '';
             input.value = formatted;
             convertirHoraMilitar(input, displayId);
+            guardarEnLocalStorage();
         }
 
         function convertirHoraMilitar(input, displayId) {
@@ -673,20 +857,12 @@
                 if (!isNaN(valor)) total += valor;
             });
             totalCajasInput.value = total;
+            guardarEnLocalStorage();
         }
 
         function convertirATextoMayusculas() {
-            // Campos fijos
-            const fixedInputs = document.querySelectorAll('input[type="text"]:not([type="hidden"]), textarea');
-            fixedInputs.forEach(input => {
-                if (input.value.trim() !== '') {
-                    input.value = input.value.toUpperCase();
-                }
-            });
-
-            // Campos dinámicos
-            const dynamicInputs = document.querySelectorAll('.registro-vehiculo input[type="text"], .parada-group input[type="text"]');
-            dynamicInputs.forEach(input => {
+            const inputs = document.querySelectorAll('input[type="text"]:not([type="hidden"]), textarea, select');
+            inputs.forEach(input => {
                 if (input.value.trim() !== '') {
                     input.value = input.value.toUpperCase();
                 }
@@ -725,10 +901,10 @@
                 return false;
             }
 
-            // Convertir a mayúsculas
+            // Convertir todo a mayúsculas en el DOM
             convertirATextoMayusculas();
 
-            // Guardar vehículos
+            // --- Guardar vehículos ---
             const contVeh = document.getElementById('vehiculos-contenedor');
             const vehiculosElems = contVeh.querySelectorAll('.registro-vehiculo');
             for (let i = 0; i < vehiculosElems.length; i++) {
@@ -736,20 +912,26 @@
             }
             document.getElementById('datos_vehiculos').value = JSON.stringify(vehiculosData);
 
-            // Guardar paradas de operación
+            // --- Guardar paradas de operación ---
             const contPar = document.getElementById('operacion-contenedor');
             const gruposPar = contPar.querySelectorAll('.parada-group');
             paradasOperacionData = [];
             gruposPar.forEach((grupo, idx) => {
                 const inicio = grupo.querySelector(`input[name="parada_inicio_operacion_${idx}"]`).value;
                 const fin = grupo.querySelector(`input[name="parada_fin_operacion_${idx}"]`).value;
-                const motivo = grupo.querySelector(`select[name="parada_motivo_operacion_${idx}"]`).value;
-                const otro_motivo = grupo.querySelector(`input[name="parada_otro_motivo_operacion_${idx}"]`)?.value || '';
+                let motivo = grupo.querySelector(`select[name="parada_motivo_operacion_${idx}"]`).value;
+                let otro_motivo = grupo.querySelector(`input[name="parada_otro_motivo_operacion_${idx}"]`)?.value || '';
+                
                 if (inicio && fin && motivo) {
+                    motivo = toUpperCaseIfNeeded(motivo);
+                    otro_motivo = toUpperCaseIfNeeded(otro_motivo);
                     paradasOperacionData.push({ inicio, fin, motivo, otro_motivo });
                 }
             });
             document.getElementById('datos_paradas_operacion').value = JSON.stringify(paradasOperacionData);
+
+            // ✅ Borrar datos guardados tras enviar
+            localStorage.removeItem(STORAGE_KEY);
 
             return true;
         }
@@ -766,11 +948,18 @@
                 this.dataset.manualChange = 'true';
             });
 
+            // 🔑 Cargar datos al iniciar
+            cargarDeLocalStorage();
+
             document.querySelector('form').addEventListener('submit', validarYEnviar);
 
-            agregarRegistroVehiculo();
-            agregarCampoParada('operacion');
-            actualizarCampos();
+            // Inicializar con un vehículo y una parada si no hay datos
+            if (vehiculosData.length === 0) {
+                agregarRegistroVehiculo();
+            }
+            if (paradasOperacionData.length === 0) {
+                agregarCampoParada('operacion');
+            }
         });
     </script>
 </body>
