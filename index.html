@@ -208,14 +208,16 @@
         <input type="number" name="cajas_totales" id="cajas_totales" min="0" required
             placeholder="Cantidad total de cajas movidas" oninput="actualizarTotalCajas()">
         
-        <!-- Campo oculto para enviar los datos de los vehículos -->
+        <!-- Campos ocultos para JSON -->
         <input type="hidden" name="datos_vehiculos" id="datos_vehiculos" value="">
+        <input type="hidden" name="datos_paradas_operacion" id="datos_paradas_operacion" value="">
         
         <button type="submit">Enviar</button>
     </form>
 
     <script>
         let vehiculosData = [];
+        let paradasOperacionData = [];
 
         // === FUNCIONES DE VALIDACIÓN DE HORARIO ===
 
@@ -264,8 +266,8 @@
             const cont = document.getElementById('operacion-contenedor');
             const grupos = cont.querySelectorAll('.parada-group');
             grupos.forEach((grupo, idx) => {
-                const inicio = grupo.querySelector('input[name="parada_inicio_operacion[]"]').value;
-                const fin = grupo.querySelector('input[name="parada_fin_operacion[]"]').value;
+                const inicio = grupo.querySelector(`input[name="parada_inicio_operacion_${idx}"]`).value;
+                const fin = grupo.querySelector(`input[name="parada_fin_operacion_${idx}"]`).value;
                 if (inicio && fin) paradas.push({ inicio, fin, idx });
             });
             for (let i = 0; i < paradas.length; i++) {
@@ -449,14 +451,12 @@
             `;
             contenedor.appendChild(registro);
 
-            // Restaurar estado de "otro"
             if (datos.muelle === 'otro') document.getElementById(`otro_muelle_${vIndex}`).style.display = 'block';
             if (datos['tipo_vehi'] === 'otro') document.getElementById(`otro_tipo_${vIndex}`).style.display = 'block';
             if (datos.destino === 'otro') document.getElementById(`otro_destino_${vIndex}`).style.display = 'block';
             if (datos.justificacion === 'otro') document.getElementById(`otro_justificacion_${vIndex}`).style.display = 'block';
             if (datos.motivo === 'otro' && datos.otro_motivo) registro.querySelector('.otro-input').style.display = 'block';
 
-            // Eventos
             const motivoSelect = document.getElementById(motivoSelectId);
             motivoSelect.addEventListener('change', () => {
                 alternarDestinoRemitente(motivoSelect, vIndex);
@@ -464,6 +464,62 @@
             });
             alternarDestinoRemitente(motivoSelect, vIndex);
             setupFotoPreview(fotoInputId, previewFotoId);
+        }
+
+        // === FUNCIONES DE PARADAS DE OPERACIÓN ===
+
+        function agregarCampoParada(tipo) {
+            const contenedor = document.getElementById('operacion-contenedor');
+            const index = contenedor.children.length;
+            
+            const div = document.createElement('div');
+            div.className = 'parada-group';
+            div.dataset.index = index;
+
+            const botonEliminar = document.createElement('button');
+            botonEliminar.type = 'button';
+            botonEliminar.className = 'btn-eliminar';
+            botonEliminar.textContent = 'Eliminar';
+            botonEliminar.onclick = function() {
+                div.remove();
+            };
+
+            const dInicio = `operacion-inicio-${index}`;
+            const dFin = `operacion-fin-${index}`;
+
+            div.innerHTML = `
+                <p style="font-weight:bold; margin-top:0; color:#555;">🛑 Parada #<span class="numero-parada">${index + 1}</span> (Operación)</p>
+                <div class="time-row">
+                    <div>
+                        <label class="time-label">Hora Inicio (HH:MM):</label>
+                        <input type="tel" name="parada_inicio_operacion_${index}" class="time-input-masked" 
+                            placeholder="HH:MM" maxlength="5"
+                            onblur="applyTimeMask(this, '${dInicio}')">
+                        <span id="${dInicio}" class="time-display"></span>
+                    </div>
+                    <div>
+                        <label class="time-label">Hora Final (HH:MM):</label>
+                        <input type="tel" name="parada_fin_operacion_${index}" class="time-input-masked" 
+                            placeholder="HH:MM" maxlength="5"
+                            onblur="applyTimeMask(this, '${dFin}')">
+                        <span id="${dFin}" class="time-display"></span>
+                    </div>
+                </div>
+                <label style="margin-top:5px;">Motivo:</label>
+                <select name="parada_motivo_operacion_${index}" onchange="manejarOtroCampo(this)">
+                    <option value="">Seleccione</option>
+                    <option value="pausas_activas">Pausas Activas y/o Charla</option>
+                    <option value="liberacion_calidad">Liberacion De Calidad</option>
+                    <option value="desayuno_almuerzo_cena">Desayuno/Almuerzo/Cena</option>
+                    <option value="aseo">Aseo</option>
+                    <option value="faltante_insumos">Faltante (Canastillas, vinipel, estibas, etc)</option>
+                    <option value="danos_equipo">Daños (Electricos, montacargas, etc)</option>
+                    <option value="otro">Otro</option>
+                </select>
+                <input type="text" name="parada_otro_motivo_operacion_${index}" placeholder="Especifique" class="otro-input">
+            `;
+            div.appendChild(botonEliminar);
+            contenedor.appendChild(div);
         }
 
         // === FUNCIONES AUXILIARES ===
@@ -483,15 +539,13 @@
                     return;
                 }
 
-                // Mostrar vista previa
                 const reader = new FileReader();
                 reader.onload = e => preview.innerHTML = `<img src="${e.target.result}" alt="Vista previa">`;
                 reader.readAsDataURL(file);
 
-                // Subir a ImgBB (con tu API Key)
                 const formData = new FormData();
                 formData.append('image', file);
-                formData.append('key', '7aa1cd8e8d0a3558833f225cbeba96ac'); // 🔑 Tu API Key
+                formData.append('key', '7aa1cd8e8d0a3558833f225cbeba96ac');
 
                 try {
                     const response = await fetch('https://api.imgbb.com/1/upload', {
@@ -509,7 +563,6 @@
                     }
                 } catch (error) {
                     alert("❌ No se pudo subir la foto. Por favor, inténtelo de nuevo.");
-                    console.error(error);
                 }
             });
         }
@@ -611,66 +664,6 @@
             display.innerHTML = value.length > 0 && value.length < 5 ? '❌ Formato incompleto. HH:MM' : '';
         }
 
-        function agregarCampoParada(tipo) {
-            let contenedor = document.getElementById('operacion-contenedor');
-            let nameInicio = `parada_inicio_operacion[]`;
-            let nameFin = `parada_fin_operacion[]`;
-
-            const div = document.createElement('div');
-            div.className = 'parada-group';
-            
-            const botonEliminar = document.createElement('button');
-            botonEliminar.type = 'button';
-            botonEliminar.className = 'btn-eliminar';
-            botonEliminar.textContent = 'Eliminar';
-            botonEliminar.onclick = function() {
-                div.remove();
-                const paradas = contenedor.getElementsByClassName('parada-group');
-                for (let i = 0; i < paradas.length; i++) {
-                    const span = paradas[i].querySelector('.numero-parada');
-                    if (span) span.textContent = i + 1;
-                }
-            };
-
-            const index = contenedor.children.length + 1;
-            const dInicio = `operacion-inicio-${index}`;
-            const dFin = `operacion-fin-${index}`;
-
-            div.innerHTML = `
-                <p style="font-weight:bold; margin-top:0; color:#555;">🛑 Parada #<span class="numero-parada">${index}</span> (Operación)</p>
-                <div class="time-row">
-                    <div>
-                        <label class="time-label">Hora Inicio (HH:MM):</label>
-                        <input type="tel" name="${nameInicio}" class="time-input-masked" 
-                            placeholder="HH:MM" maxlength="5"
-                            onblur="applyTimeMask(this, '${dInicio}')">
-                        <span id="${dInicio}" class="time-display"></span>
-                    </div>
-                    <div>
-                        <label class="time-label">Hora Final (HH:MM):</label>
-                        <input type="tel" name="${nameFin}" class="time-input-masked" 
-                            placeholder="HH:MM" maxlength="5"
-                            onblur="applyTimeMask(this, '${dFin}')">
-                        <span id="${dFin}" class="time-display"></span>
-                    </div>
-                </div>
-                <label style="margin-top:5px;">Motivo:</label>
-                <select name="parada_motivo_operacion[]" onchange="manejarOtroCampo(this)">
-                    <option value="">Seleccione</option>
-                    <option value="pausas_activas">Pausas Activas y/o Charla</option>
-                    <option value="liberacion_calidad">Liberacion De Calidad</option>
-                    <option value="desayuno_almuerzo_cena">Desayuno/Almuerzo/Cena</option>
-                    <option value="aseo">Aseo</option>
-                    <option value="faltante_insumos">Faltante (Canastillas, vinipel, estibas, etc)</option>
-                    <option value="danos_equipo">Daños (Electricos, montacargas, etc)</option>
-                    <option value="otro">Otro</option>
-                </select>
-                <input type="text" name="parada_otro_motivo_operacion[]" placeholder="Especifique" class="otro-input">
-            `;
-            div.appendChild(botonEliminar);
-            contenedor.appendChild(div);
-        }
-
         function actualizarTotalCajas() {
             const camposCajas = document.querySelectorAll('.cajas-input-js');
             const totalCajasInput = document.getElementById('cajas_totales');
@@ -683,8 +676,17 @@
         }
 
         function convertirATextoMayusculas() {
-            const textInputs = document.querySelectorAll('input[type="text"], textarea');
-            textInputs.forEach(input => {
+            // Campos fijos
+            const fixedInputs = document.querySelectorAll('input[type="text"]:not([type="hidden"]), textarea');
+            fixedInputs.forEach(input => {
+                if (input.value.trim() !== '') {
+                    input.value = input.value.toUpperCase();
+                }
+            });
+
+            // Campos dinámicos
+            const dynamicInputs = document.querySelectorAll('.registro-vehiculo input[type="text"], .parada-group input[type="text"]');
+            dynamicInputs.forEach(input => {
                 if (input.value.trim() !== '') {
                     input.value = input.value.toUpperCase();
                 }
@@ -698,7 +700,7 @@
                 return false;
             }
 
-            // Validar placas al enviar
+            // Validar placas
             let placaValida = true;
             for (let i = 0; i < vehiculosData.length; i++) {
                 const placa = vehiculosData[i].placa || '';
@@ -723,11 +725,31 @@
                 return false;
             }
 
-            // Convertir a mayúsculas antes de enviar
+            // Convertir a mayúsculas
             convertirATextoMayusculas();
 
-            // Serializar vehiculosData a JSON y guardar en el campo oculto
+            // Guardar vehículos
+            const contVeh = document.getElementById('vehiculos-contenedor');
+            const vehiculosElems = contVeh.querySelectorAll('.registro-vehiculo');
+            for (let i = 0; i < vehiculosElems.length; i++) {
+                vehiculosData[i] = guardarDatosVehiculo(vehiculosElems[i], i);
+            }
             document.getElementById('datos_vehiculos').value = JSON.stringify(vehiculosData);
+
+            // Guardar paradas de operación
+            const contPar = document.getElementById('operacion-contenedor');
+            const gruposPar = contPar.querySelectorAll('.parada-group');
+            paradasOperacionData = [];
+            gruposPar.forEach((grupo, idx) => {
+                const inicio = grupo.querySelector(`input[name="parada_inicio_operacion_${idx}"]`).value;
+                const fin = grupo.querySelector(`input[name="parada_fin_operacion_${idx}"]`).value;
+                const motivo = grupo.querySelector(`select[name="parada_motivo_operacion_${idx}"]`).value;
+                const otro_motivo = grupo.querySelector(`input[name="parada_otro_motivo_operacion_${idx}"]`)?.value || '';
+                if (inicio && fin && motivo) {
+                    paradasOperacionData.push({ inicio, fin, motivo, otro_motivo });
+                }
+            });
+            document.getElementById('datos_paradas_operacion').value = JSON.stringify(paradasOperacionData);
 
             return true;
         }
@@ -744,14 +766,7 @@
                 this.dataset.manualChange = 'true';
             });
 
-            document.querySelector('form').addEventListener('submit', function(e) {
-                const cont = document.getElementById('vehiculos-contenedor');
-                const vehiculos = cont.querySelectorAll('.registro-vehiculo');
-                for (let i = 0; i < vehiculos.length; i++) {
-                    vehiculosData[i] = guardarDatosVehiculo(vehiculos[i], i);
-                }
-                validarYEnviar(e);
-            });
+            document.querySelector('form').addEventListener('submit', validarYEnviar);
 
             agregarRegistroVehiculo();
             agregarCampoParada('operacion');
