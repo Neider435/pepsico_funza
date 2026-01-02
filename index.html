@@ -208,6 +208,9 @@
         <input type="number" name="cajas_totales" id="cajas_totales" min="0" required
             placeholder="Cantidad total de cajas movidas" oninput="actualizarTotalCajas()">
         
+        <!-- Campo oculto para enviar los datos de los vehículos -->
+        <input type="hidden" name="datos_vehiculos" id="datos_vehiculos" value="">
+        
         <button type="submit">Enviar</button>
     </form>
 
@@ -723,6 +726,9 @@
             // Convertir a mayúsculas antes de enviar
             convertirATextoMayusculas();
 
+            // Serializar vehiculosData a JSON y guardar en el campo oculto
+            document.getElementById('datos_vehiculos').value = JSON.stringify(vehiculosData);
+
             return true;
         }
 
@@ -753,5 +759,4 @@
         });
     </script>
 </body>
-
 </html>
