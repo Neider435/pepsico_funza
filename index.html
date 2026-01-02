@@ -46,7 +46,7 @@
         }
         .btn-agregar-registro,
         .btn-agregar-parada-op,
-        .btn-borrar-todo { /* 👈 Estilo para el nuevo botón */
+        .btn-borrar-todo {
             background-color: #001855;
             color: white;
             border: none;
@@ -59,7 +59,7 @@
         }
         .btn-agregar-registro:hover,
         .btn-agregar-parada-op:hover,
-        .btn-borrar-todo:hover { /* 👈 Hover para el nuevo botón */
+        .btn-borrar-todo:hover {
             background-color: #0056b3;
         }
         label {
@@ -215,7 +215,6 @@
         <input type="hidden" name="datos_vehiculos" id="datos_vehiculos" value="">
         <input type="hidden" name="datos_paradas_operacion" id="datos_paradas_operacion" value="">
         
-        <!-- 👇 BOTÓN "BORRAR TODO" -->
         <button type="button" class="btn-borrar-todo" onclick="borrarTodo()">
             🗑️ Borrar Todo
         </button>
@@ -231,7 +230,7 @@
         // === UTILIDAD: convertir a mayúsculas si es texto ===
         function toUpperCaseIfNeeded(value) {
             if (typeof value === 'string') {
-                return value.toUpperCase();
+                return value.toUpperCase().trim();
             }
             return value;
         }
@@ -297,15 +296,13 @@
             }
         }
 
-        // 👇 === FUNCIÓN "BORRAR TODO" ===
+        // === BORRAR TODO ===
         function borrarTodo() {
             if (!confirm("¿Está seguro de borrar todo el formulario?")) return;
 
-            // Resetear datos
             vehiculosData = [];
             paradasOperacionData = [];
 
-            // Limpiar campos generales
             document.getElementById('lugar').value = '';
             document.getElementById('lider').value = '';
             document.getElementById('coordinador').value = '';
@@ -315,21 +312,18 @@
             document.getElementById('total_personas').value = '';
             document.getElementById('cajas_totales').value = '';
 
-            // Limpiar contenedores
             document.getElementById('vehiculos-contenedor').innerHTML = '';
             document.getElementById('operacion-contenedor').innerHTML = '';
 
-            // Borrar de localStorage
             localStorage.removeItem(STORAGE_KEY);
 
-            // Reiniciar con 1 vehículo y 1 parada
             agregarRegistroVehiculo();
             agregarCampoParada('operacion');
 
             alert("✅ Todo ha sido borrado.");
         }
 
-        // === RENDERIZAR PARADAS DESDE PARADASOPERACIONDATA ===
+        // === RENDERIZAR PARADAS ===
         function renderizarParadas() {
             const contenedor = document.getElementById('operacion-contenedor');
             contenedor.innerHTML = '';
@@ -344,7 +338,6 @@
                 botonEliminar.textContent = 'Eliminar';
                 botonEliminar.onclick = function() {
                     div.remove();
-                    // Actualizar índice visual
                     const spans = contenedor.querySelectorAll('.numero-parada');
                     spans.forEach((span, i) => span.textContent = i + 1);
                 };
@@ -628,7 +621,6 @@
             if (datos.justificacion === 'OTRO') document.getElementById(`otro_justificacion_${vIndex}`).style.display = 'block';
             if (datos.motivo === 'OTRO' && datos.otro_motivo) registro.querySelector('.otro-input').style.display = 'block';
 
-            // Eventos
             const motivoSelect = document.getElementById(motivoSelectId);
             motivoSelect.addEventListener('change', () => {
                 alternarDestinoRemitente(motivoSelect, vIndex);
@@ -655,7 +647,6 @@
             botonEliminar.textContent = 'Eliminar';
             botonEliminar.onclick = function() {
                 div.remove();
-                // Actualizar números
                 const spans = contenedor.querySelectorAll('.numero-parada');
                 spans.forEach((span, i) => span.textContent = i + 1);
                 guardarEnLocalStorage();
@@ -870,6 +861,19 @@
         }
 
         function validarYEnviar(event) {
+            // 👇 Validar campos generales
+            const lugar = document.getElementById('lugar').value;
+            const lider = document.getElementById('lider').value;
+            const liderPepsico = document.getElementById('lider_pepsico').value;
+            const fecha = document.getElementById('fecha').value;
+            const turno = document.getElementById('turno').value;
+
+            if (!lugar || !lider || !liderPepsico || !fecha || !turno) {
+                alert("Por favor, complete todos los campos del encabezado.");
+                event.preventDefault();
+                return false;
+            }
+
             if (vehiculosData.length === 0) {
                 alert("Registre al menos un vehículo.");
                 event.preventDefault();
@@ -901,10 +905,10 @@
                 return false;
             }
 
-            // Convertir todo a mayúsculas en el DOM
+            // Convertir a mayúsculas
             convertirATextoMayusculas();
 
-            // --- Guardar vehículos ---
+            // Guardar vehículos
             const contVeh = document.getElementById('vehiculos-contenedor');
             const vehiculosElems = contVeh.querySelectorAll('.registro-vehiculo');
             for (let i = 0; i < vehiculosElems.length; i++) {
@@ -912,7 +916,7 @@
             }
             document.getElementById('datos_vehiculos').value = JSON.stringify(vehiculosData);
 
-            // --- Guardar paradas de operación ---
+            // Guardar paradas
             const contPar = document.getElementById('operacion-contenedor');
             const gruposPar = contPar.querySelectorAll('.parada-group');
             paradasOperacionData = [];
@@ -930,7 +934,7 @@
             });
             document.getElementById('datos_paradas_operacion').value = JSON.stringify(paradasOperacionData);
 
-            // ✅ Borrar datos guardados tras enviar
+            // Borrar localStorage tras enviar
             localStorage.removeItem(STORAGE_KEY);
 
             return true;
@@ -948,12 +952,10 @@
                 this.dataset.manualChange = 'true';
             });
 
-            // 🔑 Cargar datos al iniciar
             cargarDeLocalStorage();
 
             document.querySelector('form').addEventListener('submit', validarYEnviar);
 
-            // Inicializar con un vehículo y una parada si no hay datos
             if (vehiculosData.length === 0) {
                 agregarRegistroVehiculo();
             }
