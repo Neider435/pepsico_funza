@@ -294,6 +294,29 @@
 
         function agregarRegistroVehiculo() {
             const vIndex = vehiculosData.length;
+            // Guardar el vehículo actual antes de agregar uno nuevo
+            if (vIndex > 0) {
+                const data = {
+                    inicio: document.querySelector(`[name="vehiculo_${vIndex-1}_inicio"]`)?.value || '',
+                    fin: document.querySelector(`[name="vehiculo_${vIndex-1}_fin"]`)?.value || '',
+                    motivo: document.querySelector(`[name="vehiculo_${vIndex-1}_motivo"]`)?.value || '',
+                    otro_motivo: document.querySelector(`[name="vehiculo_${vIndex-1}_otro_motivo"]`)?.value || '',
+                    muelle: document.querySelector(`[name="vehiculo_${vIndex-1}_muelle"]`)?.value || '',
+                    otro_muelle_num: document.querySelector(`[name="vehiculo_${vIndex-1}_otro_muelle_num"]`)?.value || '',
+                    placa: document.querySelector(`[name="vehiculo_${vIndex-1}_placa"]`)?.value || '',
+                    tipo_vehi: document.querySelector(`[name="vehiculos[${vIndex-1}][tipo_vehi]"]`)?.value || '',
+                    otro_tipo: document.querySelector(`[name="vehiculo_${vIndex-1}_otro_tipo"]`)?.value || '',
+                    destino: document.querySelector(`[name="vehiculo_${vIndex-1}_destino"]`)?.value || '',
+                    otro_destino: document.querySelector(`[name="vehiculo_${vIndex-1}_otro_destino"]`)?.value || '',
+                    origen: document.querySelector(`[name="vehiculo_${vIndex-1}_origen"]`)?.value || '',
+                    personas: document.querySelector(`[name="vehiculo_${vIndex-1}_personas"]`)?.value || '',
+                    cajas: document.querySelector(`[name="vehiculo_${vIndex-1}_cajas"]`)?.value || '',
+                    justificacion: document.querySelector(`[name="vehiculo_${vIndex-1}_justificacion"]`)?.value || '',
+                    otro_justificacion: document.querySelector(`[name="vehiculo_${vIndex-1}_otro_justificacion"]`)?.value || '',
+                    foto_url: document.querySelector(`[name="vehiculo_${vIndex-1}_foto_url"]`)?.value || ''
+                };
+                vehiculosData[vIndex-1] = data;
+            }
             vehiculosData.push({});
             const contenedor = document.getElementById('vehiculos-contenedor');
             crearVehiculoHTML(contenedor, vIndex, {});
@@ -311,29 +334,6 @@
             registro.className = 'registro-vehiculo';
             registro.dataset.index = vIndex;
 
-            const guardarVehiculo = () => {
-                const data = {
-                    inicio: document.querySelector(`[name="vehiculo_${vIndex}_inicio"]`)?.value || '',
-                    fin: document.querySelector(`[name="vehiculo_${vIndex}_fin"]`)?.value || '',
-                    motivo: document.querySelector(`[name="vehiculo_${vIndex}_motivo"]`)?.value || '',
-                    otro_motivo: document.querySelector(`[name="vehiculo_${vIndex}_otro_motivo"]`)?.value || '',
-                    muelle: document.querySelector(`[name="vehiculo_${vIndex}_muelle"]`)?.value || '',
-                    otro_muelle_num: document.querySelector(`[name="vehiculo_${vIndex}_otro_muelle_num"]`)?.value || '',
-                    placa: document.querySelector(`[name="vehiculo_${vIndex}_placa"]`)?.value || '',
-                    tipo_vehi: document.querySelector(`[name="vehiculos[${vIndex}][tipo_vehi]"]`)?.value || '',
-                    otro_tipo: document.querySelector(`[name="vehiculo_${vIndex}_otro_tipo"]`)?.value || '',
-                    destino: document.querySelector(`[name="vehiculo_${vIndex}_destino"]`)?.value || '',
-                    otro_destino: document.querySelector(`[name="vehiculo_${vIndex}_otro_destino"]`)?.value || '',
-                    origen: document.querySelector(`[name="vehiculo_${vIndex}_origen"]`)?.value || '',
-                    personas: document.querySelector(`[name="vehiculo_${vIndex}_personas"]`)?.value || '',
-                    cajas: document.querySelector(`[name="vehiculo_${vIndex}_cajas"]`)?.value || '',
-                    justificacion: document.querySelector(`[name="vehiculo_${vIndex}_justificacion"]`)?.value || '',
-                    otro_justificacion: document.querySelector(`[name="vehiculo_${vIndex}_otro_justificacion"]`)?.value || '',
-                    foto_url: document.querySelector(`[name="vehiculo_${vIndex}_foto_url"]`)?.value || ''
-                };
-                vehiculosData[vIndex] = data;
-            };
-
             const html = `
                 <button type="button" class="btn-eliminar-registro" onclick="eliminarRegistroVehiculo(${vIndex})">Eliminar Vehículo #${vIndex + 1}</button>
                 <hr style="margin-top:25px; border-style:dashed;">
@@ -347,31 +347,31 @@
                             <label class="time-label">Hora Inicio (HH:MM):</label>
                             <input type="tel" name="vehiculo_${vIndex}_inicio" class="time-input-masked" required
                                 placeholder="HH:MM" maxlength="5" value="${datos.inicio || ''}"
-                                onblur="applyTimeMask(this, '${inicioId}'); guardarVehiculo();">
+                                onblur="applyTimeMask(this, '${inicioId}');">
                             <span id="${inicioId}" class="time-display"></span>
                         </div>
                         <div>
                             <label class="time-label">Hora Final (HH:MM):</label>
                             <input type="tel" name="vehiculo_${vIndex}_fin" class="time-input-masked" required
                                 placeholder="HH:MM" maxlength="5" value="${datos.fin || ''}"
-                                onblur="applyTimeMask(this, '${finId}'); guardarVehiculo();">
+                                onblur="applyTimeMask(this, '${finId}');">
                             <span id="${finId}" class="time-display"></span>
                         </div>
                     </div>
                     <label style="margin-top:5px;">Motivo:</label>
-                    <select id="${motivoSelectId}" name="vehiculo_${vIndex}_motivo" required onchange="guardarVehiculo();">
+                    <select id="${motivoSelectId}" name="vehiculo_${vIndex}_motivo" required>
                         <option value="">Seleccione</option>
                         <option value="cargue" ${datos.motivo === 'cargue' ? 'selected' : ''}>Cargue</option>
                         <option value="descargue" ${datos.motivo === 'descargue' ? 'selected' : ''}>Descargue</option>
                         <option value="otro" ${datos.motivo === 'otro' ? 'selected' : ''}>Otro</option>
                     </select>
-                    <input type="text" name="vehiculo_${vIndex}_otro_motivo" placeholder="Especifique otro motivo" class="otro-input" value="${datos.otro_motivo || ''}" oninput="guardarVehiculo();">
+                    <input type="text" name="vehiculo_${vIndex}_otro_motivo" placeholder="Especifique otro motivo" class="otro-input" value="${datos.otro_motivo || ''}">
                 </div>
 
                 <hr style="margin-top:25px; border-style:dashed;">
 
                 <label>Muelle:</label>
-                <select name="vehiculo_${vIndex}_muelle" required onchange="guardarVehiculo();">
+                <select name="vehiculo_${vIndex}_muelle" required>
                     <option value="">Seleccione</option>
                     <option value="3" ${datos.muelle === '3' ? 'selected' : ''}>3</option>
                     <option value="11" ${datos.muelle === '11' ? 'selected' : ''}>11</option>
@@ -384,15 +384,15 @@
                     <option value="20" ${datos.muelle === '20' ? 'selected' : ''}>20</option>
                     <option value="otro" ${datos.muelle === 'otro' ? 'selected' : ''}>Otro</option>
                 </select>
-                <input type="number" name="vehiculo_${vIndex}_otro_muelle_num" id="otro_muelle_${vIndex}" class="otro-input" placeholder="N° muelle" min="1" max="999" value="${datos.otro_muelle_num || ''}" oninput="guardarVehiculo();">
+                <input type="number" name="vehiculo_${vIndex}_otro_muelle_num" id="otro_muelle_${vIndex}" class="otro-input" placeholder="N° muelle" min="1" max="999" value="${datos.otro_muelle_num || ''}">
 
                 <label>Placa:</label>
                 <input type="text" name="vehiculo_${vIndex}_placa" required placeholder="Ej: ABC123, 123ABC o A12345" maxlength="6"
                     value="${datos.placa || ''}"
-                    oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0,6); guardarVehiculo();">
+                    oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0,6);">
 
                 <label>Tipo De Vehiculo:</label>
-                <select name="vehiculos[${vIndex}][tipo_vehi]" required onchange="guardarVehiculo();" id="tipo_vehi_${vIndex}">
+                <select name="vehiculos[${vIndex}][tipo_vehi]" required id="tipo_vehi_${vIndex}">
                     <option value="">Seleccione</option>
                     <option value="Van extralargo" ${datos['tipo_vehi'] === 'Van extralargo' ? 'selected' : ''}>Van extralargo</option>
                     <option value="Camion sencillo furgonado" ${datos['tipo_vehi'] === 'Camion sencillo furgonado' ? 'selected' : ''}>Camión sencillo furgonado</option>
@@ -405,11 +405,11 @@
                     <option value="Camabaja estandar" ${datos['tipo_vehi'] === 'Camabaja estandar' ? 'selected' : ''}>Camabaja estandar</option>
                     <option value="otro" ${datos['tipo_vehi'] === 'otro' ? 'selected' : ''}>Otro</option>
                 </select>
-                <input type="text" name="vehiculo_${vIndex}_otro_tipo" id="otro_tipo_${vIndex}" class="otro-input" placeholder="Especifique tipo" value="${datos.otro_tipo || ''}" oninput="guardarVehiculo();">
+                <input type="text" name="vehiculo_${vIndex}_otro_tipo" id="otro_tipo_${vIndex}" class="otro-input" placeholder="Especifique tipo" value="${datos.otro_tipo || ''}">
 
                 <div class="form-group-custom" id="destino-group-${vIndex}" style="${(datos.motivo === 'cargue') ? 'display:block;' : 'display:none;'}">
                     <label style="margin-top:0;">Destino:</label>
-                    <select id="destino-select-${vIndex}" name="vehiculo_${vIndex}_destino" onchange="guardarVehiculo();">
+                    <select id="destino-select-${vIndex}" name="vehiculo_${vIndex}_destino">
                         <option value="">Seleccione Destino</option>
                         <option value="guarner_medellin" ${datos.destino === 'guarner_medellin' ? 'selected' : ''}>Guarne/Medellin</option>
                         <option value="cali" ${datos.destino === 'cali' ? 'selected' : ''}>Cali</option>
@@ -420,29 +420,29 @@
                         <option value="peru" ${datos.destino === 'peru' ? 'selected' : ''}>Perú</option>
                         <option value="otro" ${datos.destino === 'otro' ? 'selected' : ''}>Otro</option>
                     </select>
-                    <input type="text" name="vehiculo_${vIndex}_otro_destino" id="otro_destino_${vIndex}" class="otro-input" placeholder="Especifique otro destino" value="${datos.otro_destino || ''}" oninput="guardarVehiculo();">
+                    <input type="text" name="vehiculo_${vIndex}_otro_destino" id="otro_destino_${vIndex}" class="otro-input" placeholder="Especifique otro destino" value="${datos.otro_destino || ''}">
                 </div>
 
                 <div class="form-group-custom" id="remitente-group-${vIndex}" style="${(datos.motivo === 'descargue') ? 'display:block;' : 'display:none;'}">
                     <label style="margin-top:0;">Origen / Remitente:</label>
-                    <input type="text" id="remitente-input-${vIndex}" name="vehiculo_${vIndex}_origen" placeholder="Ej: Zona Franca" value="${datos.origen || ''}" oninput="guardarVehiculo();">
+                    <input type="text" id="remitente-input-${vIndex}" name="vehiculo_${vIndex}_origen" placeholder="Ej: Zona Franca" value="${datos.origen || ''}">
                 </div>
 
                 <label>Total De Personas:</label>
-                <input type="number" name="vehiculo_${vIndex}_personas" min="1" required value="${datos.personas || ''}" oninput="guardarVehiculo();">
+                <input type="number" name="vehiculo_${vIndex}_personas" min="1" required value="${datos.personas || ''}">
 
                 <label>Cajas Movidas:</label>
                 <input type="number" name="vehiculo_${vIndex}_cajas" class="cajas-input-js" min="0" required 
                     value="${datos.cajas || ''}"
-                    oninput="actualizarTotalCajas(); guardarVehiculo();">
+                    oninput="actualizarTotalCajas();">
 
                 <label>Justificación del retraso o incidencia:</label>
-                <select name="vehiculo_${vIndex}_justificacion" onchange="manejarOtroCampo(this, 'otro_justificacion_${vIndex}'); guardarVehiculo();">
+                <select name="vehiculo_${vIndex}_justificacion">
                     <option value="">Seleccione motivo</option>
                     <option value="faltante_producto" ${datos.justificacion === 'faltante_producto' ? 'selected' : ''}>Faltante de producto</option>
                     <option value="otro" ${datos.justificacion === 'otro' ? 'selected' : ''}>Otro</option>
                 </select>
-                <input type="text" name="vehiculo_${vIndex}_otro_justificacion" id="otro_justificacion_${vIndex}" class="otro-input" placeholder="Especifique la incidencia" value="${datos.otro_justificacion || ''}" oninput="guardarVehiculo();">
+                <input type="text" name="vehiculo_${vIndex}_otro_justificacion" id="otro_justificacion_${vIndex}" class="otro-input" placeholder="Especifique la incidencia" value="${datos.otro_justificacion || ''}">
 
                 <label>Foto De vehiculo:</label>
                 <input type="file" name="vehiculo_${vIndex}_foto" id="${fotoInputId}" accept="image/*" capture="environment">
@@ -466,7 +466,6 @@
             motivoSelect.addEventListener('change', () => {
                 alternarDestinoRemitente(motivoSelect, vIndex);
                 manejarOtroCampo(motivoSelect, null);
-                guardarVehiculo();
             });
             alternarDestinoRemitente(motivoSelect, vIndex);
             
@@ -478,7 +477,7 @@
             }
             const tipoVehiculo = document.getElementById(`tipo_vehi_${vIndex}`)?.value?.replace(/ /g, '_') || 'vehiculo';
             const nombrePersonalizado = `${fechaFormateada}.${tipoVehiculo}.vehiculo_${vIndex}`;
-            setupFotoPreview(fotoInputId, previewFotoId, nombrePersonalizado, guardarVehiculo);
+            setupFotoPreview(fotoInputId, previewFotoId, nombrePersonalizado);
         }
 
         // === FUNCIONES DE PARADAS DE OPERACIÓN ===
@@ -544,7 +543,7 @@
 
         // === FUNCIONES AUXILIARES ===
 
-        function setupFotoPreview(inputId, previewId, nombrePersonalizado, onSave) {
+        function setupFotoPreview(inputId, previewId, nombrePersonalizado) {
             const input = document.getElementById(inputId);
             const preview = document.getElementById(previewId);
             if (!input || !preview) return;
@@ -579,7 +578,6 @@
                         const urlInput = document.getElementById(`foto_url_${nombrePersonalizado.split('.').pop().replace('vehiculo_', '')}`);
                         if (urlInput) {
                             urlInput.value = imageUrl;
-                            if (onSave) onSave();
                         }
                         alert(`✅ Foto subida: ${nombrePersonalizado}`);
                     } else {
@@ -709,7 +707,93 @@
             });
         }
 
-        // === FUNCIÓN DE ENVÍO (SIMPLIFICADA Y CONFIABLE) ===
+        // === FUNCIÓN DE ENVÍO (DEFINITIVA) ===
+
+        function enviarFormulario(event) {
+            event.preventDefault();
+
+            // Validar campos obligatorios
+            const camposObligatorios = [
+                { id: 'lugar', nombre: 'Lugar de operación' },
+                { id: 'lider', nombre: 'Líder Asignado' },
+                { id: 'lider_pepsico', nombre: 'Líder De Pepsico' },
+                { id: 'fecha', nombre: 'Fecha' },
+                { id: 'turno', nombre: 'Turno' },
+                { id: 'total_personas', nombre: 'Total Personas En El Turno' },
+                { id: 'cajas_totales', nombre: 'Total Cajas Movidas' }
+            ];
+
+            for (const campo of camposObligatorios) {
+                const valor = document.getElementById(campo.id).value.trim();
+                if (!valor) {
+                    alert(`❌ Por favor, complete el campo: "${campo.nombre}".`);
+                    return;
+                }
+            }
+
+            if (vehiculosData.length === 0) {
+                alert("Registre al menos un vehículo.");
+                return;
+            }
+
+            // Guardar el último vehículo
+            const ultimoIndex = vehiculosData.length - 1;
+            const ultimoData = {
+                inicio: document.querySelector(`[name="vehiculo_${ultimoIndex}_inicio"]`)?.value || '',
+                fin: document.querySelector(`[name="vehiculo_${ultimoIndex}_fin"]`)?.value || '',
+                motivo: document.querySelector(`[name="vehiculo_${ultimoIndex}_motivo"]`)?.value || '',
+                otro_motivo: document.querySelector(`[name="vehiculo_${ultimoIndex}_otro_motivo"]`)?.value || '',
+                muelle: document.querySelector(`[name="vehiculo_${ultimoIndex}_muelle"]`)?.value || '',
+                otro_muelle_num: document.querySelector(`[name="vehiculo_${ultimoIndex}_otro_muelle_num"]`)?.value || '',
+                placa: document.querySelector(`[name="vehiculo_${ultimoIndex}_placa"]`)?.value || '',
+                tipo_vehi: document.querySelector(`[name="vehiculos[${ultimoIndex}][tipo_vehi]"]`)?.value || '',
+                otro_tipo: document.querySelector(`[name="vehiculo_${ultimoIndex}_otro_tipo"]`)?.value || '',
+                destino: document.querySelector(`[name="vehiculo_${ultimoIndex}_destino"]`)?.value || '',
+                otro_destino: document.querySelector(`[name="vehiculo_${ultimoIndex}_otro_destino"]`)?.value || '',
+                origen: document.querySelector(`[name="vehiculo_${ultimoIndex}_origen"]`)?.value || '',
+                personas: document.querySelector(`[name="vehiculo_${ultimoIndex}_personas"]`)?.value || '',
+                cajas: document.querySelector(`[name="vehiculo_${ultimoIndex}_cajas"]`)?.value || '',
+                justificacion: document.querySelector(`[name="vehiculo_${ultimoIndex}_justificacion"]`)?.value || '',
+                otro_justificacion: document.querySelector(`[name="vehiculo_${ultimoIndex}_otro_justificacion"]`)?.value || '',
+                foto_url: document.querySelector(`[name="vehiculo_${ultimoIndex}_foto_url"]`)?.value || ''
+            };
+            vehiculosData[ultimoIndex] = ultimoData;
+
+            // Validar placas
+            for (let i = 0; i < vehiculosData.length; i++) {
+                const placa = vehiculosData[i].placa || '';
+                if (placa && !/^[A-Z]{3}[0-9]{3}$|^[0-9]{3}[A-Z]{3}$|^[A-Z][0-9]{5}$/.test(placa)) {
+                    alert("Corrija el formato de la placa del vehículo #" + (i + 1) + ". Use: ABC123, 123ABC o A12345.");
+                    return;
+                }
+            }
+
+            if (!validarSolapamientoVehiculos() || !validarSolapamientoParadas()) {
+                return;
+            }
+
+            // Serializar
+            document.getElementById('datos_vehiculos').value = JSON.stringify(vehiculosData);
+
+            const paradasOperacion = [];
+            const contPar = document.getElementById('operacion-contenedor');
+            const gruposPar = contPar.querySelectorAll('.parada-group');
+            gruposPar.forEach((grupo, idx) => {
+                const inicio = grupo.querySelector(`input[name="parada_inicio_operacion_${idx}"]`).value;
+                const fin = grupo.querySelector(`input[name="parada_fin_operacion_${idx}"]`).value;
+                const motivo = grupo.querySelector(`select[name="parada_motivo_operacion_${idx}"]`).value;
+                const otro_motivo = grupo.querySelector(`input[name="parada_otro_motivo_operacion_${idx}"]`)?.value || '';
+                if (inicio && fin && motivo) {
+                    paradasOperacion.push({ inicio, fin, motivo, otro_motivo });
+                }
+            });
+            document.getElementById('datos_paradas_operacion').value = JSON.stringify(paradasOperacion);
+
+            convertirATextoMayusculas();
+
+            // Enviar
+            event.target.submit();
+        }
 
         document.addEventListener('DOMContentLoaded', function() {
             const fechaInput = document.getElementById("fecha");
@@ -727,94 +811,9 @@
             agregarCampoParada('operacion');
             actualizarCampos();
 
-            // === ENVÍO DEL FORMULARIO ===
-            document.querySelector('form').addEventListener('submit', function(event) {
-                // Validar campos obligatorios
-                const camposObligatorios = [
-                    { id: 'lugar', nombre: 'Lugar de operación' },
-                    { id: 'lider', nombre: 'Líder Asignado' },
-                    { id: 'lider_pepsico', nombre: 'Líder De Pepsico' },
-                    { id: 'fecha', nombre: 'Fecha' },
-                    { id: 'turno', nombre: 'Turno' },
-                    { id: 'total_personas', nombre: 'Total Personas En El Turno' },
-                    { id: 'cajas_totales', nombre: 'Total Cajas Movidas' }
-                ];
-
-                for (const campo of camposObligatorios) {
-                    const valor = document.getElementById(campo.id).value.trim();
-                    if (!valor) {
-                        alert(`❌ Por favor, complete el campo: "${campo.nombre}".`);
-                        event.preventDefault();
-                        return;
-                    }
-                }
-
-                if (vehiculosData.length === 0) {
-                    alert("Registre al menos un vehículo.");
-                    event.preventDefault();
-                    return;
-                }
-
-                // Guardar todos los vehículos
-                const contVeh = document.getElementById('vehiculos-contenedor');
-                const vehiculosElems = contVeh.querySelectorAll('.registro-vehiculo');
-                for (let i = 0; i < vehiculosElems.length; i++) {
-                    const data = {
-                        inicio: document.querySelector(`[name="vehiculo_${i}_inicio"]`)?.value || '',
-                        fin: document.querySelector(`[name="vehiculo_${i}_fin"]`)?.value || '',
-                        motivo: document.querySelector(`[name="vehiculo_${i}_motivo"]`)?.value || '',
-                        otro_motivo: document.querySelector(`[name="vehiculo_${i}_otro_motivo"]`)?.value || '',
-                        muelle: document.querySelector(`[name="vehiculo_${i}_muelle"]`)?.value || '',
-                        otro_muelle_num: document.querySelector(`[name="vehiculo_${i}_otro_muelle_num"]`)?.value || '',
-                        placa: document.querySelector(`[name="vehiculo_${i}_placa"]`)?.value || '',
-                        tipo_vehi: document.querySelector(`[name="vehiculos[${i}][tipo_vehi]"]`)?.value || '',
-                        otro_tipo: document.querySelector(`[name="vehiculo_${i}_otro_tipo"]`)?.value || '',
-                        destino: document.querySelector(`[name="vehiculo_${i}_destino"]`)?.value || '',
-                        otro_destino: document.querySelector(`[name="vehiculo_${i}_otro_destino"]`)?.value || '',
-                        origen: document.querySelector(`[name="vehiculo_${i}_origen"]`)?.value || '',
-                        personas: document.querySelector(`[name="vehiculo_${i}_personas"]`)?.value || '',
-                        cajas: document.querySelector(`[name="vehiculo_${i}_cajas"]`)?.value || '',
-                        justificacion: document.querySelector(`[name="vehiculo_${i}_justificacion"]`)?.value || '',
-                        otro_justificacion: document.querySelector(`[name="vehiculo_${i}_otro_justificacion"]`)?.value || '',
-                        foto_url: document.querySelector(`[name="vehiculo_${i}_foto_url"]`)?.value || ''
-                    };
-                    vehiculosData[i] = data;
-                }
-
-                // Validar placas
-                for (let i = 0; i < vehiculosData.length; i++) {
-                    const placa = vehiculosData[i].placa || '';
-                    if (placa && !/^[A-Z]{3}[0-9]{3}$|^[0-9]{3}[A-Z]{3}$|^[A-Z][0-9]{5}$/.test(placa)) {
-                        alert("Corrija el formato de la placa del vehículo #" + (i + 1) + ". Use: ABC123, 123ABC o A12345.");
-                        event.preventDefault();
-                        return;
-                    }
-                }
-
-                if (!validarSolapamientoVehiculos() || !validarSolapamientoParadas()) {
-                    event.preventDefault();
-                    return;
-                }
-
-                // Serializar datos
-                document.getElementById('datos_vehiculos').value = JSON.stringify(vehiculosData);
-
-                const paradasOperacion = [];
-                const contPar = document.getElementById('operacion-contenedor');
-                const gruposPar = contPar.querySelectorAll('.parada-group');
-                gruposPar.forEach((grupo, idx) => {
-                    const inicio = grupo.querySelector(`input[name="parada_inicio_operacion_${idx}"]`).value;
-                    const fin = grupo.querySelector(`input[name="parada_fin_operacion_${idx}"]`).value;
-                    const motivo = grupo.querySelector(`select[name="parada_motivo_operacion_${idx}"]`).value;
-                    const otro_motivo = grupo.querySelector(`input[name="parada_otro_motivo_operacion_${idx}"]`)?.value || '';
-                    if (inicio && fin && motivo) {
-                        paradasOperacion.push({ inicio, fin, motivo, otro_motivo });
-                    }
-                });
-                document.getElementById('datos_paradas_operacion').value = JSON.stringify(paradasOperacion);
-
-                convertirATextoMayusculas();
-            });
+            // Asignar el evento de envío SOLO UNA VEZ
+            const form = document.querySelector('form');
+            form.addEventListener('submit', enviarFormulario);
         });
     </script>
 </body>
