@@ -45,7 +45,8 @@
             flex-direction: column;
         }
         .btn-agregar-registro,
-        .btn-agregar-parada-op {
+        .btn-agregar-parada-op,
+        .btn-borrar-todo {
             background-color: #001855;
             color: white;
             border: none;
@@ -57,7 +58,8 @@
             font-weight: bold;
         }
         .btn-agregar-registro:hover,
-        .btn-agregar-parada-op:hover {
+        .btn-agregar-parada-op:hover,
+        .btn-borrar-todo:hover {
             background-color: #0056b3;
         }
         label {
@@ -151,7 +153,7 @@
     </div>
     <h2 style="text-align:center;">FORMULARIO - PEPSICO FUNZA</h2>
 
-    <form name="formulario-pepsico" method="POST" data-netlify="true">
+    <form name="formulario-pepsico" method="POST" data-netlify="true" onsubmit="return validarYEnviar(event)">
         <input type="hidden" name="form-name" value="formulario-pepsico" />
 
         <label for="lugar">Lugar de operación:</label>
@@ -211,21 +213,12 @@
         <!-- Campos ocultos para JSON -->
         <input type="hidden" name="datos_vehiculos" id="datos_vehiculos" value="">
         <input type="hidden" name="datos_paradas_operacion" id="datos_paradas_operacion" value="">
-        
+
         <button type="submit">Enviar</button>
     </form>
 
     <script>
         let vehiculosData = [];
-        let paradasOperacionData = [];
-
-        // === UTILIDAD: convertir valor a mayúsculas si es texto ===
-        function toUpperCaseIfNeeded(value) {
-            if (typeof value === 'string') {
-                return value.toUpperCase();
-            }
-            return value;
-        }
 
         // === FUNCIONES DE VALIDACIÓN DE HORARIO ===
 
@@ -274,8 +267,8 @@
             const cont = document.getElementById('operacion-contenedor');
             const grupos = cont.querySelectorAll('.parada-group');
             grupos.forEach((grupo, idx) => {
-                const inicio = grupo.querySelector(`input[name="parada_inicio_operacion_${idx}"]`).value;
-                const fin = grupo.querySelector(`input[name="parada_fin_operacion_${idx}"]`).value;
+                const inicio = grupo.querySelector('input[name="parada_inicio_operacion_'+idx+'"]').value;
+                const fin = grupo.querySelector('input[name="parada_fin_operacion_'+idx+'"]').value;
                 if (inicio && fin) paradas.push({ inicio, fin, idx });
             });
             for (let i = 0; i < paradas.length; i++) {
@@ -300,7 +293,7 @@
             ];
             fields.forEach(field => {
                 const el = element.querySelector(`[name="vehiculo_${index}_${field}"]`);
-                if (el) data[field] = toUpperCaseIfNeeded(el.value);
+                if (el) data[field] = el.value.toUpperCase();
             });
             return data;
         }
@@ -365,9 +358,9 @@
                     <label style="margin-top:5px;">Motivo:</label>
                     <select id="${motivoSelectId}" name="vehiculo_${vIndex}_motivo" required>
                         <option value="">Seleccione</option>
-                        <option value="cargue" ${datos.motivo === 'CARGUE' ? 'selected' : ''}>Cargue</option>
-                        <option value="descargue" ${datos.motivo === 'DESCARGUE' ? 'selected' : ''}>Descargue</option>
-                        <option value="otro" ${datos.motivo === 'OTRO' ? 'selected' : ''}>Otro</option>
+                        <option value="cargue">Cargue</option>
+                        <option value="descargue">Descargue</option>
+                        <option value="otro">Otro</option>
                     </select>
                     <input type="text" name="vehiculo_${vIndex}_otro_motivo" placeholder="Especifique otro motivo" class="otro-input" value="${datos.otro_motivo || ''}">
                 </div>
@@ -377,16 +370,16 @@
                 <label>Muelle:</label>
                 <select name="vehiculo_${vIndex}_muelle" required>
                     <option value="">Seleccione</option>
-                    <option value="3" ${datos.muelle === '3' ? 'selected' : ''}>3</option>
-                    <option value="11" ${datos.muelle === '11' ? 'selected' : ''}>11</option>
-                    <option value="12" ${datos.muelle === '12' ? 'selected' : ''}>12</option>
-                    <option value="13" ${datos.muelle === '13' ? 'selected' : ''}>13</option>
-                    <option value="14" ${datos.muelle === '14' ? 'selected' : ''}>14</option>
-                    <option value="17" ${datos.muelle === '17' ? 'selected' : ''}>17</option>
-                    <option value="18" ${datos.muelle === '18' ? 'selected' : ''}>18</option>
-                    <option value="19" ${datos.muelle === '19' ? 'selected' : ''}>19</option>
-                    <option value="20" ${datos.muelle === '20' ? 'selected' : ''}>20</option>
-                    <option value="otro" ${datos.muelle === 'OTRO' ? 'selected' : ''}>Otro</option>
+                    <option value="3">3</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                    <option value="13">13</option>
+                    <option value="14">14</option>
+                    <option value="17">17</option>
+                    <option value="18">18</option>
+                    <option value="19">19</option>
+                    <option value="20">20</option>
+                    <option value="otro">Otro</option>
                 </select>
                 <input type="number" name="vehiculo_${vIndex}_otro_muelle_num" id="otro_muelle_${vIndex}" class="otro-input" placeholder="N° muelle" min="1" max="999" value="${datos.otro_muelle_num || ''}">
 
@@ -398,16 +391,16 @@
                 <label>Tipo De Vehiculo:</label>
                 <select name="vehiculos[${vIndex}][tipo_vehi]" required>
                     <option value="">Seleccione</option>
-                    <option value="Van extralargo" ${datos['tipo_vehi'] === 'VAN EXTRALARGO' ? 'selected' : ''}>Van extralargo</option>
-                    <option value="Camion sencillo furgonado" ${datos['tipo_vehi'] === 'CAMION SENCILLO FURGONADO' ? 'selected' : ''}>Camión sencillo furgonado</option>
-                    <option value="Camabaja furgonado" ${datos['tipo_vehi'] === 'CAMABAJA FURGONADO' ? 'selected' : ''}>Camabaja furgonado</option>
-                    <option value="Tractomula furgonado" ${datos['tipo_vehi'] === 'TRACTOMULA FURGONADO' ? 'selected' : ''}>Tractomula furgonado</option>
-                    <option value="Exportacion 35" ${datos['tipo_vehi'] === 'EXPORTACION 35' ? 'selected' : ''}>Exportacion 35</option>
-                    <option value="Exportacion 40" ${datos['tipo_vehi'] === 'EXPORTACION 40' ? 'selected' : ''}>Exportacion 40</option>
-                    <option value="Cama baja con topes" ${datos['tipo_vehi'] === 'CAMA BAJA CON TOPES' ? 'selected' : ''}>Cama baja con topes</option>
-                    <option value="Camion sencillo carpado" ${datos['tipo_vehi'] === 'CAMION SENCILLO CARPADO' ? 'selected' : ''}>Camión Sencillo Carpado</option>
-                    <option value="Camabaja estandar" ${datos['tipo_vehi'] === 'CAMABAJA ESTANDAR' ? 'selected' : ''}>Camabaja estandar</option>
-                    <option value="otro" ${datos['tipo_vehi'] === 'OTRO' ? 'selected' : ''}>Otro</option>
+                    <option value="Van extralargo">Van extralargo</option>
+                    <option value="Camion sencillo furgonado">Camión sencillo furgonado</option>
+                    <option value="Camabaja furgonado">Camabaja furgonado</option>
+                    <option value="Tractomula furgonado">Tractomula furgonado</option>
+                    <option value="Exportacion 35">Exportacion 35</option>
+                    <option value="Exportacion 40">Exportacion 40</option>
+                    <option value="Cama baja con topes">Cama baja con topes</option>
+                    <option value="Camion sencillo carpado">Camión Sencillo Carpado</option>
+                    <option value="Camabaja estandar">Camabaja estandar</option>
+                    <option value="otro">Otro</option>
                 </select>
                 <input type="text" name="vehiculo_${vIndex}_otro_tipo" id="otro_tipo_${vIndex}" class="otro-input" placeholder="Especifique tipo" value="${datos.otro_tipo || ''}">
 
@@ -415,14 +408,14 @@
                     <label style="margin-top:0;">Destino:</label>
                     <select id="destino-select-${vIndex}" name="vehiculo_${vIndex}_destino">
                         <option value="">Seleccione Destino</option>
-                        <option value="guarner_medellin" ${datos.destino === 'GUARNER_MEDELLIN' ? 'selected' : ''}>Guarne/Medellin</option>
-                        <option value="cali" ${datos.destino === 'CALI' ? 'selected' : ''}>Cali</option>
-                        <option value="barranquilla" ${datos.destino === 'BARRANQUILLA' ? 'selected' : ''}>Barranquilla</option>
-                        <option value="pereira" ${datos.destino === 'PEREIRA' ? 'selected' : ''}>Pereira</option>
-                        <option value="bucaramanga" ${datos.destino === 'BUCARAMANGA' ? 'selected' : ''}>Bucaramanga</option>
-                        <option value="monteria" ${datos.destino === 'MONTERIA' ? 'selected' : ''}>Montería</option>
-                        <option value="peru" ${datos.destino === 'PERU' ? 'selected' : ''}>Perú</option>
-                        <option value="otro" ${datos.destino === 'OTRO' ? 'selected' : ''}>Otro</option>
+                        <option value="guarner_medellin">Guarne/Medellin</option>
+                        <option value="cali">Cali</option>
+                        <option value="barranquilla">Barranquilla</option>
+                        <option value="pereira">Pereira</option>
+                        <option value="bucaramanga">Bucaramanga</option>
+                        <option value="monteria">Montería</option>
+                        <option value="peru">Perú</option>
+                        <option value="otro">Otro</option>
                     </select>
                     <input type="text" name="vehiculo_${vIndex}_otro_destino" id="otro_destino_${vIndex}" class="otro-input" placeholder="Especifique otro destino" value="${datos.otro_destino || ''}">
                 </div>
@@ -443,8 +436,8 @@
                 <label>Justificación del retraso o incidencia:</label>
                 <select name="vehiculo_${vIndex}_justificacion" onchange="manejarOtroCampo(this, 'otro_justificacion_${vIndex}')">
                     <option value="">Seleccione motivo</option>
-                    <option value="faltante_producto" ${datos.justificacion === 'FALTANTE_PRODUCTO' ? 'selected' : ''}>Faltante de producto</option>
-                    <option value="otro" ${datos.justificacion === 'OTRO' ? 'selected' : ''}>Otro</option>
+                    <option value="faltante_producto">Faltante de producto</option>
+                    <option value="otro">Otro</option>
                 </select>
                 <input type="text" name="vehiculo_${vIndex}_otro_justificacion" id="otro_justificacion_${vIndex}" class="otro-input" placeholder="Especifique la incidencia" value="${datos.otro_justificacion || ''}">
 
@@ -459,11 +452,11 @@
             `;
             contenedor.appendChild(registro);
 
-            if (datos.muelle === 'OTRO') document.getElementById(`otro_muelle_${vIndex}`).style.display = 'block';
-            if (datos['tipo_vehi'] === 'OTRO') document.getElementById(`otro_tipo_${vIndex}`).style.display = 'block';
-            if (datos.destino === 'OTRO') document.getElementById(`otro_destino_${vIndex}`).style.display = 'block';
-            if (datos.justificacion === 'OTRO') document.getElementById(`otro_justificacion_${vIndex}`).style.display = 'block';
-            if (datos.motivo === 'OTRO' && datos.otro_motivo) registro.querySelector('.otro-input').style.display = 'block';
+            if (datos.muelle === 'otro') document.getElementById(`otro_muelle_${vIndex}`).style.display = 'block';
+            if (datos['tipo_vehi'] === 'otro') document.getElementById(`otro_tipo_${vIndex}`).style.display = 'block';
+            if (datos.destino === 'otro') document.getElementById(`otro_destino_${vIndex}`).style.display = 'block';
+            if (datos.justificacion === 'otro') document.getElementById(`otro_justificacion_${vIndex}`).style.display = 'block';
+            if (datos.motivo === 'otro' && datos.otro_motivo) registro.querySelector('.otro-input').style.display = 'block';
 
             const motivoSelect = document.getElementById(motivoSelectId);
             motivoSelect.addEventListener('change', () => {
@@ -490,6 +483,11 @@
             botonEliminar.textContent = 'Eliminar';
             botonEliminar.onclick = function() {
                 div.remove();
+                const paradas = contenedor.getElementsByClassName('parada-group');
+                for (let i = 0; i < paradas.length; i++) {
+                    const span = paradas[i].querySelector('.numero-parada');
+                    if (span) span.textContent = i + 1;
+                }
             };
 
             const dInicio = `operacion-inicio-${index}`;
@@ -571,6 +569,7 @@
                     }
                 } catch (error) {
                     alert("❌ No se pudo subir la foto. Por favor, inténtelo de nuevo.");
+                    console.error(error);
                 }
             });
         }
@@ -684,8 +683,8 @@
         }
 
         function convertirATextoMayusculas() {
-            const inputs = document.querySelectorAll('input[type="text"]:not([type="hidden"]), textarea, select');
-            inputs.forEach(input => {
+            const textInputs = document.querySelectorAll('input[type="text"], textarea');
+            textInputs.forEach(input => {
                 if (input.value.trim() !== '') {
                     input.value = input.value.toUpperCase();
                 }
@@ -693,6 +692,27 @@
         }
 
         function validarYEnviar(event) {
+            // === Validar campos obligatorios del encabezado ===
+            const camposObligatorios = [
+                { id: 'lugar', nombre: 'Lugar de operación' },
+                { id: 'lider', nombre: 'Líder Asignado' },
+                { id: 'lider_pepsico', nombre: 'Líder De Pepsico' },
+                { id: 'fecha', nombre: 'Fecha' },
+                { id: 'turno', nombre: 'Turno' },
+                { id: 'total_personas', nombre: 'Total Personas En El Turno' },
+                { id: 'cajas_totales', nombre: 'Total Cajas Movidas' }
+            ];
+
+            for (const campo of camposObligatorios) {
+                const valor = document.getElementById(campo.id).value.trim();
+                if (!valor) {
+                    alert(`❌ Por favor, complete el campo: "${campo.nombre}".`);
+                    event.preventDefault();
+                    return false;
+                }
+            }
+
+            // === Validar vehículos ===
             if (vehiculosData.length === 0) {
                 alert("Registre al menos un vehículo.");
                 event.preventDefault();
@@ -700,34 +720,22 @@
             }
 
             // Validar placas
-            let placaValida = true;
             for (let i = 0; i < vehiculosData.length; i++) {
                 const placa = vehiculosData[i].placa || '';
                 if (placa && !/^[A-Z]{3}[0-9]{3}$|^[0-9]{3}[A-Z]{3}$|^[A-Z][0-9]{5}$/.test(placa)) {
-                    placaValida = false;
-                    break;
+                    alert("Corrija el formato de la placa del vehículo #" + (i + 1) + ". Use: ABC123, 123ABC o A12345.");
+                    event.preventDefault();
+                    return false;
                 }
-            }
-            if (!placaValida) {
-                alert("Corrija el formato de las placas. Use: ABC123, 123ABC o A12345.");
-                event.preventDefault();
-                return false;
             }
 
             // Validar solapamientos
-            if (!validarSolapamientoVehiculos()) {
-                event.preventDefault();
-                return false;
-            }
-            if (!validarSolapamientoParadas()) {
+            if (!validarSolapamientoVehiculos() || !validarSolapamientoParadas()) {
                 event.preventDefault();
                 return false;
             }
 
-            // Convertir todo a mayúsculas en el DOM
-            convertirATextoMayusculas();
-
-            // --- Guardar vehículos (YA EN MAYÚSCULAS por toUpperCaseIfNeeded) ---
+            // === Serializar datos ===
             const contVeh = document.getElementById('vehiculos-contenedor');
             const vehiculosElems = contVeh.querySelectorAll('.registro-vehiculo');
             for (let i = 0; i < vehiculosElems.length; i++) {
@@ -735,25 +743,25 @@
             }
             document.getElementById('datos_vehiculos').value = JSON.stringify(vehiculosData);
 
-            // --- Guardar paradas de operación (convertir a mayúsculas) ---
+            // Recoger paradas
+            const paradasOperacion = [];
             const contPar = document.getElementById('operacion-contenedor');
             const gruposPar = contPar.querySelectorAll('.parada-group');
-            paradasOperacionData = [];
             gruposPar.forEach((grupo, idx) => {
                 const inicio = grupo.querySelector(`input[name="parada_inicio_operacion_${idx}"]`).value;
                 const fin = grupo.querySelector(`input[name="parada_fin_operacion_${idx}"]`).value;
-                let motivo = grupo.querySelector(`select[name="parada_motivo_operacion_${idx}"]`).value;
-                let otro_motivo = grupo.querySelector(`input[name="parada_otro_motivo_operacion_${idx}"]`)?.value || '';
-                
+                const motivo = grupo.querySelector(`select[name="parada_motivo_operacion_${idx}"]`).value;
+                const otro_motivo = grupo.querySelector(`input[name="parada_otro_motivo_operacion_${idx}"]`)?.value || '';
                 if (inicio && fin && motivo) {
-                    motivo = toUpperCaseIfNeeded(motivo);
-                    otro_motivo = toUpperCaseIfNeeded(otro_motivo);
-                    paradasOperacionData.push({ inicio, fin, motivo, otro_motivo });
+                    paradasOperacion.push({ inicio, fin, motivo, otro_motivo });
                 }
             });
-            document.getElementById('datos_paradas_operacion').value = JSON.stringify(paradasOperacionData);
+            document.getElementById('datos_paradas_operacion').value = JSON.stringify(paradasOperacion);
 
-            return true;
+            // === Convertir a mayúsculas ===
+            convertirATextoMayusculas();
+
+            return true; // ✅ Permitir envío
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -767,8 +775,6 @@
             liderPepsico.addEventListener('change', function() {
                 this.dataset.manualChange = 'true';
             });
-
-            document.querySelector('form').addEventListener('submit', validarYEnviar);
 
             agregarRegistroVehiculo();
             agregarCampoParada('operacion');
