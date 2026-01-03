@@ -236,6 +236,7 @@
 
     <script>
         let vehiculosData = [];
+        let paradasOperacionData = [];
         const STORAGE_KEY = 'formulario_pepsico_data';
 
         // === FUNCIONES DE VALIDACIÓN DE HORARIO ===
@@ -551,6 +552,7 @@
             `;
             div.appendChild(botonEliminar);
             contenedor.appendChild(div);
+            guardarEnLocalStorage();
         }
 
         // === FUNCIONES AUXILIARES ===
@@ -713,6 +715,7 @@
                 if (!isNaN(valor)) total += valor;
             });
             totalCajasInput.value = total;
+            guardarEnLocalStorage();
         }
 
         function convertirATextoMayusculas() {
@@ -737,7 +740,8 @@
                     turno: document.getElementById('turno').value,
                     total_personas: document.getElementById('total_personas').value,
                     cajas_totales: document.getElementById('cajas_totales').value,
-                    vehiculos: vehiculosData
+                    vehiculos: vehiculosData,
+                    paradas: paradasOperacionData
                 };
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
             } catch (e) {
@@ -769,6 +773,15 @@
                     });
                 }
 
+                if (formData.paradas && Array.isArray(formData.paradas)) {
+                    paradasOperacionData = formData.paradas;
+                    const contenedor = document.getElementById('operacion-contenedor');
+                    contenedor.innerHTML = '';
+                    paradasOperacionData.forEach((data, i) => {
+                        crearParadaHTML(contenedor, i, data);
+                    });
+                }
+
                 actualizarCampos();
                 return true;
             } catch (e) {
@@ -796,6 +809,7 @@
             agregarRegistroVehiculo(); // Agregar uno vacío
 
             // Limpiar paradas
+            paradasOperacionData = [];
             document.getElementById('operacion-contenedor').innerHTML = '';
             agregarCampoParada('operacion');
 
@@ -803,6 +817,70 @@
             localStorage.removeItem(STORAGE_KEY);
 
             alert("✅ Todo ha sido borrado.");
+        }
+
+        // === FUNCIONES PARA PARADAS DE OPERACIÓN ===
+
+        function crearParadaHTML(contenedor, index, datos = {}) {
+            const inicioId = `operacion-inicio-${index}`;
+            const finId = `operacion-fin-${index}`;
+
+            const div = document.createElement('div');
+            div.className = 'parada-group';
+            div.dataset.index = index;
+
+            const botonEliminar = document.createElement('button');
+            botonEliminar.type = 'button';
+            botonEliminar.className = 'btn-eliminar';
+            botonEliminar.textContent = 'Eliminar';
+            botonEliminar.onclick = function() {
+                div.remove();
+                const paradas = contenedor.getElementsByClassName('parada-group');
+                for (let i = 0; i < paradas.length; i++) {
+                    const span = paradas[i].querySelector('.numero-parada');
+                    if (span) span.textContent = i + 1;
+                }
+                // Actualizar array de paradas
+                paradasOperacionData.splice(index, 1);
+                guardarEnLocalStorage();
+            };
+
+            const html = `
+                <p style="font-weight:bold; margin-top:0; color:#555;">🛑 Parada #<span class="numero-parada">${index + 1}</span> (Operación)</p>
+                <div class="time-row">
+                    <div>
+                        <label class="time-label">Hora Inicio (HH:MM):</label>
+                        <input type="tel" name="parada_inicio_operacion_${index}" class="time-input-masked" 
+                            placeholder="HH:MM" maxlength="5" value="${datos.inicio || ''}"
+                            onblur="applyTimeMask(this, '${inicioId}'); guardarEnLocalStorage();">
+                        <span id="${inicioId}" class="time-display"></span>
+                    </div>
+                    <div>
+                        <label class="time-label">Hora Final (HH:MM):</label>
+                        <input type="tel" name="parada_fin_operacion_${index}" class="time-input-masked" 
+                            placeholder="HH:MM" maxlength="5" value="${datos.fin || ''}"
+                            onblur="applyTimeMask(this, '${finId}'); guardarEnLocalStorage();">
+                        <span id="${finId}" class="time-display"></span>
+                    </div>
+                </div>
+                <label style="margin-top:5px;">Motivo:</label>
+                <select name="parada_motivo_operacion_${index}" onchange="manejarOtroCampo(this); guardarEnLocalStorage();">
+                    <option value="">Seleccione</option>
+                    <option value="pausas_activas" ${datos.motivo === 'pausas_activas' ? 'selected' : ''}>Pausas Activas y/o Charla</option>
+                    <option value="liberacion_calidad" ${datos.motivo === 'liberacion_calidad' ? 'selected' : ''}>Liberacion De Calidad</option>
+                    <option value="desayuno_almuerzo_cena" ${datos.motivo === 'desayuno_almuerzo_cena' ? 'selected' : ''}>Desayuno/Almuerzo/Cena</option>
+                    <option value="aseo" ${datos.motivo === 'aseo' ? 'selected' : ''}>Aseo</option>
+                    <option value="faltante_insumos" ${datos.motivo === 'faltante_insumos' ? 'selected' : ''}>Faltante (Canastillas, vinipel, estibas, etc)</option>
+                    <option value="danos_equipo" ${datos.motivo === 'danos_equipo' ? 'selected' : ''}>Daños (Electricos, montacargas, etc)</option>
+                    <option value="otro" ${datos.motivo === 'otro' ? 'selected' : ''}>Otro</option>
+                </select>
+                <input type="text" name="parada_otro_motivo_operacion_${index}" placeholder="Especifique otro motivo" class="otro-input" value="${datos.otro_motivo || ''}" oninput="guardarEnLocalStorage();">
+            `;
+            div.innerHTML = html;
+            div.appendChild(botonEliminar);
+            contenedor.appendChild(div);
+
+            if (datos.motivo === 'otro' && datos.otro_motivo) div.querySelector('.otro-input').style.display = 'block';
         }
 
         // === FUNCIÓN DE ENVÍO ===
@@ -847,6 +925,7 @@
 
             document.getElementById('datos_vehiculos').value = JSON.stringify(vehiculosData);
 
+            // Serializar paradas
             const paradasOperacion = [];
             const contPar = document.getElementById('operacion-contenedor');
             const gruposPar = contPar.querySelectorAll('.parada-group');
