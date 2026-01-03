@@ -151,7 +151,7 @@
     </div>
     <h2 style="text-align:center;">FORMULARIO - PEPSICO FUNZA</h2>
 
-    <form name="formulario-pepsico" method="POST" data-netlify="true" onsubmit="return validarYEnviar(event)">
+    <form name="formulario-pepsico" method="POST" data-netlify="true">
         <input type="hidden" name="form-name" value="formulario-pepsico" />
 
         <label for="lugar">Lugar de operación:</label>
@@ -709,66 +709,7 @@
             });
         }
 
-        function validarYEnviar(event) {
-            const camposObligatorios = [
-                { id: 'lugar', nombre: 'Lugar de operación' },
-                { id: 'lider', nombre: 'Líder Asignado' },
-                { id: 'lider_pepsico', nombre: 'Líder De Pepsico' },
-                { id: 'fecha', nombre: 'Fecha' },
-                { id: 'turno', nombre: 'Turno' },
-                { id: 'total_personas', nombre: 'Total Personas En El Turno' },
-                { id: 'cajas_totales', nombre: 'Total Cajas Movidas' }
-            ];
-
-            for (const campo of camposObligatorios) {
-                const valor = document.getElementById(campo.id).value.trim();
-                if (!valor) {
-                    alert(`❌ Por favor, complete el campo: "${campo.nombre}".`);
-                    event.preventDefault();
-                    return false;
-                }
-            }
-
-            if (vehiculosData.length === 0) {
-                alert("Registre al menos un vehículo.");
-                event.preventDefault();
-                return false;
-            }
-
-            for (let i = 0; i < vehiculosData.length; i++) {
-                const placa = vehiculosData[i].placa || '';
-                if (placa && !/^[A-Z]{3}[0-9]{3}$|^[0-9]{3}[A-Z]{3}$|^[A-Z][0-9]{5}$/.test(placa)) {
-                    alert("Corrija el formato de la placa del vehículo #" + (i + 1) + ". Use: ABC123, 123ABC o A12345.");
-                    event.preventDefault();
-                    return false;
-                }
-            }
-
-            if (!validarSolapamientoVehiculos() || !validarSolapamientoParadas()) {
-                event.preventDefault();
-                return false;
-            }
-
-            document.getElementById('datos_vehiculos').value = JSON.stringify(vehiculosData);
-
-            const paradasOperacion = [];
-            const contPar = document.getElementById('operacion-contenedor');
-            const gruposPar = contPar.querySelectorAll('.parada-group');
-            gruposPar.forEach((grupo, idx) => {
-                const inicio = grupo.querySelector(`input[name="parada_inicio_operacion_${idx}"]`).value;
-                const fin = grupo.querySelector(`input[name="parada_fin_operacion_${idx}"]`).value;
-                const motivo = grupo.querySelector(`select[name="parada_motivo_operacion_${idx}"]`).value;
-                const otro_motivo = grupo.querySelector(`input[name="parada_otro_motivo_operacion_${idx}"]`)?.value || '';
-                if (inicio && fin && motivo) {
-                    paradasOperacion.push({ inicio, fin, motivo, otro_motivo });
-                }
-            });
-            document.getElementById('datos_paradas_operacion').value = JSON.stringify(paradasOperacion);
-
-            convertirATextoMayusculas();
-
-            return true;
-        }
+        // === FUNCIÓN DE ENVÍO (SIMPLIFICADA Y CONFIABLE) ===
 
         document.addEventListener('DOMContentLoaded', function() {
             const fechaInput = document.getElementById("fecha");
@@ -785,6 +726,95 @@
             agregarRegistroVehiculo();
             agregarCampoParada('operacion');
             actualizarCampos();
+
+            // === ENVÍO DEL FORMULARIO ===
+            document.querySelector('form').addEventListener('submit', function(event) {
+                // Validar campos obligatorios
+                const camposObligatorios = [
+                    { id: 'lugar', nombre: 'Lugar de operación' },
+                    { id: 'lider', nombre: 'Líder Asignado' },
+                    { id: 'lider_pepsico', nombre: 'Líder De Pepsico' },
+                    { id: 'fecha', nombre: 'Fecha' },
+                    { id: 'turno', nombre: 'Turno' },
+                    { id: 'total_personas', nombre: 'Total Personas En El Turno' },
+                    { id: 'cajas_totales', nombre: 'Total Cajas Movidas' }
+                ];
+
+                for (const campo of camposObligatorios) {
+                    const valor = document.getElementById(campo.id).value.trim();
+                    if (!valor) {
+                        alert(`❌ Por favor, complete el campo: "${campo.nombre}".`);
+                        event.preventDefault();
+                        return;
+                    }
+                }
+
+                if (vehiculosData.length === 0) {
+                    alert("Registre al menos un vehículo.");
+                    event.preventDefault();
+                    return;
+                }
+
+                // Guardar todos los vehículos
+                const contVeh = document.getElementById('vehiculos-contenedor');
+                const vehiculosElems = contVeh.querySelectorAll('.registro-vehiculo');
+                for (let i = 0; i < vehiculosElems.length; i++) {
+                    const data = {
+                        inicio: document.querySelector(`[name="vehiculo_${i}_inicio"]`)?.value || '',
+                        fin: document.querySelector(`[name="vehiculo_${i}_fin"]`)?.value || '',
+                        motivo: document.querySelector(`[name="vehiculo_${i}_motivo"]`)?.value || '',
+                        otro_motivo: document.querySelector(`[name="vehiculo_${i}_otro_motivo"]`)?.value || '',
+                        muelle: document.querySelector(`[name="vehiculo_${i}_muelle"]`)?.value || '',
+                        otro_muelle_num: document.querySelector(`[name="vehiculo_${i}_otro_muelle_num"]`)?.value || '',
+                        placa: document.querySelector(`[name="vehiculo_${i}_placa"]`)?.value || '',
+                        tipo_vehi: document.querySelector(`[name="vehiculos[${i}][tipo_vehi]"]`)?.value || '',
+                        otro_tipo: document.querySelector(`[name="vehiculo_${i}_otro_tipo"]`)?.value || '',
+                        destino: document.querySelector(`[name="vehiculo_${i}_destino"]`)?.value || '',
+                        otro_destino: document.querySelector(`[name="vehiculo_${i}_otro_destino"]`)?.value || '',
+                        origen: document.querySelector(`[name="vehiculo_${i}_origen"]`)?.value || '',
+                        personas: document.querySelector(`[name="vehiculo_${i}_personas"]`)?.value || '',
+                        cajas: document.querySelector(`[name="vehiculo_${i}_cajas"]`)?.value || '',
+                        justificacion: document.querySelector(`[name="vehiculo_${i}_justificacion"]`)?.value || '',
+                        otro_justificacion: document.querySelector(`[name="vehiculo_${i}_otro_justificacion"]`)?.value || '',
+                        foto_url: document.querySelector(`[name="vehiculo_${i}_foto_url"]`)?.value || ''
+                    };
+                    vehiculosData[i] = data;
+                }
+
+                // Validar placas
+                for (let i = 0; i < vehiculosData.length; i++) {
+                    const placa = vehiculosData[i].placa || '';
+                    if (placa && !/^[A-Z]{3}[0-9]{3}$|^[0-9]{3}[A-Z]{3}$|^[A-Z][0-9]{5}$/.test(placa)) {
+                        alert("Corrija el formato de la placa del vehículo #" + (i + 1) + ". Use: ABC123, 123ABC o A12345.");
+                        event.preventDefault();
+                        return;
+                    }
+                }
+
+                if (!validarSolapamientoVehiculos() || !validarSolapamientoParadas()) {
+                    event.preventDefault();
+                    return;
+                }
+
+                // Serializar datos
+                document.getElementById('datos_vehiculos').value = JSON.stringify(vehiculosData);
+
+                const paradasOperacion = [];
+                const contPar = document.getElementById('operacion-contenedor');
+                const gruposPar = contPar.querySelectorAll('.parada-group');
+                gruposPar.forEach((grupo, idx) => {
+                    const inicio = grupo.querySelector(`input[name="parada_inicio_operacion_${idx}"]`).value;
+                    const fin = grupo.querySelector(`input[name="parada_fin_operacion_${idx}"]`).value;
+                    const motivo = grupo.querySelector(`select[name="parada_motivo_operacion_${idx}"]`).value;
+                    const otro_motivo = grupo.querySelector(`input[name="parada_otro_motivo_operacion_${idx}"]`)?.value || '';
+                    if (inicio && fin && motivo) {
+                        paradasOperacion.push({ inicio, fin, motivo, otro_motivo });
+                    }
+                });
+                document.getElementById('datos_paradas_operacion').value = JSON.stringify(paradasOperacion);
+
+                convertirATextoMayusculas();
+            });
         });
     </script>
 </body>
