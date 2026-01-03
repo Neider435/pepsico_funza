@@ -217,8 +217,6 @@
     <script>
         let vehiculosData = [];
 
-        // === FUNCIONES DE VALIDACIÓN DE HORARIO ===
-
         function horaAMinutos(horaStr) {
             if (!horaStr || !horaStr.includes(':')) return null;
             const [h, m] = horaStr.split(':').map(Number);
@@ -264,8 +262,8 @@
             const cont = document.getElementById('operacion-contenedor');
             const grupos = cont.querySelectorAll('.parada-group');
             grupos.forEach((grupo, idx) => {
-                const inicio = grupo.querySelector('input[name="parada_inicio_operacion_'+idx+'"]').value;
-                const fin = grupo.querySelector('input[name="parada_fin_operacion_'+idx+'"]').value;
+                const inicio = grupo.querySelector(`input[name="parada_inicio_operacion_${idx}"]`).value;
+                const fin = grupo.querySelector(`input[name="parada_fin_operacion_${idx}"]`).value;
                 if (inicio && fin) paradas.push({ inicio, fin, idx });
             });
             for (let i = 0; i < paradas.length; i++) {
@@ -279,44 +277,40 @@
             return true;
         }
 
-        // === FUNCIONES DE VEHÍCULOS ===
-
         function eliminarRegistroVehiculo(index) {
             if (vehiculosData.length <= 1) {
                 alert("Debe haber al menos un vehículo.");
                 return;
             }
+
+            // Eliminar del array
             vehiculosData.splice(index, 1);
+
+            // Eliminar del DOM
             const registro = document.querySelector(`.registro-vehiculo[data-index="${index}"]`);
             if (registro) registro.remove();
+
+            // Reindexar TODOS los vehículos en el DOM
+            reindexarVehiculos();
+
             actualizarTotalCajas();
+        }
+
+        function reindexarVehiculos() {
+            const contenedor = document.getElementById('vehiculos-contenedor');
+            const registros = contenedor.querySelectorAll('.registro-vehiculo');
+            
+            // Limpiar contenedor
+            contenedor.innerHTML = '';
+
+            // Volver a agregar con nuevos índices
+            for (let i = 0; i < vehiculosData.length; i++) {
+                crearVehiculoHTML(contenedor, i, vehiculosData[i]);
+            }
         }
 
         function agregarRegistroVehiculo() {
             const vIndex = vehiculosData.length;
-            // Guardar el vehículo actual antes de agregar uno nuevo
-            if (vIndex > 0) {
-                const data = {
-                    inicio: document.querySelector(`[name="vehiculo_${vIndex-1}_inicio"]`)?.value || '',
-                    fin: document.querySelector(`[name="vehiculo_${vIndex-1}_fin"]`)?.value || '',
-                    motivo: document.querySelector(`[name="vehiculo_${vIndex-1}_motivo"]`)?.value || '',
-                    otro_motivo: document.querySelector(`[name="vehiculo_${vIndex-1}_otro_motivo"]`)?.value || '',
-                    muelle: document.querySelector(`[name="vehiculo_${vIndex-1}_muelle"]`)?.value || '',
-                    otro_muelle_num: document.querySelector(`[name="vehiculo_${vIndex-1}_otro_muelle_num"]`)?.value || '',
-                    placa: document.querySelector(`[name="vehiculo_${vIndex-1}_placa"]`)?.value || '',
-                    tipo_vehi: document.querySelector(`[name="vehiculos[${vIndex-1}][tipo_vehi]"]`)?.value || '',
-                    otro_tipo: document.querySelector(`[name="vehiculo_${vIndex-1}_otro_tipo"]`)?.value || '',
-                    destino: document.querySelector(`[name="vehiculo_${vIndex-1}_destino"]`)?.value || '',
-                    otro_destino: document.querySelector(`[name="vehiculo_${vIndex-1}_otro_destino"]`)?.value || '',
-                    origen: document.querySelector(`[name="vehiculo_${vIndex-1}_origen"]`)?.value || '',
-                    personas: document.querySelector(`[name="vehiculo_${vIndex-1}_personas"]`)?.value || '',
-                    cajas: document.querySelector(`[name="vehiculo_${vIndex-1}_cajas"]`)?.value || '',
-                    justificacion: document.querySelector(`[name="vehiculo_${vIndex-1}_justificacion"]`)?.value || '',
-                    otro_justificacion: document.querySelector(`[name="vehiculo_${vIndex-1}_otro_justificacion"]`)?.value || '',
-                    foto_url: document.querySelector(`[name="vehiculo_${vIndex-1}_foto_url"]`)?.value || ''
-                };
-                vehiculosData[vIndex-1] = data;
-            }
             vehiculosData.push({});
             const contenedor = document.getElementById('vehiculos-contenedor');
             crearVehiculoHTML(contenedor, vIndex, {});
@@ -480,8 +474,6 @@
             setupFotoPreview(fotoInputId, previewFotoId, nombrePersonalizado);
         }
 
-        // === FUNCIONES DE PARADAS DE OPERACIÓN ===
-
         function agregarCampoParada(tipo) {
             const contenedor = document.getElementById('operacion-contenedor');
             const index = contenedor.children.length;
@@ -540,8 +532,6 @@
             div.appendChild(botonEliminar);
             contenedor.appendChild(div);
         }
-
-        // === FUNCIONES AUXILIARES ===
 
         function setupFotoPreview(inputId, previewId, nombrePersonalizado) {
             const input = document.getElementById(inputId);
@@ -707,12 +697,9 @@
             });
         }
 
-        // === FUNCIÓN DE ENVÍO (DEFINITIVA) ===
-
         function enviarFormulario(event) {
             event.preventDefault();
 
-            // Validar campos obligatorios
             const camposObligatorios = [
                 { id: 'lugar', nombre: 'Lugar de operación' },
                 { id: 'lider', nombre: 'Líder Asignado' },
@@ -736,30 +723,6 @@
                 return;
             }
 
-            // Guardar el último vehículo
-            const ultimoIndex = vehiculosData.length - 1;
-            const ultimoData = {
-                inicio: document.querySelector(`[name="vehiculo_${ultimoIndex}_inicio"]`)?.value || '',
-                fin: document.querySelector(`[name="vehiculo_${ultimoIndex}_fin"]`)?.value || '',
-                motivo: document.querySelector(`[name="vehiculo_${ultimoIndex}_motivo"]`)?.value || '',
-                otro_motivo: document.querySelector(`[name="vehiculo_${ultimoIndex}_otro_motivo"]`)?.value || '',
-                muelle: document.querySelector(`[name="vehiculo_${ultimoIndex}_muelle"]`)?.value || '',
-                otro_muelle_num: document.querySelector(`[name="vehiculo_${ultimoIndex}_otro_muelle_num"]`)?.value || '',
-                placa: document.querySelector(`[name="vehiculo_${ultimoIndex}_placa"]`)?.value || '',
-                tipo_vehi: document.querySelector(`[name="vehiculos[${ultimoIndex}][tipo_vehi]"]`)?.value || '',
-                otro_tipo: document.querySelector(`[name="vehiculo_${ultimoIndex}_otro_tipo"]`)?.value || '',
-                destino: document.querySelector(`[name="vehiculo_${ultimoIndex}_destino"]`)?.value || '',
-                otro_destino: document.querySelector(`[name="vehiculo_${ultimoIndex}_otro_destino"]`)?.value || '',
-                origen: document.querySelector(`[name="vehiculo_${ultimoIndex}_origen"]`)?.value || '',
-                personas: document.querySelector(`[name="vehiculo_${ultimoIndex}_personas"]`)?.value || '',
-                cajas: document.querySelector(`[name="vehiculo_${ultimoIndex}_cajas"]`)?.value || '',
-                justificacion: document.querySelector(`[name="vehiculo_${ultimoIndex}_justificacion"]`)?.value || '',
-                otro_justificacion: document.querySelector(`[name="vehiculo_${ultimoIndex}_otro_justificacion"]`)?.value || '',
-                foto_url: document.querySelector(`[name="vehiculo_${ultimoIndex}_foto_url"]`)?.value || ''
-            };
-            vehiculosData[ultimoIndex] = ultimoData;
-
-            // Validar placas
             for (let i = 0; i < vehiculosData.length; i++) {
                 const placa = vehiculosData[i].placa || '';
                 if (placa && !/^[A-Z]{3}[0-9]{3}$|^[0-9]{3}[A-Z]{3}$|^[A-Z][0-9]{5}$/.test(placa)) {
@@ -772,7 +735,6 @@
                 return;
             }
 
-            // Serializar
             document.getElementById('datos_vehiculos').value = JSON.stringify(vehiculosData);
 
             const paradasOperacion = [];
@@ -791,7 +753,6 @@
 
             convertirATextoMayusculas();
 
-            // Enviar
             event.target.submit();
         }
 
@@ -811,7 +772,6 @@
             agregarCampoParada('operacion');
             actualizarCampos();
 
-            // Asignar el evento de envío SOLO UNA VEZ
             const form = document.querySelector('form');
             form.addEventListener('submit', enviarFormulario);
         });
