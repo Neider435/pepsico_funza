@@ -60,6 +60,20 @@
         .btn-agregar-parada-op:hover {
             background-color: #0056b3;
         }
+        .btn-borrar-todo {
+            background-color: #8B0000; /* Rojo intenso */
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 15px;
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        .btn-borrar-todo:hover {
+            background-color: #a50000;
+        }
         label {
             font-weight: bold;
             display: block;
@@ -155,19 +169,20 @@
         <input type="hidden" name="form-name" value="formulario-pepsico" />
 
         <label for="lugar">Lugar de operación:</label>
-        <select name="lugar" id="lugar" required onchange="actualizarCampos()">
+        <select name="lugar" id="lugar" required onchange="actualizarCampos(); guardarEnLocalStorage();">
             <option value="">Seleccione una opción</option>
             <option value="Funza">Pepsico Funza</option>
         </select>
 
         <label for="lider">Líder Asignado:</label>
-        <input type="text" name="lider_asignado" id="lider" required placeholder="Primer Nombre y Primer Apellido">
+        <input type="text" name="lider_asignado" id="lider" required placeholder="Primer Nombre y Primer Apellido"
+               oninput="guardarEnLocalStorage();">
 
         <label for="coordinador">Coordinador Asignado:</label>
         <input type="text" name="coordinador" id="coordinador" readonly required>
 
         <label for="lider_pepsico">Líder De Pepsico:</label>
-        <select name="lider_pepsico" id="lider_pepsico" required>
+        <select name="lider_pepsico" id="lider_pepsico" required onchange="guardarEnLocalStorage();">
             <option value="">Seleccione un líder</option>
             <option value="Alejandro Ariza">Alejandro Ariza</option>
             <option value="Alejandro Monroy">Alejandro Monroy</option>
@@ -175,10 +190,10 @@
         </select>
 
         <label for="fecha">Fecha:</label>
-        <input type="date" name="fecha" id="fecha" required>
+        <input type="date" name="fecha" id="fecha" required onchange="guardarEnLocalStorage();">
 
         <label for="turno">Turno Asignado:</label>
-        <select name="turno" id="turno" required>
+        <select name="turno" id="turno" required onchange="guardarEnLocalStorage();">
             <option value="">Seleccione un turno</option>
             <option value="Manana">Mañana</option>
             <option value="Tarde">Tarde</option>
@@ -203,19 +218,27 @@
         <h3 style="text-align:center; font-size:1.1em; color:#296097;">TOTALES DE TURNO</h3>
         <label for="total_personas">Total Personas En El Turno:</label>
         <input type="number" name="total_personas" id="total_personas" min="1" required
-            placeholder="Total de empleados en el turno">
+            placeholder="Total de empleados en el turno" oninput="actualizarTotalCajas(); guardarEnLocalStorage();">
         <label for="cajas_totales">Total Cajas Movidas:</label>
         <input type="number" name="cajas_totales" id="cajas_totales" min="0" required
-            placeholder="Cantidad total de cajas movidas" oninput="actualizarTotalCajas()">
+            placeholder="Cantidad total de cajas movidas" oninput="actualizarTotalCajas(); guardarEnLocalStorage();">
         
         <input type="hidden" name="datos_vehiculos" id="datos_vehiculos" value="">
         <input type="hidden" name="datos_paradas_operacion" id="datos_paradas_operacion" value="">
+
+        <!-- Botón Borrar Todo -->
+        <button type="button" class="btn-borrar-todo" onclick="borrarTodo()">
+            🗑️ Borrar Todo
+        </button>
 
         <button type="submit">Enviar</button>
     </form>
 
     <script>
         let vehiculosData = [];
+        const STORAGE_KEY = 'formulario_pepsico_data';
+
+        // === FUNCIONES DE VALIDACIÓN DE HORARIO ===
 
         function horaAMinutos(horaStr) {
             if (!horaStr || !horaStr.includes(':')) return null;
@@ -277,33 +300,25 @@
             return true;
         }
 
+        // === FUNCIONES DE VEHÍCULOS ===
+
         function eliminarRegistroVehiculo(index) {
             if (vehiculosData.length <= 1) {
                 alert("Debe haber al menos un vehículo.");
                 return;
             }
-
-            // Eliminar del array
             vehiculosData.splice(index, 1);
-
-            // Eliminar del DOM
             const registro = document.querySelector(`.registro-vehiculo[data-index="${index}"]`);
             if (registro) registro.remove();
-
-            // Reindexar TODOS los vehículos en el DOM
             reindexarVehiculos();
-
             actualizarTotalCajas();
+            guardarEnLocalStorage();
         }
 
         function reindexarVehiculos() {
             const contenedor = document.getElementById('vehiculos-contenedor');
             const registros = contenedor.querySelectorAll('.registro-vehiculo');
-            
-            // Limpiar contenedor
             contenedor.innerHTML = '';
-
-            // Volver a agregar con nuevos índices
             for (let i = 0; i < vehiculosData.length; i++) {
                 crearVehiculoHTML(contenedor, i, vehiculosData[i]);
             }
@@ -315,6 +330,7 @@
             const contenedor = document.getElementById('vehiculos-contenedor');
             crearVehiculoHTML(contenedor, vIndex, {});
             actualizarTotalCajas();
+            guardarEnLocalStorage();
         }
 
         function crearVehiculoHTML(contenedor, vIndex, datos = {}) {
@@ -341,31 +357,31 @@
                             <label class="time-label">Hora Inicio (HH:MM):</label>
                             <input type="tel" name="vehiculo_${vIndex}_inicio" class="time-input-masked" required
                                 placeholder="HH:MM" maxlength="5" value="${datos.inicio || ''}"
-                                onblur="applyTimeMask(this, '${inicioId}');">
+                                onblur="applyTimeMask(this, '${inicioId}'); guardarEnLocalStorage();">
                             <span id="${inicioId}" class="time-display"></span>
                         </div>
                         <div>
                             <label class="time-label">Hora Final (HH:MM):</label>
                             <input type="tel" name="vehiculo_${vIndex}_fin" class="time-input-masked" required
                                 placeholder="HH:MM" maxlength="5" value="${datos.fin || ''}"
-                                onblur="applyTimeMask(this, '${finId}');">
+                                onblur="applyTimeMask(this, '${finId}'); guardarEnLocalStorage();">
                             <span id="${finId}" class="time-display"></span>
                         </div>
                     </div>
                     <label style="margin-top:5px;">Motivo:</label>
-                    <select id="${motivoSelectId}" name="vehiculo_${vIndex}_motivo" required>
+                    <select id="${motivoSelectId}" name="vehiculo_${vIndex}_motivo" required onchange="guardarEnLocalStorage();">
                         <option value="">Seleccione</option>
                         <option value="cargue" ${datos.motivo === 'cargue' ? 'selected' : ''}>Cargue</option>
                         <option value="descargue" ${datos.motivo === 'descargue' ? 'selected' : ''}>Descargue</option>
                         <option value="otro" ${datos.motivo === 'otro' ? 'selected' : ''}>Otro</option>
                     </select>
-                    <input type="text" name="vehiculo_${vIndex}_otro_motivo" placeholder="Especifique otro motivo" class="otro-input" value="${datos.otro_motivo || ''}">
+                    <input type="text" name="vehiculo_${vIndex}_otro_motivo" placeholder="Especifique otro motivo" class="otro-input" value="${datos.otro_motivo || ''}" oninput="guardarEnLocalStorage();">
                 </div>
 
                 <hr style="margin-top:25px; border-style:dashed;">
 
                 <label>Muelle:</label>
-                <select name="vehiculo_${vIndex}_muelle" required>
+                <select name="vehiculo_${vIndex}_muelle" required onchange="guardarEnLocalStorage();">
                     <option value="">Seleccione</option>
                     <option value="3" ${datos.muelle === '3' ? 'selected' : ''}>3</option>
                     <option value="11" ${datos.muelle === '11' ? 'selected' : ''}>11</option>
@@ -378,15 +394,15 @@
                     <option value="20" ${datos.muelle === '20' ? 'selected' : ''}>20</option>
                     <option value="otro" ${datos.muelle === 'otro' ? 'selected' : ''}>Otro</option>
                 </select>
-                <input type="number" name="vehiculo_${vIndex}_otro_muelle_num" id="otro_muelle_${vIndex}" class="otro-input" placeholder="N° muelle" min="1" max="999" value="${datos.otro_muelle_num || ''}">
+                <input type="number" name="vehiculo_${vIndex}_otro_muelle_num" id="otro_muelle_${vIndex}" class="otro-input" placeholder="N° muelle" min="1" max="999" value="${datos.otro_muelle_num || ''}" oninput="guardarEnLocalStorage();">
 
                 <label>Placa:</label>
                 <input type="text" name="vehiculo_${vIndex}_placa" required placeholder="Ej: ABC123, 123ABC o A12345" maxlength="6"
                     value="${datos.placa || ''}"
-                    oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0,6);">
+                    oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0,6); guardarEnLocalStorage();">
 
                 <label>Tipo De Vehiculo:</label>
-                <select name="vehiculos[${vIndex}][tipo_vehi]" required id="tipo_vehi_${vIndex}">
+                <select name="vehiculos[${vIndex}][tipo_vehi]" required onchange="guardarEnLocalStorage();" id="tipo_vehi_${vIndex}">
                     <option value="">Seleccione</option>
                     <option value="Van extralargo" ${datos['tipo_vehi'] === 'Van extralargo' ? 'selected' : ''}>Van extralargo</option>
                     <option value="Camion sencillo furgonado" ${datos['tipo_vehi'] === 'Camion sencillo furgonado' ? 'selected' : ''}>Camión sencillo furgonado</option>
@@ -399,11 +415,11 @@
                     <option value="Camabaja estandar" ${datos['tipo_vehi'] === 'Camabaja estandar' ? 'selected' : ''}>Camabaja estandar</option>
                     <option value="otro" ${datos['tipo_vehi'] === 'otro' ? 'selected' : ''}>Otro</option>
                 </select>
-                <input type="text" name="vehiculo_${vIndex}_otro_tipo" id="otro_tipo_${vIndex}" class="otro-input" placeholder="Especifique tipo" value="${datos.otro_tipo || ''}">
+                <input type="text" name="vehiculo_${vIndex}_otro_tipo" id="otro_tipo_${vIndex}" class="otro-input" placeholder="Especifique tipo" value="${datos.otro_tipo || ''}" oninput="guardarEnLocalStorage();">
 
                 <div class="form-group-custom" id="destino-group-${vIndex}" style="${(datos.motivo === 'cargue') ? 'display:block;' : 'display:none;'}">
                     <label style="margin-top:0;">Destino:</label>
-                    <select id="destino-select-${vIndex}" name="vehiculo_${vIndex}_destino">
+                    <select id="destino-select-${vIndex}" name="vehiculo_${vIndex}_destino" onchange="guardarEnLocalStorage();">
                         <option value="">Seleccione Destino</option>
                         <option value="guarner_medellin" ${datos.destino === 'guarner_medellin' ? 'selected' : ''}>Guarne/Medellin</option>
                         <option value="cali" ${datos.destino === 'cali' ? 'selected' : ''}>Cali</option>
@@ -414,29 +430,29 @@
                         <option value="peru" ${datos.destino === 'peru' ? 'selected' : ''}>Perú</option>
                         <option value="otro" ${datos.destino === 'otro' ? 'selected' : ''}>Otro</option>
                     </select>
-                    <input type="text" name="vehiculo_${vIndex}_otro_destino" id="otro_destino_${vIndex}" class="otro-input" placeholder="Especifique otro destino" value="${datos.otro_destino || ''}">
+                    <input type="text" name="vehiculo_${vIndex}_otro_destino" id="otro_destino_${vIndex}" class="otro-input" placeholder="Especifique otro destino" value="${datos.otro_destino || ''}" oninput="guardarEnLocalStorage();">
                 </div>
 
                 <div class="form-group-custom" id="remitente-group-${vIndex}" style="${(datos.motivo === 'descargue') ? 'display:block;' : 'display:none;'}">
                     <label style="margin-top:0;">Origen / Remitente:</label>
-                    <input type="text" id="remitente-input-${vIndex}" name="vehiculo_${vIndex}_origen" placeholder="Ej: Zona Franca" value="${datos.origen || ''}">
+                    <input type="text" id="remitente-input-${vIndex}" name="vehiculo_${vIndex}_origen" placeholder="Ej: Zona Franca" value="${datos.origen || ''}" oninput="guardarEnLocalStorage();">
                 </div>
 
                 <label>Total De Personas:</label>
-                <input type="number" name="vehiculo_${vIndex}_personas" min="1" required value="${datos.personas || ''}">
+                <input type="number" name="vehiculo_${vIndex}_personas" min="1" required value="${datos.personas || ''}" oninput="guardarEnLocalStorage();">
 
                 <label>Cajas Movidas:</label>
                 <input type="number" name="vehiculo_${vIndex}_cajas" class="cajas-input-js" min="0" required 
                     value="${datos.cajas || ''}"
-                    oninput="actualizarTotalCajas();">
+                    oninput="actualizarTotalCajas(); guardarEnLocalStorage();">
 
                 <label>Justificación del retraso o incidencia:</label>
-                <select name="vehiculo_${vIndex}_justificacion">
+                <select name="vehiculo_${vIndex}_justificacion" onchange="manejarOtroCampo(this, 'otro_justificacion_${vIndex}'); guardarEnLocalStorage();">
                     <option value="">Seleccione motivo</option>
                     <option value="faltante_producto" ${datos.justificacion === 'faltante_producto' ? 'selected' : ''}>Faltante de producto</option>
                     <option value="otro" ${datos.justificacion === 'otro' ? 'selected' : ''}>Otro</option>
                 </select>
-                <input type="text" name="vehiculo_${vIndex}_otro_justificacion" id="otro_justificacion_${vIndex}" class="otro-input" placeholder="Especifique la incidencia" value="${datos.otro_justificacion || ''}">
+                <input type="text" name="vehiculo_${vIndex}_otro_justificacion" id="otro_justificacion_${vIndex}" class="otro-input" placeholder="Especifique la incidencia" value="${datos.otro_justificacion || ''}" oninput="guardarEnLocalStorage();">
 
                 <label>Foto De vehiculo:</label>
                 <input type="file" name="vehiculo_${vIndex}_foto" id="${fotoInputId}" accept="image/*" capture="environment">
@@ -460,6 +476,7 @@
             motivoSelect.addEventListener('change', () => {
                 alternarDestinoRemitente(motivoSelect, vIndex);
                 manejarOtroCampo(motivoSelect, null);
+                guardarEnLocalStorage();
             });
             alternarDestinoRemitente(motivoSelect, vIndex);
             
@@ -473,6 +490,8 @@
             const nombrePersonalizado = `${fechaFormateada}.${tipoVehiculo}.vehiculo_${vIndex}`;
             setupFotoPreview(fotoInputId, previewFotoId, nombrePersonalizado);
         }
+
+        // === FUNCIONES DE PARADAS DE OPERACIÓN ===
 
         function agregarCampoParada(tipo) {
             const contenedor = document.getElementById('operacion-contenedor');
@@ -493,6 +512,7 @@
                     const span = paradas[i].querySelector('.numero-parada');
                     if (span) span.textContent = i + 1;
                 }
+                guardarEnLocalStorage();
             };
 
             const dInicio = `operacion-inicio-${index}`;
@@ -505,19 +525,19 @@
                         <label class="time-label">Hora Inicio (HH:MM):</label>
                         <input type="tel" name="parada_inicio_operacion_${index}" class="time-input-masked" 
                             placeholder="HH:MM" maxlength="5"
-                            onblur="applyTimeMask(this, '${dInicio}')">
+                            onblur="applyTimeMask(this, '${dInicio}'); guardarEnLocalStorage();">
                         <span id="${dInicio}" class="time-display"></span>
                     </div>
                     <div>
                         <label class="time-label">Hora Final (HH:MM):</label>
                         <input type="tel" name="parada_fin_operacion_${index}" class="time-input-masked" 
                             placeholder="HH:MM" maxlength="5"
-                            onblur="applyTimeMask(this, '${dFin}')">
+                            onblur="applyTimeMask(this, '${dFin}'); guardarEnLocalStorage();">
                         <span id="${dFin}" class="time-display"></span>
                     </div>
                 </div>
                 <label style="margin-top:5px;">Motivo:</label>
-                <select name="parada_motivo_operacion_${index}" onchange="manejarOtroCampo(this)">
+                <select name="parada_motivo_operacion_${index}" onchange="manejarOtroCampo(this); guardarEnLocalStorage();">
                     <option value="">Seleccione</option>
                     <option value="pausas_activas">Pausas Activas y/o Charla</option>
                     <option value="liberacion_calidad">Liberacion De Calidad</option>
@@ -527,11 +547,13 @@
                     <option value="danos_equipo">Daños (Electricos, montacargas, etc)</option>
                     <option value="otro">Otro</option>
                 </select>
-                <input type="text" name="parada_otro_motivo_operacion_${index}" placeholder="Especifique" class="otro-input">
+                <input type="text" name="parada_otro_motivo_operacion_${index}" placeholder="Especifique" class="otro-input" oninput="guardarEnLocalStorage();">
             `;
             div.appendChild(botonEliminar);
             contenedor.appendChild(div);
         }
+
+        // === FUNCIONES AUXILIARES ===
 
         function setupFotoPreview(inputId, previewId, nombrePersonalizado) {
             const input = document.getElementById(inputId);
@@ -577,6 +599,7 @@
                     alert("❌ No se pudo subir la foto.");
                     console.error(error);
                 }
+                guardarEnLocalStorage();
             });
         }
 
@@ -606,6 +629,7 @@
             }
 
             actualizarTotalCajas();
+            guardarEnLocalStorage();
         }
 
         function manejarOtroCampo(select, otroId) {
@@ -619,6 +643,7 @@
                 otro.required = false;
                 otro.value = '';
             }
+            guardarEnLocalStorage();
         }
         
         function alternarDestinoRemitente(selectMotivo, vIndex) {
@@ -640,6 +665,7 @@
                 destinoSelect.removeAttribute('required');
                 remitenteInput.removeAttribute('required');
             }
+            guardarEnLocalStorage();
         }
 
         function applyTimeMask(input, displayId) {
@@ -657,6 +683,7 @@
             value.substring(0,2) + ':' + (value.length > 2 ? value.substring(2,4) : '00') : '';
             input.value = formatted;
             convertirHoraMilitar(input, displayId);
+            guardarEnLocalStorage();
         }
 
         function convertirHoraMilitar(input, displayId) {
@@ -696,6 +723,89 @@
                 }
             });
         }
+
+        // === FUNCIONES DE LOCALSTORAGE ===
+
+        function guardarEnLocalStorage() {
+            try {
+                const formData = {
+                    lugar: document.getElementById('lugar').value,
+                    lider_asignado: document.getElementById('lider').value,
+                    coordinador: document.getElementById('coordinador').value,
+                    lider_pepsico: document.getElementById('lider_pepsico').value,
+                    fecha: document.getElementById('fecha').value,
+                    turno: document.getElementById('turno').value,
+                    total_personas: document.getElementById('total_personas').value,
+                    cajas_totales: document.getElementById('cajas_totales').value,
+                    vehiculos: vehiculosData
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+            } catch (e) {
+                console.warn('No se pudo guardar en localStorage:', e);
+            }
+        }
+
+        function cargarDeLocalStorage() {
+            try {
+                const data = localStorage.getItem(STORAGE_KEY);
+                if (!data) return false;
+                const formData = JSON.parse(data);
+
+                document.getElementById('lugar').value = formData.lugar || '';
+                document.getElementById('lider').value = formData.lider_asignado || '';
+                document.getElementById('coordinador').value = formData.coordinador || '';
+                document.getElementById('lider_pepsico').value = formData.lider_pepsico || '';
+                document.getElementById('fecha').value = formData.fecha || '';
+                document.getElementById('turno').value = formData.turno || '';
+                document.getElementById('total_personas').value = formData.total_personas || '';
+                document.getElementById('cajas_totales').value = formData.cajas_totales || '';
+
+                if (formData.vehiculos && Array.isArray(formData.vehiculos)) {
+                    vehiculosData = formData.vehiculos;
+                    const contenedor = document.getElementById('vehiculos-contenedor');
+                    contenedor.innerHTML = '';
+                    vehiculosData.forEach((data, i) => {
+                        crearVehiculoHTML(contenedor, i, data);
+                    });
+                }
+
+                actualizarCampos();
+                return true;
+            } catch (e) {
+                console.warn('Error al cargar de localStorage:', e);
+                return false;
+            }
+        }
+
+        function borrarTodo() {
+            if (!confirm("⚠️ ¿Está seguro de borrar todo el formulario? Esta acción no se puede deshacer.")) return;
+            
+            // Limpiar campos
+            document.getElementById('lugar').value = '';
+            document.getElementById('lider').value = '';
+            document.getElementById('coordinador').value = '';
+            document.getElementById('lider_pepsico').value = '';
+            document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+            document.getElementById('turno').value = '';
+            document.getElementById('total_personas').value = '';
+            document.getElementById('cajas_totales').value = '';
+
+            // Limpiar vehículos
+            vehiculosData = [];
+            document.getElementById('vehiculos-contenedor').innerHTML = '';
+            agregarRegistroVehiculo(); // Agregar uno vacío
+
+            // Limpiar paradas
+            document.getElementById('operacion-contenedor').innerHTML = '';
+            agregarCampoParada('operacion');
+
+            // Borrar de localStorage
+            localStorage.removeItem(STORAGE_KEY);
+
+            alert("✅ Todo ha sido borrado.");
+        }
+
+        // === FUNCIÓN DE ENVÍO ===
 
         function enviarFormulario(event) {
             event.preventDefault();
@@ -753,6 +863,9 @@
 
             convertirATextoMayusculas();
 
+            // Borrar de localStorage al enviar
+            localStorage.removeItem(STORAGE_KEY);
+
             event.target.submit();
         }
 
@@ -768,8 +881,14 @@
                 this.dataset.manualChange = 'true';
             });
 
-            agregarRegistroVehiculo();
-            agregarCampoParada('operacion');
+            // Cargar datos guardados
+            const datosCargados = cargarDeLocalStorage();
+
+            if (!datosCargados) {
+                agregarRegistroVehiculo();
+                agregarCampoParada('operacion');
+            }
+
             actualizarCampos();
 
             const form = document.querySelector('form');
