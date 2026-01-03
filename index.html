@@ -301,12 +301,6 @@
                 alert("Debe haber al menos un vehículo.");
                 return;
             }
-            // Guardar datos antes de eliminar
-            const contVeh = document.getElementById('vehiculos-contenedor');
-            const vehiculosElems = contVeh.querySelectorAll('.registro-vehiculo');
-            if (index < vehiculosElems.length) {
-                vehiculosData[index] = guardarDatosVehiculo(vehiculosElems[index], index);
-            }
             vehiculosData.splice(index, 1);
             renderizarVehiculos();
             actualizarTotalCajas();
@@ -321,16 +315,7 @@
         }
 
         function agregarRegistroVehiculo() {
-            // Guardar el último vehículo si ya hay uno
-            if (vehiculosData.length > 0) {
-                const contVeh = document.getElementById('vehiculos-contenedor');
-                const vehiculosElems = contVeh.querySelectorAll('.registro-vehiculo');
-                const ultimoIndex = vehiculosElems.length - 1;
-                if (ultimoIndex >= 0) {
-                    vehiculosData[ultimoIndex] = guardarDatosVehiculo(vehiculosElems[ultimoIndex], ultimoIndex);
-                }
-            }
-            // Agregar nuevo vehículo
+            // Solo agregar un nuevo vehículo vacío
             vehiculosData.push({});
             renderizarVehiculos();
             actualizarTotalCajas();
@@ -345,7 +330,24 @@
 
             const registro = document.createElement('div');
             registro.className = 'registro-vehiculo';
-            registro.innerHTML = `
+            registro.dataset.index = vIndex;
+
+            // Función para guardar automáticamente
+            const autoSave = () => {
+                const contVeh = document.getElementById('vehiculos-contenedor');
+                const elem = contVeh.querySelector(`.registro-vehiculo[data-index="${vIndex}"]`);
+                if (elem) {
+                    // Asegurar que el índice existe en vehiculosData
+                    if (vehiculosData.length <= vIndex) {
+                        while (vehiculosData.length <= vIndex) {
+                            vehiculosData.push({});
+                        }
+                    }
+                    vehiculosData[vIndex] = guardarDatosVehiculo(elem, vIndex);
+                }
+            };
+
+            const html = `
                 <button type="button" class="btn-eliminar-registro" onclick="eliminarRegistroVehiculo(${vIndex})">Eliminar Vehículo #${vIndex + 1}</button>
                 <hr style="margin-top:25px; border-style:dashed;">
                 <h4 style="text-align:center; color:#C76E00;">VEHÍCULO #${vIndex + 1}</h4>
@@ -400,10 +402,10 @@
                 <label>Placa:</label>
                 <input type="text" name="vehiculo_${vIndex}_placa" required placeholder="Ej: ABC123, 123ABC o A12345" maxlength="6"
                     value="${datos.placa || ''}"
-                    oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0,6)">
+                    oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0,6); autoSave();">
 
                 <label>Tipo De Vehiculo:</label>
-                <select name="vehiculos[${vIndex}][tipo_vehi]" required>
+                <select name="vehiculos[${vIndex}][tipo_vehi]" required onchange="autoSave();">
                     <option value="">Seleccione</option>
                     <option value="Van extralargo" ${datos['tipo_vehi'] === 'VAN EXTRALARGO' ? 'selected' : ''}>Van extralargo</option>
                     <option value="Camion sencillo furgonado" ${datos['tipo_vehi'] === 'CAMION SENCILLO FURGONADO' ? 'selected' : ''}>Camión sencillo furgonado</option>
@@ -416,11 +418,11 @@
                     <option value="Camabaja estandar" ${datos['tipo_vehi'] === 'CAMABAJA ESTANDAR' ? 'selected' : ''}>Camabaja estandar</option>
                     <option value="otro" ${datos['tipo_vehi'] === 'OTRO' ? 'selected' : ''}>Otro</option>
                 </select>
-                <input type="text" name="vehiculo_${vIndex}_otro_tipo" id="otro_tipo_${vIndex}" class="otro-input" placeholder="Especifique tipo" value="${datos.otro_tipo || ''}">
+                <input type="text" name="vehiculo_${vIndex}_otro_tipo" id="otro_tipo_${vIndex}" class="otro-input" placeholder="Especifique tipo" value="${datos.otro_tipo || ''}" oninput="autoSave();">
 
                 <div class="form-group-custom" id="destino-group-${vIndex}" style="${(datos.motivo === 'CARGUE') ? 'display:block;' : 'display:none;'}">
                     <label style="margin-top:0;">Destino:</label>
-                    <select id="destino-select-${vIndex}" name="vehiculo_${vIndex}_destino">
+                    <select id="destino-select-${vIndex}" name="vehiculo_${vIndex}_destino" onchange="autoSave();">
                         <option value="">Seleccione Destino</option>
                         <option value="guarner_medellin" ${datos.destino === 'GUARNER_MEDELLIN' ? 'selected' : ''}>Guarne/Medellin</option>
                         <option value="cali" ${datos.destino === 'CALI' ? 'selected' : ''}>Cali</option>
@@ -431,29 +433,29 @@
                         <option value="peru" ${datos.destino === 'PERU' ? 'selected' : ''}>Perú</option>
                         <option value="otro" ${datos.destino === 'OTRO' ? 'selected' : ''}>Otro</option>
                     </select>
-                    <input type="text" name="vehiculo_${vIndex}_otro_destino" id="otro_destino_${vIndex}" class="otro-input" placeholder="Especifique otro destino" value="${datos.otro_destino || ''}">
+                    <input type="text" name="vehiculo_${vIndex}_otro_destino" id="otro_destino_${vIndex}" class="otro-input" placeholder="Especifique otro destino" value="${datos.otro_destino || ''}" oninput="autoSave();">
                 </div>
 
                 <div class="form-group-custom" id="remitente-group-${vIndex}" style="${(datos.motivo === 'DESCARGUE') ? 'display:block;' : 'display:none;'}">
                     <label style="margin-top:0;">Origen / Remitente:</label>
-                    <input type="text" id="remitente-input-${vIndex}" name="vehiculo_${vIndex}_origen" placeholder="Ej: Zona Franca" value="${datos.origen || ''}">
+                    <input type="text" id="remitente-input-${vIndex}" name="vehiculo_${vIndex}_origen" placeholder="Ej: Zona Franca" value="${datos.origen || ''}" oninput="autoSave();">
                 </div>
 
                 <label>Total De Personas:</label>
-                <input type="number" name="vehiculo_${vIndex}_personas" min="1" required value="${datos.personas || ''}">
+                <input type="number" name="vehiculo_${vIndex}_personas" min="1" required value="${datos.personas || ''}" oninput="autoSave();">
 
                 <label>Cajas Movidas:</label>
                 <input type="number" name="vehiculo_${vIndex}_cajas" class="cajas-input-js" min="0" required 
                     value="${datos.cajas || ''}"
-                    oninput="actualizarTotalCajas()">
+                    oninput="actualizarTotalCajas(); autoSave();">
 
                 <label>Justificación del retraso o incidencia:</label>
-                <select name="vehiculo_${vIndex}_justificacion" onchange="manejarOtroCampo(this, 'otro_justificacion_${vIndex}')">
+                <select name="vehiculo_${vIndex}_justificacion" onchange="manejarOtroCampo(this, 'otro_justificacion_${vIndex}'); autoSave();">
                     <option value="">Seleccione motivo</option>
                     <option value="faltante_producto" ${datos.justificacion === 'FALTANTE_PRODUCTO' ? 'selected' : ''}>Faltante de producto</option>
                     <option value="otro" ${datos.justificacion === 'OTRO' ? 'selected' : ''}>Otro</option>
                 </select>
-                <input type="text" name="vehiculo_${vIndex}_otro_justificacion" id="otro_justificacion_${vIndex}" class="otro-input" placeholder="Especifique la incidencia" value="${datos.otro_justificacion || ''}">
+                <input type="text" name="vehiculo_${vIndex}_otro_justificacion" id="otro_justificacion_${vIndex}" class="otro-input" placeholder="Especifique la incidencia" value="${datos.otro_justificacion || ''}" oninput="autoSave();">
 
                 <label>Foto De vehiculo:</label>
                 <input type="file" name="vehiculo_${vIndex}_foto" id="${fotoInputId}" accept="image/*" capture="environment">
@@ -464,21 +466,25 @@
                     📸 <strong>La foto se sube automáticamente.</strong> No necesita hacer nada más.
                 </p>
             `;
+            registro.innerHTML = html;
             contenedor.appendChild(registro);
 
+            // Restaurar estado de "otro"
             if (datos.muelle === 'OTRO') document.getElementById(`otro_muelle_${vIndex}`).style.display = 'block';
             if (datos['tipo_vehi'] === 'OTRO') document.getElementById(`otro_tipo_${vIndex}`).style.display = 'block';
             if (datos.destino === 'OTRO') document.getElementById(`otro_destino_${vIndex}`).style.display = 'block';
             if (datos.justificacion === 'OTRO') document.getElementById(`otro_justificacion_${vIndex}`).style.display = 'block';
             if (datos.motivo === 'OTRO' && datos.otro_motivo) registro.querySelector('.otro-input').style.display = 'block';
 
+            // Eventos
             const motivoSelect = document.getElementById(motivoSelectId);
             motivoSelect.addEventListener('change', () => {
                 alternarDestinoRemitente(motivoSelect, vIndex);
                 manejarOtroCampo(motivoSelect, null);
+                autoSave();
             });
             alternarDestinoRemitente(motivoSelect, vIndex);
-            setupFotoPreview(fotoInputId, previewFotoId);
+            setupFotoPreview(fotoInputId, previewFotoId, autoSave);
         }
 
         // === FUNCIONES DE PARADAS DE OPERACIÓN ===
@@ -544,7 +550,7 @@
 
         // === FUNCIONES AUXILIARES ===
 
-        function setupFotoPreview(inputId, previewId) {
+        function setupFotoPreview(inputId, previewId, onSave) {
             const input = document.getElementById(inputId);
             const preview = document.getElementById(previewId);
             if (!input || !preview) return;
@@ -576,7 +582,10 @@
                     if (data.success) {
                         const imageUrl = data.data.url;
                         const urlInput = document.getElementById(`foto_url_${inputId.replace('foto_vehiculo_', '').replace('_foto', '')}`);
-                        if (urlInput) urlInput.value = imageUrl;
+                        if (urlInput) {
+                            urlInput.value = imageUrl;
+                            if (onSave) onSave();
+                        }
                         alert("✅ Foto subida con éxito. URL guardada.");
                     } else {
                         throw new Error(data.error.message || 'Error al subir la foto');
@@ -732,10 +741,13 @@
                 return false;
             }
 
-            // Guardar datos del último vehículo
+            // Asegurar que el último vehículo esté guardado
             const contVeh = document.getElementById('vehiculos-contenedor');
             const vehiculosElems = contVeh.querySelectorAll('.registro-vehiculo');
             for (let i = 0; i < vehiculosElems.length; i++) {
+                if (vehiculosData.length <= i) {
+                    vehiculosData.push({});
+                }
                 vehiculosData[i] = guardarDatosVehiculo(vehiculosElems[i], i);
             }
 
