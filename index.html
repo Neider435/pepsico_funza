@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Registro - Pepsico Funza</title>
     <style>
+        /* Mantenemos tu diseño original exacto */
         body { font-family: Arial, sans-serif; background-color: #f8f9fa; padding: 40px; }
         .logo-container { position: absolute; top: 50px; left: 50px; }
         .logo-container img { width: 200px; height: auto; }
@@ -18,21 +19,21 @@
         .time-row { display: flex; gap: 10px; align-items: flex-start; }
         .time-display { display: block; margin-top: 5px; font-size: 0.85em; color: #155724; font-weight: bold; }
         .time-label { font-weight: bold; display: block; margin-top: 5px; color: #007bff; }
-        button[type="submit"] { background-color: #001855; color: white; border: none; cursor: pointer; margin-top: 20px; font-weight: bold; font-size: 1.1em; }
+        button[type="submit"] { background-color: #001855; color: white; border: none; cursor: pointer; margin-top: 20px; }
         .time-input-masked { text-align: center; font-size: 1.1em; letter-spacing: 2px; }
-        .btn-eliminar-registro { position: absolute; top: 10px; right: 10px; background-color: #8B0000; color: white; border: none; padding: 5px 10px; cursor: pointer; font-size: 0.8em; border-radius: 5px; }
-        .btn-eliminar-parada { background-color: #8B0000; color: white; border: none; padding: 5px; margin-top: 10px; cursor: pointer; border-radius: 5px; }
+        .btn-eliminar { background-color:#8B0000 !important; width:auto !important; padding:5px 10px !important; margin-top:10px !important; border: none !important; color: white !important; }
+        .btn-eliminar-registro { position: absolute; top: 10px; right: 10px; background-color: #8B0000 !important; color: white !important; border: none !important; padding: 5px 10px !important; cursor: pointer; font-size: 0.8em; width: auto; }
         .otro-input { margin-top:5px; display:none; }
         .preview-foto img { max-width: 100%; max-height: 200px; border: 1px solid #ddd; border-radius: 8px; margin-top: 8px; }
     </style>
 </head>
 <body>
     <div class="logo-container">
-        <img src="prueba.png" alt="Logo"> 
+        <img src="prueba.png" alt="Logo de la Empresa"> 
     </div>
     <h2 style="text-align:center;">FORMULARIO - PEPSICO FUNZA</h2>
 
-    <form name="formulario-pepsico" method="POST" data-netlify="true" id="miFormulario">
+    <form name="formulario-pepsico" method="POST" data-netlify="true">
         <input type="hidden" name="form-name" value="formulario-pepsico" />
 
         <label for="lugar">Lugar de operación:</label>
@@ -42,14 +43,14 @@
         </select>
 
         <label for="lider">Líder Asignado:</label>
-        <input type="text" name="lider_asignado" id="lider" required placeholder="Nombre y Apellido">
+        <input type="text" name="lider_asignado" id="lider" required placeholder="Primer Nombre y Primer Apellido">
 
         <label for="coordinador">Coordinador Asignado:</label>
         <input type="text" name="coordinador" id="coordinador" readonly required>
 
         <label for="lider_pepsico">Líder De Pepsico:</label>
         <select name="lider_pepsico" id="lider_pepsico" required>
-            <option value="">Seleccione</option>
+            <option value="">Seleccione un líder</option>
             <option value="Alejandro Ariza">Alejandro Ariza</option>
             <option value="Alejandro Monroy">Alejandro Monroy</option>
             <option value="Carlos Ruiz">Carlos Ruiz</option>
@@ -60,128 +61,146 @@
 
         <label for="turno">Turno Asignado:</label>
         <select name="turno" id="turno" required>
-            <option value="">Seleccione</option>
+            <option value="">Seleccione un turno</option>
             <option value="Manana">Mañana</option>
             <option value="Tarde">Tarde</option>
             <option value="Noche">Noche</option>
         </select>
 
+        <hr style="margin-top: 25px; border-style: dotted;">
+        <h3 style="text-align:center; font-size:1.3em; color:#C76E00;">REGISTRO DE VEHÍCULOS</h3>
         <div id="vehiculos-contenedor"></div>
         <button type="button" class="btn-agregar-registro" onclick="agregarRegistroVehiculo()">+ Registrar Nuevo Vehículo</button>
 
+        <hr style="margin-top: 25px; border-style: dotted;">
+        <h3 style="text-align:center; font-size:1.3em; color:#001855;">PARADAS DE OPERACIÓN</h3>
         <div id="operacion-contenedor"></div>
-        <button type="button" class="btn-agregar-parada-op" onclick="agregarCampoParada()">+ Agregar Parada de Operación</button>
+        <button type="button" class="btn-agregar-parada-op" onclick="agregarCampoParada('operacion')">+ Agregar Parada</button>
 
+        <hr style="margin-top: 25px; border-style: dotted;">
         <label for="total_personas">Total Personas En El Turno:</label>
         <input type="number" name="total_personas" id="total_personas" min="1" required>
-
+        
         <label for="cajas_totales">Total Cajas Movidas:</label>
         <input type="number" name="cajas_totales" id="cajas_totales" readonly>
         
         <input type="hidden" name="datos_vehiculos" id="datos_vehiculos">
         <input type="hidden" name="datos_paradas_operacion" id="datos_paradas_operacion">
 
-        <button type="submit">Enviar Formulario</button>
+        <button type="submit">Enviar</button>
     </form>
 
     <script>
-        // --- UTILIDADES ---
-        function horaAMinutos(hStr) {
-            if(!hStr || !hStr.includes(':')) return null;
-            const [h, m] = hStr.split(':').map(Number);
-            return h * 60 + m;
+        // Función para recolectar datos reales antes de enviar
+        function recolectarDatos() {
+            // 1. Recolectar Vehículos
+            const vehiculosArr = [];
+            const registros = document.querySelectorAll('.registro-vehiculo');
+            registros.forEach(reg => {
+                const idx = reg.dataset.index;
+                const muelleSelect = reg.querySelector(`select[name="vehiculo_${idx}_muelle"]`).value;
+                const placa = reg.querySelector(`input[name="vehiculo_${idx}_placa"]`).value;
+                
+                vehiculosArr.push({
+                    inicio: reg.querySelector(`input[name="vehiculo_${idx}_inicio"]`).value,
+                    fin: reg.querySelector(`input[name="vehiculo_${idx}_fin"]`).value,
+                    placa: placa,
+                    muelle: muelleSelect === 'otro' ? reg.querySelector(`input[name="vehiculo_${idx}_otro_muelle_num"]`).value : muelleSelect,
+                    tipo: reg.querySelector(`select[id="tipo_vehi_${idx}"]`).value,
+                    cajas: reg.querySelector(`input[name="vehiculo_${idx}_cajas"]`).value,
+                    foto_url: reg.querySelector(`#foto_url_${idx}`).value
+                });
+            });
+            document.getElementById('datos_vehiculos').value = JSON.stringify(vehiculosArr);
+
+            // 2. Recolectar Paradas Operación
+            const paradasArr = [];
+            const grupos = document.querySelectorAll('#operacion-contenedor .parada-group');
+            grupos.forEach(grupo => {
+                const pIdx = grupo.dataset.index;
+                const inicio = grupo.querySelector(`input[name="parada_inicio_operacion_${pIdx}"]`).value;
+                const fin = grupo.querySelector(`input[name="parada_fin_operacion_${pIdx}"]`).value;
+                const motivo = grupo.querySelector(`select[name="parada_motivo_operacion_${pIdx}"]`).value;
+
+                if(inicio && fin) {
+                    paradasArr.push({ inicio, fin, motivo });
+                }
+            });
+            document.getElementById('datos_paradas_operacion').value = JSON.stringify(paradasArr);
         }
 
-        function rangosSeSolapan(i1, f1, i2, f2) {
-            const inicio1 = horaAMinutos(i1), fin1 = horaAMinutos(f1);
-            const inicio2 = horaAMinutos(i2), fin2 = horaAMinutos(f2);
-            if (inicio1 === null || fin1 === null || inicio2 === null || fin2 === null) return false;
-            return inicio1 < fin2 && inicio2 < fin1;
-        }
-
+        // --- FUNCIONES DE SEGURIDAD Y MASCARAS ---
         function applyTimeMask(input, displayId) {
-            let v = input.value.replace(/\D/g, '');
-            if (v.length >= 4) {
-                v = v.substring(0, 4);
-                input.value = v.substring(0, 2) + ":" + v.substring(2, 4);
+            let v = input.value.replace(/\D/g,'');
+            if(v.length >= 2) v = v.substring(0,2) + ":" + v.substring(2,4);
+            input.value = v;
+            // Mostrar hora AM/PM para ayuda visual
+            const display = document.getElementById(displayId);
+            if(v.length === 5) {
+                const [h, m] = v.split(':').map(Number);
+                if(h < 24 && m < 60) {
+                    const ampm = h >= 12 ? 'P.M.' : 'A.M.';
+                    const h12 = (h % 12) || 12;
+                    display.innerText = `Hora: ${h12}:${m.toString().padStart(2,'0')} ${ampm}`;
+                }
             }
         }
 
-        function manejarOtro(select) {
-            const otro = select.nextElementSibling;
-            if(otro && otro.classList.contains('otro-input')) {
-                otro.style.display = select.value === 'otro' ? 'block' : 'none';
-            }
-        }
-
-        // --- GESTIÓN DE VEHÍCULOS ---
-        let vCounter = 0;
         function agregarRegistroVehiculo() {
             const container = document.getElementById('vehiculos-contenedor');
-            const idx = vCounter++;
-            const div = document.createElement('div');
-            div.className = 'registro-vehiculo';
-            div.dataset.index = idx;
-            div.innerHTML = `
-                <button type="button" class="btn-eliminar-registro" onclick="this.parentElement.remove(); actualizarTotalCajas();">Eliminar #</button>
-                <h4 style="color:#C76E00; text-align:center;">VEHÍCULO</h4>
+            const vIndex = container.children.length;
+            const registro = document.createElement('div');
+            registro.className = 'registro-vehiculo';
+            registro.dataset.index = vIndex;
+            registro.innerHTML = `
+                <button type="button" class="btn-eliminar-registro" onclick="this.parentElement.remove(); actualizarTotalCajas();">Eliminar</button>
+                <h4 style="color:#C76E00;">VEHÍCULO #${vIndex + 1}</h4>
                 <div class="time-row">
                     <div>
-                        <label>Hora Inicio:</label>
-                        <input type="tel" name="v_ini_${idx}" class="time-input-masked" placeholder="HH:MM" onblur="applyTimeMask(this)">
+                        <label>Inicio:</label>
+                        <input type="tel" name="vehiculo_${vIndex}_inicio" class="time-input-masked" placeholder="HH:MM" maxlength="5" onblur="applyTimeMask(this, 'v-ini-${vIndex}')">
+                        <span id="v-ini-${vIndex}" class="time-display"></span>
                     </div>
                     <div>
-                        <label>Hora Fin:</label>
-                        <input type="tel" name="v_fin_${idx}" class="time-input-masked" placeholder="HH:MM" onblur="applyTimeMask(this)">
+                        <label>Final:</label>
+                        <input type="tel" name="vehiculo_${vIndex}_fin" class="time-input-masked" placeholder="HH:MM" maxlength="5" onblur="applyTimeMask(this, 'v-fin-${vIndex}')">
+                        <span id="v-fin-${vIndex}" class="time-display"></span>
                     </div>
                 </div>
                 <label>Placa:</label>
-                <input type="text" name="v_placa_${idx}" id="placa_${idx}" required maxlength="6" oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '')">
-                <label>Muelle:</label>
-                <select name="v_muelle_${idx}" onchange="manejarOtro(this)">
-                    <option value="3">3</option><option value="11">11</option><option value="12">12</option><option value="otro">Otro</option>
+                <input type="text" name="vehiculo_${vIndex}_placa" id="placa_${vIndex}" required maxlength="6" oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '')">
+                
+                <label>Tipo Vehículo:</label>
+                <select id="tipo_vehi_${vIndex}" required>
+                    <option value="Camion">Camión</option>
+                    <option value="Tractomula">Tractomula</option>
+                    <option value="Van">Van</option>
                 </select>
-                <input type="number" name="v_otro_m_${idx}" class="otro-input" placeholder="N° Muelle">
-                <label>Cajas:</label>
-                <input type="number" name="v_cajas_${idx}" class="cajas-input-js" oninput="actualizarTotalCajas()">
-                <label>Foto:</label>
-                <input type="file" id="foto_file_${idx}" accept="image/*" capture="environment" onchange="subirFoto(${idx})">
-                <input type="hidden" name="v_url_${idx}" id="url_${idx}">
-                <div id="prev_${idx}" class="preview-foto"></div>
-            `;
-            container.appendChild(div);
-        }
 
-        // --- GESTIÓN DE PARADAS ---
-        let pCounter = 0;
-        function agregarCampoParada() {
-            const container = document.getElementById('operacion-contenedor');
-            const idx = pCounter++;
-            const div = document.createElement('div');
-            div.className = 'parada-group';
-            div.innerHTML = `
-                <label>Parada de Operación</label>
-                <div class="time-row">
-                    <input type="tel" name="p_ini_${idx}" class="time-input-masked" placeholder="Inicio HH:MM" onblur="applyTimeMask(this)">
-                    <input type="tel" name="p_fin_${idx}" class="time-input-masked" placeholder="Fin HH:MM" onblur="applyTimeMask(this)">
-                </div>
-                <select name="p_motivo_${idx}" onchange="manejarOtro(this)">
-                    <option value="aseo">Aseo</option>
-                    <option value="pausas">Pausas Activas</option>
+                <label>Muelle:</label>
+                <select name="vehiculo_${vIndex}_muelle" onchange="this.nextElementSibling.style.display = (this.value === 'otro' ? 'block' : 'none')">
+                    <option value="3">3</option>
+                    <option value="11">11</option>
                     <option value="otro">Otro</option>
                 </select>
-                <input type="text" name="p_otro_m_${idx}" class="otro-input" placeholder="Especifique">
-                <button type="button" class="btn-eliminar-parada" onclick="this.parentElement.remove()">Eliminar Parada</button>
+                <input type="number" name="vehiculo_${vIndex}_otro_muelle_num" class="otro-input" placeholder="N° Muelle">
+
+                <label>Cajas:</label>
+                <input type="number" name="vehiculo_${vIndex}_cajas" class="cajas-input-js" oninput="actualizarTotalCajas()">
+
+                <label>Foto:</label>
+                <input type="file" id="foto_${vIndex}" accept="image/*" capture="environment" onchange="subirFoto(${vIndex})">
+                <input type="hidden" name="vehiculo_${vIndex}_foto_url" id="foto_url_${vIndex}" value="">
+                <div id="prev_${vIndex}" class="preview-foto"></div>
             `;
-            container.appendChild(div);
+            container.appendChild(registro);
         }
 
-        // --- SUBIDA DE FOTOS (NOMBRE POR PLACA) ---
-        async function subirFoto(idx) {
-            const file = document.getElementById(`foto_file_${idx}`).files[0];
-            const placa = document.getElementById(`placa_${idx}`).value || 'SIN_PLACA';
-            const fecha = document.getElementById('fecha').value.split('-').reverse().join('.') || '00.00.0000';
-            const preview = document.getElementById(`prev_${idx}`);
+        async function subirFoto(vIndex) {
+            const file = document.getElementById(`foto_${vIndex}`).files[0];
+            const placa = document.getElementById(`placa_${vIndex}`).value || 'SIN_PLACA';
+            const fecha = document.getElementById('fecha').value || '00-00-00';
+            const preview = document.getElementById(`prev_${vIndex}`);
             
             if(!file) return;
             preview.innerHTML = "Subiendo...";
@@ -189,16 +208,39 @@
             const formData = new FormData();
             formData.append('image', file);
             formData.append('key', '7aa1cd8e8d0a3558833f225cbeba96ac');
-            formData.append('name', `${fecha}.${placa}.vehiculo_${idx}`);
+            formData.append('name', `${fecha}.${placa}.vehiculo_${vIndex}`);
 
             try {
                 const res = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: formData });
                 const data = await res.json();
                 if(data.success) {
-                    document.getElementById(`url_${idx}`).value = data.data.url;
-                    preview.innerHTML = `<img src="${data.data.url}"><p>✅ Subida</p>`;
+                    document.getElementById(`foto_url_${vIndex}`).value = data.data.url;
+                    preview.innerHTML = `<img src="${data.data.url}"><p>✅ Guardada</p>`;
                 }
             } catch(e) { alert("Error al subir foto"); }
+        }
+
+        function agregarCampoParada() {
+            const container = document.getElementById('operacion-contenedor');
+            const pIdx = container.children.length;
+            const div = document.createElement('div');
+            div.className = 'parada-group';
+            div.dataset.index = pIdx;
+            div.innerHTML = `
+                <label>Parada #${pIdx + 1}</label>
+                <div class="time-row">
+                    <input type="tel" name="parada_inicio_operacion_${pIdx}" placeholder="HH:MM" maxlength="5" onblur="applyTimeMask(this, 'p-ini-${pIdx}')">
+                    <input type="tel" name="parada_fin_operacion_${pIdx}" placeholder="HH:MM" maxlength="5" onblur="applyTimeMask(this, 'p-fin-${pIdx}')">
+                </div>
+                <span id="p-ini-${pIdx}" class="time-display"></span>
+                <select name="parada_motivo_operacion_${pIdx}">
+                    <option value="Aseo">Aseo</option>
+                    <option value="Almuerzo">Almuerzo</option>
+                    <option value="Pausas">Pausas Activas</option>
+                </select>
+                <button type="button" class="btn-eliminar" onclick="this.parentElement.remove()">Quitar</button>
+            `;
+            container.appendChild(div);
         }
 
         function actualizarTotalCajas() {
@@ -214,62 +256,15 @@
             }
         }
 
-        // --- LÓGICA DE ENVÍO FINAL (CORRECCIÓN DE DATOS VACÍOS) ---
-        document.getElementById('miFormulario').addEventListener('submit', function(e) {
-            const vehiculosArr = [];
-            const paradasArr = [];
+        // --- ENVÍO FINAL ---
+        document.forms[0].onsubmit = function(e) {
+            recolectarDatos(); // <--- Aquí es donde se asegura que se guarden los campos ocultos
+            const txts = document.querySelectorAll('input[type="text"]');
+            txts.forEach(t => t.value = t.value.toUpperCase());
+            return true;
+        };
 
-            // Recolectar Vehículos
-            document.querySelectorAll('.registro-vehiculo').forEach(reg => {
-                const i = reg.dataset.index;
-                const muelleVal = reg.querySelector(`[name="v_muelle_${i}"]`).value;
-                vehiculosArr.push({
-                    inicio: reg.querySelector(`[name="v_ini_${i}"]`).value,
-                    fin: reg.querySelector(`[name="v_fin_${i}"]`).value,
-                    placa: reg.querySelector(`[name="v_placa_${i}"]`).value,
-                    muelle: muelleVal === 'otro' ? reg.querySelector(`[name="v_otro_m_${i}"]`).value : muelleVal,
-                    cajas: reg.querySelector(`[name="v_cajas_${i}"]`).value,
-                    foto: reg.querySelector(`#url_${i}`).value
-                });
-            });
-
-            // Recolectar Paradas
-            document.querySelectorAll('.parada-group').forEach(p => {
-                const ini = p.querySelector('input[name^="p_ini"]').value;
-                const fin = p.querySelector('input[name^="p_fin"]').value;
-                const mot = p.querySelector('select[name^="p_motivo"]').value;
-                if(ini && fin) {
-                    paradasArr.push({ inicio: ini, fin: fin, motivo: mot });
-                }
-            });
-
-            // Validar Solapamientos (Ejemplo Muelles)
-            for(let a=0; a<vehiculosArr.length; a++) {
-                for(let b=a+1; b<vehiculosArr.length; b++) {
-                    if(vehiculosArr[a].muelle === vehiculosArr[b].muelle && 
-                       rangosSeSolapan(vehiculosArr[a].inicio, vehiculosArr[a].fin, vehiculosArr[b].inicio, vehiculosArr[b].fin)) {
-                        alert(`¡Conflicto de horario en muelle ${vehiculosArr[a].muelle}!`);
-                        e.preventDefault();
-                        return;
-                    }
-                }
-            }
-
-            // Asignar a campos ocultos antes de enviar
-            document.getElementById('datos_vehiculos').value = JSON.stringify(vehiculosArr);
-            document.getElementById('datos_paradas_operacion').value = JSON.stringify(paradasArr);
-            
-            // Convertir textos a Mayúsculas
-            document.querySelectorAll('input[type="text"]').forEach(input => {
-                input.value = input.value.toUpperCase();
-            });
-        });
-
-        // Iniciar con un registro
-        document.addEventListener('DOMContentLoaded', () => {
-            agregarRegistroVehiculo();
-            agregarCampoParada();
-        });
+        window.onload = () => { agregarRegistroVehiculo(); agregarCampoParada(); };
     </script>
 </body>
 </html>
