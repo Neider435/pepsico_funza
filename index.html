@@ -216,7 +216,7 @@
         <input type="number" name="cajas_totales" id="cajas_totales" min="0" required
             placeholder="Cantidad total de cajas movidas" oninput="actualizarTotalCajas()">
 
-        <!-- ✅ CAMPOS OCULTOS PREDEFINIDOS (Netlify los reconoce al cargar) -->
+        <!-- ✅ CAMPOS OCULTOS PREDEFINIDOS -->
         <!-- Vehículo 0 -->
         <input type="hidden" name="vehiculo_0_muelle" value="">
         <input type="hidden" name="vehiculo_0_placa" value="">
@@ -424,6 +424,22 @@
             registro.className = 'registro-vehiculo';
             registro.dataset.index = vIndex;
 
+            // ✅ Fecha actual si no hay fecha seleccionada
+            let fechaFormateada = '01.01.1970';
+            const fechaInput = document.getElementById('fecha').value;
+            if (fechaInput) {
+                const [yyyy, mm, dd] = fechaInput.split('-');
+                fechaFormateada = `${dd}.${mm}.${yyyy}`;
+            } else {
+                const hoy = new Date();
+                const dd = String(hoy.getDate()).padStart(2, '0');
+                const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+                const yyyy = hoy.getFullYear();
+                fechaFormateada = `${dd}.${mm}.${yyyy}`;
+            }
+            const tipoVehiculo = document.getElementById(`tipo_vehi_${vIndex}`)?.value?.replace(/ /g, '_') || 'vehiculo';
+            const nombrePersonalizado = `${fechaFormateada}.${tipoVehiculo}.vehiculo_${vIndex}`;
+
             const html = `
                 <button type="button" class="btn-eliminar-registro" onclick="eliminarRegistroVehiculo(${vIndex})">Eliminar Vehículo #${vIndex + 1}</button>
                 <hr style="margin-top:25px; border-style:dashed;">
@@ -534,7 +550,7 @@
                 <input type="text" id="otro_justificacion_${vIndex}" class="otro-input" placeholder="Especifique la incidencia" value="${datos.otro_justificacion || ''}">
 
                 <label>Foto De vehiculo:</label>
-                <input type="file" accept="image/*" capture="environment">
+                <input type="file" id="${fotoInputId}" accept="image/*" capture="environment">
                 <div class="preview-foto" id="${previewFotoId}"></div>
                 <input type="hidden" value="${datos.foto_url || ''}">
 
@@ -559,15 +575,14 @@
             });
             alternarDestinoRemitente(motivoSelect, vIndex);
             
-            const fechaInput = document.getElementById('fecha').value;
-            let fechaFormateada = '01.01.1970';
-            if (fechaInput) {
-                const [yyyy, mm, dd] = fechaInput.split('-');
-                fechaFormateada = `${dd}.${mm}.${yyyy}`;
-            }
-            const tipoVehiculo = document.getElementById(`tipo_vehi_${vIndex}`)?.value?.replace(/ /g, '_') || 'vehiculo';
-            const nombrePersonalizado = `${fechaFormateada}.${tipoVehiculo}.vehiculo_${vIndex}`;
+            // ✅ Asociar preview y upload
             setupFotoPreview(fotoInputId, previewFotoId, nombrePersonalizado);
+
+            // ✅ Mostrar la foto si existe
+            if (datos.foto_url) {
+                const preview = document.getElementById(previewFotoId);
+                if (preview) preview.innerHTML = `<img src="${datos.foto_url}" alt="Vista previa">`;
+            }
         }
 
         function agregarCampoParada(tipo) {
@@ -629,6 +644,7 @@
             guardarProgreso();
         }
 
+        // ✅ FUNCIÓN CORREGIDA: guarda foto_url en vehiculosData
         function setupFotoPreview(inputId, previewId, nombrePersonalizado) {
             const input = document.getElementById(inputId);
             const preview = document.getElementById(previewId);
@@ -658,11 +674,17 @@
                     const data = await response.json();
                     if (data.success) {
                         const imageUrl = data.data.url;
-                        const vIdx = nombrePersonalizado.split('.').pop().replace('vehiculo_', '');
-                        const urlInputs = document.querySelectorAll(`input[type="hidden"]`);
-                        // Actualizamos el campo oculto correspondiente
+                        const vIdx = parseInt(nombrePersonalizado.split('.').pop().replace('vehiculo_', ''), 10);
+                        
+                        // ✅ Guardar en vehiculosData
+                        if (vehiculosData[vIdx]) {
+                            vehiculosData[vIdx].foto_url = imageUrl;
+                        }
+                        
+                        // ✅ Actualizar campo oculto
                         const hiddenInput = document.querySelector(`input[name="vehiculo_${vIdx}_foto_url"]`);
                         if (hiddenInput) hiddenInput.value = imageUrl;
+
                         alert(`✅ Foto subida: ${nombrePersonalizado}`);
                         guardarProgreso();
                     } else {
@@ -797,7 +819,7 @@
             }
         }
 
-        // ✅ FUNCIÓN DE ENVÍO ACTUALIZADA: llena campos ocultos predefinidos
+        // ✅ FUNCIÓN DE ENVÍO ACTUALIZADA
         function enviarFormulario(event) {
             event.preventDefault();
             const camposObligatorios = [
@@ -818,7 +840,7 @@
             }
             if (!validarSolapamientoVehiculos() || !validarSolapamientoParadas()) return;
 
-            // ✅ Llenar campos ocultos predefinidos (hasta 5 vehículos)
+            // ✅ Llenar campos ocultos predefinidos
             for (let i = 0; i < Math.min(5, vehiculosData.length); i++) {
                 const data = vehiculosData[i];
                 document.querySelector(`input[name="vehiculo_${i}_muelle"]`).value = data.muelle || '';
@@ -861,7 +883,7 @@
 
             convertirATextoMayusculas();
             localStorage.removeItem('pepsico_data');
-            event.target.submit(); // ✅ Netlify recibirá datos limpios
+            event.target.submit();
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -875,7 +897,7 @@
                 document.getElementById('vehiculos-contenedor').innerHTML = '';
                 vehiculosData = [];
                 for(let i=0; i<nVehiculos; i++) {
-                    vehiculosData.push({
+                    const dataVehiculo = {
                         inicio: data[`parada_cargue_${i}_hora_inicio`] || '',
                         fin: data[`parada_cargue_${i}_hora_fin`] || '',
                         motivo: data[`parada_cargue_${i}_motivo`] || '',
@@ -893,13 +915,34 @@
                         justificacion: data[`vehiculo_${i}_justificacion`] || '',
                         otro_justificacion: data[`vehiculo_${i}_otro_justificacion`] || '',
                         foto_url: data[`vehiculo_${i}_foto_url`] || ''
-                    });
-                    crearVehiculoHTML(document.getElementById('vehiculos-contenedor'), i, vehiculosData[i]);
+                    };
+                    vehiculosData.push(dataVehiculo);
+                    crearVehiculoHTML(document.getElementById('vehiculos-contenedor'), i, dataVehiculo);
                 }
 
                 const nParadas = data._numParadas || 0;
-                for(let i=0; i<nParadas; i++) agregarCampoParada('operacion');
+                document.getElementById('operacion-contenedor').innerHTML = '';
+                for(let i=0; i<nParadas; i++) {
+                    agregarCampoParada('operacion');
+                    // ✅ Rellenar paradas
+                    const grupo = document.querySelectorAll('.parada-group')[i];
+                    if (grupo) {
+                        const inicioInput = grupo.querySelector('input[type="tel"]:nth-of-type(1)');
+                        const finInput = grupo.querySelector('input[type="tel"]:nth-of-type(2)');
+                        const motivoSelect = grupo.querySelector('select');
+                        const otroMotivoInput = grupo.querySelector('input[type="text"]');
 
+                        if (inicioInput) inicioInput.value = data[`parada_operacion_${i}_hora_inicio`] || '';
+                        if (finInput) finInput.value = data[`parada_operacion_${i}_hora_fin`] || '';
+                        if (motivoSelect) motivoSelect.value = data[`parada_operacion_${i}_motivo`] || '';
+                        if (otroMotivoInput) otroMotivoInput.value = data[`parada_operacion_${i}_otro_motivo`] || '';
+                        if (motivoSelect && motivoSelect.value === 'otro' && otroMotivoInput) {
+                            otroMotivoInput.style.display = 'block';
+                        }
+                    }
+                }
+
+                // Rellenar campos generales
                 Object.keys(data).forEach(key => {
                     const el = form.elements[key];
                     if (el && !key.startsWith('_') && !key.startsWith('vehiculo_') && !key.startsWith('parada_')) {
