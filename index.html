@@ -143,7 +143,6 @@
             border-radius: 8px;
             margin-top: 8px;
         }
-        /* Estilo para el botón de borrar todo */
         .btn-borrar-todo {
             background-color: #8B0000;
             color: white;
@@ -452,7 +451,6 @@
             registro.innerHTML = html;
             contenedor.appendChild(registro);
 
-            // Re-aplicar visibilidad de campos "otro"
             if (datos.muelle === 'otro') document.getElementById(`otro_muelle_${vIndex}`).style.display = 'block';
             if (datos.tipo_vehi === 'otro') document.getElementById(`otro_tipo_${vIndex}`).style.display = 'block';
             if (datos.destino === 'otro') document.getElementById(`otro_destino_${vIndex}`).style.display = 'block';
@@ -690,7 +688,6 @@
             formData.forEach((value, key) => {
                 if (!(value instanceof File) && key !== 'form-name') data[key] = value;
             });
-            // Guardar estructura de arreglos dinámicos
             data._numVehiculos = vehiculosData.length;
             data._numParadas = document.getElementById('operacion-contenedor').children.length;
             localStorage.setItem('pepsico_data', JSON.stringify(data));
@@ -703,6 +700,7 @@
             }
         }
 
+        // ✅ NUEVA FUNCIÓN MODIFICADA PARA ENVIAR A NETLIFY
         function enviarFormulario(event) {
             event.preventDefault();
             const camposObligatorios = [
@@ -723,9 +721,48 @@
             }
             if (!validarSolapamientoVehiculos() || !validarSolapamientoParadas()) return;
 
+            // ✅ Serializar datos dinámicos a los campos ocultos
+            const vehiculosForm = [];
+            for (let i = 0; i < vehiculosData.length; i++) {
+                const data = {
+                    inicio: vehiculosData[i].inicio || '',
+                    fin: vehiculosData[i].fin || '',
+                    motivo: vehiculosData[i].motivo || '',
+                    otro_motivo: vehiculosData[i].otro_motivo || '',
+                    muelle: vehiculosData[i].muelle || '',
+                    otro_muelle_num: vehiculosData[i].otro_muelle_num || '',
+                    placa: vehiculosData[i].placa || '',
+                    tipo_vehi: vehiculosData[i].tipo_vehi || '',
+                    otro_tipo: vehiculosData[i].otro_tipo || '',
+                    destino: vehiculosData[i].destino || '',
+                    otro_destino: vehiculosData[i].otro_destino || '',
+                    origen: vehiculosData[i].origen || '',
+                    personas: vehiculosData[i].personas || '',
+                    cajas: vehiculosData[i].cajas || '',
+                    justificacion: vehiculosData[i].justificacion || '',
+                    otro_justificacion: vehiculosData[i].otro_justificacion || '',
+                    foto_url: vehiculosData[i].foto_url || ''
+                };
+                vehiculosForm.push(data);
+            }
+
+            const paradasForm = [];
+            const cont = document.getElementById('operacion-contenedor');
+            const grupos = cont.querySelectorAll('.parada-group');
+            grupos.forEach((grupo, idx) => {
+                const inicio = grupo.querySelector(`input[name="parada_inicio_operacion_${idx}"]`).value || '';
+                const fin = grupo.querySelector(`input[name="parada_fin_operacion_${idx}"]`).value || '';
+                const motivo = grupo.querySelector(`select[name="parada_motivo_operacion_${idx}"]`).value || '';
+                const otro_motivo = grupo.querySelector(`input[name="parada_otro_motivo_operacion_${idx}"]`).value || '';
+                paradasForm.push({ inicio, fin, motivo, otro_motivo });
+            });
+
+            document.getElementById('datos_vehiculos').value = JSON.stringify(vehiculosForm);
+            document.getElementById('datos_paradas_operacion').value = JSON.stringify(paradasForm);
+
             convertirATextoMayusculas();
-            localStorage.removeItem('pepsico_data'); // Limpiar al enviar con éxito
-            event.target.submit();
+            localStorage.removeItem('pepsico_data');
+            event.target.submit(); // ✅ Netlify recibirá los datos
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -735,7 +772,6 @@
             if (savedData) {
                 const data = JSON.parse(savedData);
                 
-                // Reconstruir Vehículos
                 const nVehiculos = data._numVehiculos || 1;
                 document.getElementById('vehiculos-contenedor').innerHTML = '';
                 vehiculosData = [];
@@ -744,26 +780,31 @@
                         inicio: data[`vehiculo_${i}_inicio`],
                         fin: data[`vehiculo_${i}_fin`],
                         motivo: data[`vehiculo_${i}_motivo`],
+                        otro_motivo: data[`vehiculo_${i}_otro_motivo`] || '',
                         muelle: data[`vehiculo_${i}_muelle`],
+                        otro_muelle_num: data[`vehiculo_${i}_otro_muelle_num`] || '',
                         placa: data[`vehiculo_${i}_placa`],
                         tipo_vehi: data[`vehiculo_${i}_tipo_vehi`],
+                        otro_tipo: data[`vehiculo_${i}_otro_tipo`] || '',
+                        destino: data[`vehiculo_${i}_destino`] || '',
+                        otro_destino: data[`vehiculo_${i}_otro_destino`] || '',
+                        origen: data[`vehiculo_${i}_origen`] || '',
                         personas: data[`vehiculo_${i}_personas`],
                         cajas: data[`vehiculo_${i}_cajas`],
+                        justificacion: data[`vehiculo_${i}_justificacion`],
+                        otro_justificacion: data[`vehiculo_${i}_otro_justificacion`] || '',
                         foto_url: data[`vehiculo_${i}_foto_url`]
                     });
                     crearVehiculoHTML(document.getElementById('vehiculos-contenedor'), i, vehiculosData[i]);
                 }
 
-                // Reconstruir Paradas
                 const nParadas = data._numParadas || 0;
                 for(let i=0; i<nParadas; i++) agregarCampoParada('operacion');
 
-                // Llenar valores generales
                 Object.keys(data).forEach(key => {
                     const el = form.elements[key];
-                    if (el && !key.startsWith('_')) {
+                    if (el && !key.startsWith('_') && !key.startsWith('vehiculo_') && !key.startsWith('parada_')) {
                         el.value = data[key];
-                        // Actualizar máscaras de tiempo visuales
                         if (el.classList.contains('time-input-masked')) {
                             const spanId = el.nextElementSibling?.id;
                             if(spanId) applyTimeMask(el, spanId);
