@@ -158,25 +158,25 @@ font-weight: bold;
 <form name="formulario-pepsico" method="POST" data-netlify="true">
 <input type="hidden" name="form-name" value="formulario-pepsico" />
 <label for="lugar">Lugar de operación:</label>
-<select name="lugar" id="lugar" required onchange="actualizarCampos()">
+<select name="lugar" id="lugar" required onchange="actualizarCampos(); guardarProgreso();">
 <option value="">Seleccione una opción</option>
 <option value="Funza">Pepsico Funza</option>
 </select>
 <label for="lider">Líder Asignado:</label>
-<input type="text" name="lider" id="lider" required placeholder="Primer Nombre y Primer Apellido">
+<input type="text" name="lider" id="lider" required placeholder="Primer Nombre y Primer Apellido" oninput="guardarProgreso();">
 <label for="coordinador">Coordinador Asignado:</label>
 <input type="text" name="coordinador" id="coordinador" readonly required>
 <label for="lider_pepsico">Líder De Pepsico:</label>
-<select name="lider_pepsico" id="lider_pepsico" required>
+<select name="lider_pepsico" id="lider_pepsico" required onchange="guardarProgreso();">
 <option value="">Seleccione un líder</option>
 <option value="Alejandro Ariza">Alejandro Ariza</option>
 <option value="Alejandro Monroy">Alejandro Monroy</option>
 <option value="Carlos Ruiz">Carlos Ruiz</option>
 </select>
 <label for="fecha">Fecha:</label>
-<input type="date" name="fecha" id="fecha" required>
+<input type="date" name="fecha" id="fecha" required onchange="guardarProgreso();">
 <label for="turno">Turno Asignado:</label>
-<select name="turno" id="turno" required>
+<select name="turno" id="turno" required onchange="guardarProgreso();">
 <option value="">Seleccione un turno</option>
 <option value="Manana">Mañana</option>
 <option value="Tarde">Tarde</option>
@@ -198,11 +198,10 @@ font-weight: bold;
 <h3 style="text-align:center; font-size:1.1em; color:#296097;">TOTALES DE TURNO</h3>
 <label for="total_personas">Total Personas En El Turno:</label>
 <input type="number" name="total_personas" id="total_personas" min="1" required
-placeholder="Total de empleados en el turno">
+placeholder="Total de empleados en el turno" oninput="guardarProgreso();">
 <label for="cajas_totales">Total Cajas Movidas:</label>
 <input type="number" name="cajas_totales" id="cajas_totales" min="0" required
-placeholder="Cantidad total de cajas movidas" oninput="actualizarTotalCajas()">
-<!-- ⚠️ NO HAY CAMPOS OCULTOS PREDEFINIDOS. Se generan dinámicamente al enviar. -->
+placeholder="Cantidad total de cajas movidas" oninput="actualizarTotalCajas(); guardarProgreso();">
 <div style="display: flex; gap: 10px;">
 <button type="submit" style="flex: 3;">Enviar</button>
 <button type="button" class="btn-borrar-todo" style="flex: 1;" onclick="limpiarTodo()">Borrar Todo</button>
@@ -359,7 +358,7 @@ onblur="applyTimeMask(this, '${finId}');">
 <option value="descargue" ${datos.motivo === 'descargue' ? 'selected' : ''}>Descargue</option>
 <option value="otro" ${datos.motivo === 'otro' ? 'selected' : ''}>Otro</option>
 </select>
-<input type="text" placeholder="Especifique otro motivo" class="otro-input" value="${datos.otro_motivo || ''}">
+<input type="text" placeholder="Especifique otro motivo" class="otro-input" value="${datos.otro_motivo || ''}" oninput="guardarProgreso();">
 </div>
 <hr style="margin-top:25px; border-style:dashed;">
 <label>Muelle:</label>
@@ -376,7 +375,7 @@ onblur="applyTimeMask(this, '${finId}');">
 <option value="20" ${datos.muelle === '20' ? 'selected' : ''}>20</option>
 <option value="otro" ${datos.muelle === 'otro' ? 'selected' : ''}>Otro</option>
 </select>
-<input type="number" id="otro_muelle_${vIndex}" class="otro-input" placeholder="N° muelle" min="1" max="999" value="${datos.otro_muelle_num || ''}">
+<input type="number" id="otro_muelle_${vIndex}" class="otro-input" placeholder="N° muelle" min="1" max="999" value="${datos.otro_muelle_num || ''}" oninput="guardarProgreso();">
 <label>Placa:</label>
 <input type="text" required placeholder="Ej: ABC123, 123ABC o A12345" maxlength="6"
 value="${datos.placa || ''}"
@@ -395,7 +394,7 @@ oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').substri
 <option value="Camabaja estandar" ${datos.tipo_vehi === 'Camabaja estandar' ? 'selected' : ''}>Camabaja estandar</option>
 <option value="otro" ${datos.tipo_vehi === 'otro' ? 'selected' : ''}>Otro</option>
 </select>
-<input type="text" id="otro_tipo_${vIndex}" class="otro-input" placeholder="Especifique tipo" value="${datos.otro_tipo || ''}">
+<input type="text" id="otro_tipo_${vIndex}" class="otro-input" placeholder="Especifique tipo" value="${datos.otro_tipo || ''}" oninput="guardarProgreso();">
 <div class="form-group-custom" id="destino-group-${vIndex}" style="${(datos.motivo === 'cargue') ? 'display:block;' : 'display:none;'}">
 <label style="margin-top:0;">Destino:</label>
 <select id="destino-select-${vIndex}" onchange="guardarProgreso()">
@@ -409,29 +408,28 @@ oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').substri
 <option value="peru" ${datos.destino === 'peru' ? 'selected' : ''}>Perú</option>
 <option value="otro" ${datos.destino === 'otro' ? 'selected' : ''}>Otro</option>
 </select>
-<input type="text" id="otro_destino_${vIndex}" class="otro-input" placeholder="Especifique otro destino" value="${datos.otro_destino || ''}">
+<input type="text" id="otro_destino_${vIndex}" class="otro-input" placeholder="Especifique otro destino" value="${datos.otro_destino || ''}" oninput="guardarProgreso();">
 </div>
 <div class="form-group-custom" id="remitente-group-${vIndex}" style="${(datos.motivo === 'descargue') ? 'display:block;' : 'display:none;'}">
 <label style="margin-top:0;">Origen / Remitente:</label>
-<input type="text" id="remitente-input-${vIndex}" placeholder="Ej: Zona Franca" value="${datos.origen || ''}" oninput="guardarProgreso()">
+<input type="text" id="remitente-input-${vIndex}" placeholder="Ej: Zona Franca" value="${datos.origen || ''}" oninput="guardarProgreso();">
 </div>
 <label>Total De Personas:</label>
-<input type="number" min="1" required value="${datos.personas || ''}" oninput="guardarProgreso()">
+<input type="number" min="1" required value="${datos.personas || ''}" oninput="guardarProgreso();">
 <label>Cajas Movidas:</label>
 <input type="number" class="cajas-input-js" min="0" required
 value="${datos.cajas || ''}"
 oninput="actualizarTotalCajas(); guardarProgreso();">
 <label>Justificación del retraso o incidencia:</label>
-<select onchange="guardarProgreso()">
+<select onchange="guardarProgreso();">
 <option value="">Seleccione motivo</option>
 <option value="faltante_producto" ${datos.justificacion === 'faltante_producto' ? 'selected' : ''}>Faltante de producto</option>
 <option value="otro" ${datos.justificacion === 'otro' ? 'selected' : ''}>Otro</option>
 </select>
-<input type="text" id="otro_justificacion_${vIndex}" class="otro-input" placeholder="Especifique la incidencia" value="${datos.otro_justificacion || ''}">
+<input type="text" id="otro_justificacion_${vIndex}" class="otro-input" placeholder="Especifique la incidencia" value="${datos.otro_justificacion || ''}" oninput="guardarProgreso();">
 <label>Foto De vehiculo:</label>
 <input type="file" id="${fotoInputId}" accept="image/*" capture="environment">
 <div class="preview-foto" id="${previewFotoId}"></div>
-<input type="hidden" value="${datos.foto_url || ''}">
 <p style="font-size:0.85em; color:#6c757d; margin-top:5px;">
 📸 <strong>La foto se sube automáticamente.</strong> No necesita hacer nada más.
 </p>
@@ -452,7 +450,7 @@ oninput="actualizarTotalCajas(); guardarProgreso();">
   });
   alternarDestinoRemitente(motivoSelect, vIndex);
 
-  setupFotoPreview(fotoInputId, previewFotoId, nombrePersonalizado);
+  setupFotoPreview(fotoInputId, previewFotoId, nombrePersonalizado, vIndex);
 
   if (datos.foto_url) {
     const preview = document.getElementById(previewFotoId);
@@ -510,14 +508,14 @@ onblur="applyTimeMask(this);">
 <option value="danos_equipo">Daños (Electricos, montacargas, etc)</option>
 <option value="otro">Otro</option>
 </select>
-<input type="text" placeholder="Especifique" class="otro-input" oninput="guardarProgreso()">
+<input type="text" placeholder="Especifique" class="otro-input" oninput="guardarProgreso();">
 `;
   div.appendChild(botonEliminar);
   contenedor.appendChild(div);
   guardarProgreso();
 }
 
-function setupFotoPreview(inputId, previewId, nombrePersonalizado) {
+function setupFotoPreview(inputId, previewId, nombrePersonalizado, vIndex) {
   const input = document.getElementById(inputId);
   const preview = document.getElementById(previewId);
   if (!input || !preview) return;
@@ -546,12 +544,11 @@ function setupFotoPreview(inputId, previewId, nombrePersonalizado) {
       const data = await response.json();
       if (data.success) {
         const imageUrl = data.data.url;
-        const vIdx = parseInt(nombrePersonalizado.split('.').pop().replace('vehiculo_', ''), 10);
-        if (vehiculosData[vIdx]) {
-          vehiculosData[vIdx].foto_url = imageUrl;
-        }
+        // ✅ Actualizar vehiculosData y guardar
+        vehiculosData[vIndex] = vehiculosData[vIndex] || {};
+        vehiculosData[vIndex].foto_url = imageUrl;
+        guardarProgreso(); // ✅ Esto ahora guarda la URL correctamente
         alert(`✅ Foto subida: ${nombrePersonalizado}`);
-        guardarProgreso();
       } else {
         throw new Error(data.error.message || 'Error al subir la foto');
       }
@@ -597,6 +594,7 @@ function manejarOtroCampo(select, otroId) {
     otro.required = false;
     otro.value = '';
   }
+  guardarProgreso();
 }
 
 function alternarDestinoRemitente(selectMotivo, vIndex) {
@@ -613,6 +611,7 @@ function alternarDestinoRemitente(selectMotivo, vIndex) {
   } else if (motivo === 'descargue' && remitenteInput) {
     remitenteInput.setAttribute('required', 'required');
   }
+  guardarProgreso();
 }
 
 function applyTimeMask(input, displayId) {
@@ -662,14 +661,58 @@ function actualizarTotalCajas() {
 }
 
 function convertirATextoMayusculas() {
-  const textInputs = document.querySelectorAll('input[type="text"], textarea');
+  const textInputs = document.querySelectorAll('input[type="text"]');
   textInputs.forEach(input => {
     if (input.value.trim() !== '') input.value = input.value.toUpperCase();
   });
 }
 
+// 🔄 FUNCIÓN CLAVE: guarda desde el DOM actual
 function guardarProgreso() {
-  localStorage.setItem('pepsico_vehiculosData', JSON.stringify(vehiculosData));
+  const vehiculosActualizados = [];
+  const registros = document.querySelectorAll('.registro-vehiculo');
+  registros.forEach((reg, idx) => {
+    const selects = reg.querySelectorAll('select');
+    const telInputs = reg.querySelectorAll('input[type="tel"]');
+    const otroInputs = reg.querySelectorAll('.otro-input');
+
+    const motivoSelect = selects[0];
+    const muelleSelect = selects[1];
+    const tipoVehiSelect = selects[2];
+    const destinoSelect = selects[3];
+    const justificacionSelect = selects[4];
+
+    const otroMuelleInput = reg.querySelector('input[id^="otro_muelle_"]');
+    const otroTipoInput = reg.querySelector('input[id^="otro_tipo_"]');
+    const otroDestinoInput = reg.querySelector('input[id^="otro_destino_"]');
+    const otroJustificacionInput = reg.querySelector('input[id^="otro_justificacion_"]');
+    const remitenteInput = reg.querySelector('[id^="remitente-input-"]');
+    const placaInput = reg.querySelector('input[type="text"][maxlength="6"]');
+    const cajasInput = reg.querySelector('.cajas-input-js');
+    const personasInput = reg.querySelector('input[type="number"][min="1"]');
+
+    vehiculosActualizados.push({
+      inicio: telInputs[0]?.value || '',
+      fin: telInputs[1]?.value || '',
+      motivo: motivoSelect?.value || '',
+      otro_motivo: motivoSelect?.value === 'otro' ? otroInputs[0]?.value || '' : '',
+      muelle: muelleSelect?.value || '',
+      otro_muelle_num: muelleSelect?.value === 'otro' ? otroMuelleInput?.value || '' : '',
+      placa: placaInput?.value || '',
+      tipo_vehi: tipoVehiSelect?.value || '',
+      otro_tipo: tipoVehiSelect?.value === 'otro' ? otroTipoInput?.value || '' : '',
+      destino: destinoSelect?.value || '',
+      otro_destino: destinoSelect?.value === 'otro' ? otroDestinoInput?.value || '' : '',
+      origen: remitenteInput?.value || '',
+      personas: personasInput?.value || '',
+      cajas: cajasInput?.value || '',
+      justificacion: justificacionSelect?.value || '',
+      otro_justificacion: justificacionSelect?.value === 'otro' ? otroJustificacionInput?.value || '' : '',
+      foto_url: vehiculosData[idx]?.foto_url || ''
+    });
+  });
+  localStorage.setItem('pepsico_vehiculosData', JSON.stringify(vehiculosActualizados));
+  vehiculosData = vehiculosActualizados;
 
   const paradas = [];
   const grupos = document.querySelectorAll('#operacion-contenedor .parada-group');
@@ -692,53 +735,6 @@ function guardarProgreso() {
   });
 }
 
-function sincronizarVehiculosData() {
-  const cont = document.getElementById('vehiculos-contenedor');
-  const registros = cont.querySelectorAll('.registro-vehiculo');
-  for (let i = 0; i < registros.length; i++) {
-    const reg = registros[i];
-    const selects = reg.querySelectorAll('select');
-    const inputs = reg.querySelectorAll('input[type="text"], input[type="number"]');
-    const telInputs = reg.querySelectorAll('input[type="tel"]');
-    const otroInputs = reg.querySelectorAll('.otro-input');
-
-    const motivoSelect = selects[0];
-    const muelleSelect = selects[1];
-    const tipoVehiSelect = selects[2];
-    const destinoSelect = selects[3];
-    const justificacionSelect = selects[4];
-
-    const otroMuelleInput = reg.querySelector('input[id^="otro_muelle_"]');
-    const otroTipoInput = reg.querySelector('input[id^="otro_tipo_"]');
-    const otroDestinoInput = reg.querySelector('input[id^="otro_destino_"]');
-    const otroJustificacionInput = reg.querySelector('input[id^="otro_justificacion_"]');
-    const remitenteInput = reg.querySelector('[id^="remitente-input-"]');
-    const placaInput = reg.querySelector('input[type="text"][maxlength="6"]');
-    const cajasInput = reg.querySelector('.cajas-input-js');
-    const personasInput = reg.querySelector('input[type="number"][min="1"]');
-
-    vehiculosData[i] = {
-      inicio: telInputs[0]?.value || '',
-      fin: telInputs[1]?.value || '',
-      motivo: motivoSelect?.value || '',
-      otro_motivo: motivoSelect?.value === 'otro' ? otroInputs[0]?.value || '' : '',
-      muelle: muelleSelect?.value || '',
-      otro_muelle_num: muelleSelect?.value === 'otro' ? otroMuelleInput?.value || '' : '',
-      placa: placaInput?.value || '',
-      tipo_vehi: tipoVehiSelect?.value || '',
-      otro_tipo: tipoVehiSelect?.value === 'otro' ? otroTipoInput?.value || '' : '',
-      destino: destinoSelect?.value || '',
-      otro_destino: destinoSelect?.value === 'otro' ? otroDestinoInput?.value || '' : '',
-      origen: remitenteInput?.value || '',
-      personas: personasInput?.value || '',
-      cajas: cajasInput?.value || '',
-      justificacion: justificacionSelect?.value || '',
-      otro_justificacion: justificacionSelect?.value === 'otro' ? otroJustificacionInput?.value || '' : '',
-      foto_url: vehiculosData[i]?.foto_url || ''
-    };
-  }
-}
-
 function limpiarTodo() {
   if (confirm("¿Estás seguro de borrar toda la información?")) {
     localStorage.removeItem('pepsico_vehiculosData');
@@ -750,9 +746,10 @@ function limpiarTodo() {
   }
 }
 
-// ✅ FUNCIÓN DE ENVÍO DINÁMICA (sin campos fijos)
+// 📤 Envío dinámico
 function enviarFormulario(event) {
   event.preventDefault();
+  guardarProgreso(); // ✅ Asegurar datos sincronizados
 
   const form = event.target;
   const camposObligatorios = [
@@ -775,13 +772,10 @@ function enviarFormulario(event) {
 
   if (!validarSolapamientoVehiculos() || !validarSolapamientoParadas()) return;
 
-  // Sincronizar datos actuales
-  sincronizarVehiculosData();
-
-  // ✅ Eliminar campos dinámicos previos (por si hay reenvío)
+  // Limpiar campos dinámicos previos
   form.querySelectorAll('input[name^="vehiculo_"], input[name^="parada_cargue_"], input[name^="parada_operacion_"]').forEach(el => el.remove());
 
-  // ✅ Agregar campos dinámicos para vehículos
+  // Vehículos
   vehiculosData.forEach((veh, i) => {
     const camposVehiculo = {
       muelle: veh.muelle,
@@ -816,7 +810,7 @@ function enviarFormulario(event) {
     }
   });
 
-  // ✅ Agregar campos dinámicos para paradas de operación
+  // Paradas de operación
   const gruposParadas = document.querySelectorAll('#operacion-contenedor .parada-group');
   gruposParadas.forEach((grupo, i) => {
     const telInputs = grupo.querySelectorAll('input[type="tel"]');
@@ -838,20 +832,14 @@ function enviarFormulario(event) {
   });
 
   convertirATextoMayusculas();
-  localStorage.removeItem('pepsico_vehiculosData');
-  localStorage.removeItem('pepsico_paradasOperacion');
-  ['lugar', 'lider', 'coordinador', 'lider_pepsico', 'fecha', 'turno', 'total_personas', 'cajas_totales'].forEach(key => {
-    localStorage.removeItem(`pepsico_${key}`);
-  });
-
+  localStorage.clear(); // ✅ Limpiar todo
   alert('✅ ¡Formulario enviado correctamente!');
-  form.submit(); // ✅ Netlify recibirá solo los campos que existan
+  form.submit();
 }
 
-// ✅ CARGA INICIAL
+// 🔄 Carga inicial
 document.addEventListener('DOMContentLoaded', function() {
-  const form = document.querySelector('form');
-
+  // Restaurar vehículos
   const savedVehiculos = localStorage.getItem('pepsico_vehiculosData');
   if (savedVehiculos) {
     vehiculosData = JSON.parse(savedVehiculos);
@@ -866,26 +854,26 @@ document.addEventListener('DOMContentLoaded', function() {
     crearVehiculoHTML(contVeh, idx, datos);
   });
 
+  // Restaurar paradas
   const savedParadas = localStorage.getItem('pepsico_paradasOperacion');
   const contPar = document.getElementById('operacion-contenedor');
   contPar.innerHTML = '';
   if (savedParadas) {
     const paradas = JSON.parse(savedParadas);
-    paradas.forEach(parada => {
-      agregarCampoParada('operacion');
-      const grupo = contPar.lastElementChild;
-      if (grupo) {
-        const telInputs = grupo.querySelectorAll('input[type="tel"]');
-        const select = grupo.querySelector('select');
-        const otroInput = grupo.querySelector('.otro-input');
+    paradas.forEach(() => agregarCampoParada('operacion'));
+    // Llenar valores
+    const grupos = contPar.querySelectorAll('.parada-group');
+    paradas.forEach((parada, i) => {
+      if (grupos[i]) {
+        const telInputs = grupos[i].querySelectorAll('input[type="tel"]');
+        const select = grupos[i].querySelector('select');
+        const otroInput = grupos[i].querySelector('.otro-input');
         if (telInputs[0]) telInputs[0].value = parada.inicio;
         if (telInputs[1]) telInputs[1].value = parada.fin;
-        if (select) {
-          select.value = parada.motivo;
-          if (parada.motivo === 'otro' && otroInput) {
-            otroInput.style.display = 'block';
-            otroInput.value = parada.otro_motivo;
-          }
+        if (select) select.value = parada.motivo;
+        if (otroInput && parada.motivo === 'otro') {
+          otroInput.style.display = 'block';
+          otroInput.value = parada.otro_motivo;
         }
         if (telInputs[0].value) applyTimeMask(telInputs[0], telInputs[0].nextElementSibling?.id || '');
         if (telInputs[1].value) applyTimeMask(telInputs[1], telInputs[1].nextElementSibling?.id || '');
@@ -895,21 +883,16 @@ document.addEventListener('DOMContentLoaded', function() {
     agregarCampoParada('operacion');
   }
 
+  // Restaurar campos simples
   ['lugar', 'lider', 'coordinador', 'lider_pepsico', 'fecha', 'turno', 'total_personas', 'cajas_totales'].forEach(key => {
     const saved = localStorage.getItem(`pepsico_${key}`);
     const el = document.getElementById(key);
     if (el && saved) el.value = saved;
   });
 
+  // Inicializar
+  const form = document.querySelector('form');
   form.addEventListener('submit', enviarFormulario);
-  form.addEventListener('input', function() {
-    ['lugar', 'lider', 'coordinador', 'lider_pepsico', 'fecha', 'turno', 'total_personas', 'cajas_totales'].forEach(key => {
-      const el = document.getElementById(key);
-      if (el) localStorage.setItem(`pepsico_${key}`, el.value);
-    });
-    guardarProgreso();
-  });
-
   if (document.getElementById('lugar').value === 'Funza') {
     actualizarCampos();
   }
