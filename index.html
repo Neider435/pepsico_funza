@@ -258,8 +258,8 @@ function validarSolapamientoParadas() {
   const cont = document.getElementById('operacion-contenedor');
   const grupos = cont.querySelectorAll('.parada-group');
   grupos.forEach((grupo, idx) => {
-    const inicio = grupo.querySelector(`input[name="parada_inicio_operacion_${idx}"]`).value;
-    const fin = grupo.querySelector(`input[name="parada_fin_operacion_${idx}"]`).value;
+    const inicio = grupo.querySelector(`input[name="parada_inicio_operacion_${grupo.dataset.index}"]`).value;
+    const fin = grupo.querySelector(`input[name="parada_fin_operacion_${grupo.dataset.index}"]`).value;
     if (inicio && fin) paradas.push({ inicio, fin, idx });
   });
   for (let i = 0; i < paradas.length; i++) {
@@ -278,10 +278,7 @@ function eliminarRegistroVehiculo(index) {
     alert("Debe haber al menos un vehículo.");
     return;
   }
-
-  // Sincronizar antes de eliminar
   sincronizarVehiculosDesdeDOM();
-
   vehiculosData.splice(index, 1);
   reindexarVehiculos();
   actualizarTotalCajas();
@@ -490,7 +487,6 @@ function crearVehiculoHTML(contenedor, vIndex, datos = {}) {
   registro.innerHTML = html;
   contenedor.appendChild(registro);
 
-  // Activar listeners y mostrar campos "Otro"
   const motivoSelect = document.getElementById(motivoSelectId);
   motivoSelect.addEventListener('change', () => {
     alternarDestinoRemitente(motivoSelect, vIndex);
@@ -509,7 +505,6 @@ function crearVehiculoHTML(contenedor, vIndex, datos = {}) {
 
   alternarDestinoRemitente(motivoSelect, vIndex);
 
-  // Nombre de foto se generará al subir, usando la fecha ACTUAL del formulario
   document.getElementById(fotoInputId).addEventListener('change', function() {
     let fechaInput = document.getElementById('fecha').value;
     if (!fechaInput) fechaInput = new Date().toISOString().split('T')[0];
@@ -752,11 +747,14 @@ function enviarFormulario(event) {
   const paradasForm = [];
   const cont = document.getElementById('operacion-contenedor');
   const grupos = cont.querySelectorAll('.parada-group');
-  grupos.forEach((grupo, idx) => {
-    const inicio = grupo.querySelector(`input[name="parada_inicio_operacion_${idx}"]`).value || '';
-    const fin = grupo.querySelector(`input[name="parada_fin_operacion_${idx}"]`).value || '';
-    const motivo = grupo.querySelector(`select[name="parada_motivo_operacion_${idx}"]`).value || '';
-    const otro_motivo = grupo.querySelector(`input[name="parada_otro_motivo_operacion_${idx}"]`).value || '';
+
+  // ✅ CORRECCIÓN CLAVE: Usar dataset.index para obtener el índice real
+  grupos.forEach(grupo => {
+    const idx = grupo.dataset.index;
+    const inicio = grupo.querySelector(`input[name="parada_inicio_operacion_${idx}"]`)?.value || '';
+    const fin = grupo.querySelector(`input[name="parada_fin_operacion_${idx}"]`)?.value || '';
+    const motivo = grupo.querySelector(`select[name="parada_motivo_operacion_${idx}"]`)?.value || '';
+    const otro_motivo = grupo.querySelector(`input[name="parada_otro_motivo_operacion_${idx}"]`)?.value || '';
     paradasForm.push({ inicio, fin, motivo, otro_motivo });
   });
 
