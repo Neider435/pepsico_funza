@@ -169,7 +169,7 @@
         </select>
 
         <label for="lider">Líder Asignado:</label>
-        <input type="text" name="lider_asignado" id="lider" required placeholder="Primer Nombre y Primer Apellido">
+        <input type="text" name="lider" id="lider" required placeholder="Primer Nombre y Primer Apellido">
 
         <label for="coordinador">Coordinador Asignado:</label>
         <input type="text" name="coordinador" id="coordinador" readonly required>
@@ -215,9 +215,103 @@
         <label for="cajas_totales">Total Cajas Movidas:</label>
         <input type="number" name="cajas_totales" id="cajas_totales" min="0" required
             placeholder="Cantidad total de cajas movidas" oninput="actualizarTotalCajas()">
-        
-        <input type="hidden" name="datos_vehiculos" id="datos_vehiculos" value="">
-        <input type="hidden" name="datos_paradas_operacion" id="datos_paradas_operacion" value="">
+
+        <!-- ✅ CAMPOS OCULTOS PREDEFINIDOS (Netlify los reconoce al cargar) -->
+        <!-- Vehículo 0 -->
+        <input type="hidden" name="vehiculo_0_muelle" value="">
+        <input type="hidden" name="vehiculo_0_placa" value="">
+        <input type="hidden" name="vehiculo_0_tipo_vehi" value="">
+        <input type="hidden" name="vehiculo_0_destino" value="">
+        <input type="hidden" name="vehiculo_0_origen" value="">
+        <input type="hidden" name="vehiculo_0_personas" value="">
+        <input type="hidden" name="vehiculo_0_cajas_movidas" value="">
+        <input type="hidden" name="vehiculo_0_foto_url" value="">
+        <input type="hidden" name="parada_cargue_0_hora_inicio" value="">
+        <input type="hidden" name="parada_cargue_0_hora_fin" value="">
+        <input type="hidden" name="parada_cargue_0_motivo" value="">
+        <input type="hidden" name="parada_cargue_0_otro_motivo" value="">
+
+        <!-- Vehículo 1 -->
+        <input type="hidden" name="vehiculo_1_muelle" value="">
+        <input type="hidden" name="vehiculo_1_placa" value="">
+        <input type="hidden" name="vehiculo_1_tipo_vehi" value="">
+        <input type="hidden" name="vehiculo_1_destino" value="">
+        <input type="hidden" name="vehiculo_1_origen" value="">
+        <input type="hidden" name="vehiculo_1_personas" value="">
+        <input type="hidden" name="vehiculo_1_cajas_movidas" value="">
+        <input type="hidden" name="vehiculo_1_foto_url" value="">
+        <input type="hidden" name="parada_cargue_1_hora_inicio" value="">
+        <input type="hidden" name="parada_cargue_1_hora_fin" value="">
+        <input type="hidden" name="parada_cargue_1_motivo" value="">
+        <input type="hidden" name="parada_cargue_1_otro_motivo" value="">
+
+        <!-- Vehículo 2 -->
+        <input type="hidden" name="vehiculo_2_muelle" value="">
+        <input type="hidden" name="vehiculo_2_placa" value="">
+        <input type="hidden" name="vehiculo_2_tipo_vehi" value="">
+        <input type="hidden" name="vehiculo_2_destino" value="">
+        <input type="hidden" name="vehiculo_2_origen" value="">
+        <input type="hidden" name="vehiculo_2_personas" value="">
+        <input type="hidden" name="vehiculo_2_cajas_movidas" value="">
+        <input type="hidden" name="vehiculo_2_foto_url" value="">
+        <input type="hidden" name="parada_cargue_2_hora_inicio" value="">
+        <input type="hidden" name="parada_cargue_2_hora_fin" value="">
+        <input type="hidden" name="parada_cargue_2_motivo" value="">
+        <input type="hidden" name="parada_cargue_2_otro_motivo" value="">
+
+        <!-- Vehículo 3 -->
+        <input type="hidden" name="vehiculo_3_muelle" value="">
+        <input type="hidden" name="vehiculo_3_placa" value="">
+        <input type="hidden" name="vehiculo_3_tipo_vehi" value="">
+        <input type="hidden" name="vehiculo_3_destino" value="">
+        <input type="hidden" name="vehiculo_3_origen" value="">
+        <input type="hidden" name="vehiculo_3_personas" value="">
+        <input type="hidden" name="vehiculo_3_cajas_movidas" value="">
+        <input type="hidden" name="vehiculo_3_foto_url" value="">
+        <input type="hidden" name="parada_cargue_3_hora_inicio" value="">
+        <input type="hidden" name="parada_cargue_3_hora_fin" value="">
+        <input type="hidden" name="parada_cargue_3_motivo" value="">
+        <input type="hidden" name="parada_cargue_3_otro_motivo" value="">
+
+        <!-- Vehículo 4 -->
+        <input type="hidden" name="vehiculo_4_muelle" value="">
+        <input type="hidden" name="vehiculo_4_placa" value="">
+        <input type="hidden" name="vehiculo_4_tipo_vehi" value="">
+        <input type="hidden" name="vehiculo_4_destino" value="">
+        <input type="hidden" name="vehiculo_4_origen" value="">
+        <input type="hidden" name="vehiculo_4_personas" value="">
+        <input type="hidden" name="vehiculo_4_cajas_movidas" value="">
+        <input type="hidden" name="vehiculo_4_foto_url" value="">
+        <input type="hidden" name="parada_cargue_4_hora_inicio" value="">
+        <input type="hidden" name="parada_cargue_4_hora_fin" value="">
+        <input type="hidden" name="parada_cargue_4_motivo" value="">
+        <input type="hidden" name="parada_cargue_4_otro_motivo" value="">
+
+        <!-- Paradas de operación -->
+        <input type="hidden" name="parada_operacion_0_hora_inicio" value="">
+        <input type="hidden" name="parada_operacion_0_hora_fin" value="">
+        <input type="hidden" name="parada_operacion_0_motivo" value="">
+        <input type="hidden" name="parada_operacion_0_otro_motivo" value="">
+
+        <input type="hidden" name="parada_operacion_1_hora_inicio" value="">
+        <input type="hidden" name="parada_operacion_1_hora_fin" value="">
+        <input type="hidden" name="parada_operacion_1_motivo" value="">
+        <input type="hidden" name="parada_operacion_1_otro_motivo" value="">
+
+        <input type="hidden" name="parada_operacion_2_hora_inicio" value="">
+        <input type="hidden" name="parada_operacion_2_hora_fin" value="">
+        <input type="hidden" name="parada_operacion_2_motivo" value="">
+        <input type="hidden" name="parada_operacion_2_otro_motivo" value="">
+
+        <input type="hidden" name="parada_operacion_3_hora_inicio" value="">
+        <input type="hidden" name="parada_operacion_3_hora_fin" value="">
+        <input type="hidden" name="parada_operacion_3_motivo" value="">
+        <input type="hidden" name="parada_operacion_3_otro_motivo" value="">
+
+        <input type="hidden" name="parada_operacion_4_hora_inicio" value="">
+        <input type="hidden" name="parada_operacion_4_hora_fin" value="">
+        <input type="hidden" name="parada_operacion_4_motivo" value="">
+        <input type="hidden" name="parada_operacion_4_otro_motivo" value="">
 
         <div style="display: flex; gap: 10px;">
             <button type="submit" style="flex: 3;">Enviar</button>
@@ -273,8 +367,8 @@
             const cont = document.getElementById('operacion-contenedor');
             const grupos = cont.querySelectorAll('.parada-group');
             grupos.forEach((grupo, idx) => {
-                const inicio = grupo.querySelector(`input[name="parada_inicio_operacion_${idx}"]`).value;
-                const fin = grupo.querySelector(`input[name="parada_fin_operacion_${idx}"]`).value;
+                const inicio = grupo.querySelector(`input[name="parada_operacion_${idx}_hora_inicio"]`).value;
+                const fin = grupo.querySelector(`input[name="parada_operacion_${idx}_hora_fin"]`).value;
                 if (inicio && fin) paradas.push({ inicio, fin, idx });
             });
             for (let i = 0; i < paradas.length; i++) {
@@ -340,33 +434,33 @@
                     <div class="time-row">
                         <div>
                             <label class="time-label">Hora Inicio (HH:MM):</label>
-                            <input type="tel" name="vehiculo_${vIndex}_inicio" class="time-input-masked" required
+                            <input type="tel" class="time-input-masked" required
                                 placeholder="HH:MM" maxlength="5" value="${datos.inicio || ''}"
                                 onblur="applyTimeMask(this, '${inicioId}');">
                             <span id="${inicioId}" class="time-display"></span>
                         </div>
                         <div>
                             <label class="time-label">Hora Final (HH:MM):</label>
-                            <input type="tel" name="vehiculo_${vIndex}_fin" class="time-input-masked" required
+                            <input type="tel" class="time-input-masked" required
                                 placeholder="HH:MM" maxlength="5" value="${datos.fin || ''}"
                                 onblur="applyTimeMask(this, '${finId}');">
                             <span id="${finId}" class="time-display"></span>
                         </div>
                     </div>
                     <label style="margin-top:5px;">Motivo:</label>
-                    <select id="${motivoSelectId}" name="vehiculo_${vIndex}_motivo" required onchange="guardarProgreso()">
+                    <select id="${motivoSelectId}" required onchange="guardarProgreso()">
                         <option value="">Seleccione</option>
                         <option value="cargue" ${datos.motivo === 'cargue' ? 'selected' : ''}>Cargue</option>
                         <option value="descargue" ${datos.motivo === 'descargue' ? 'selected' : ''}>Descargue</option>
                         <option value="otro" ${datos.motivo === 'otro' ? 'selected' : ''}>Otro</option>
                     </select>
-                    <input type="text" name="vehiculo_${vIndex}_otro_motivo" placeholder="Especifique otro motivo" class="otro-input" value="${datos.otro_motivo || ''}">
+                    <input type="text" placeholder="Especifique otro motivo" class="otro-input" value="${datos.otro_motivo || ''}">
                 </div>
 
                 <hr style="margin-top:25px; border-style:dashed;">
 
                 <label>Muelle:</label>
-                <select name="vehiculo_${vIndex}_muelle" required onchange="guardarProgreso()">
+                <select required onchange="guardarProgreso()">
                     <option value="">Seleccione</option>
                     <option value="3" ${datos.muelle === '3' ? 'selected' : ''}>3</option>
                     <option value="11" ${datos.muelle === '11' ? 'selected' : ''}>11</option>
@@ -379,15 +473,15 @@
                     <option value="20" ${datos.muelle === '20' ? 'selected' : ''}>20</option>
                     <option value="otro" ${datos.muelle === 'otro' ? 'selected' : ''}>Otro</option>
                 </select>
-                <input type="number" name="vehiculo_${vIndex}_otro_muelle_num" id="otro_muelle_${vIndex}" class="otro-input" placeholder="N° muelle" min="1" max="999" value="${datos.otro_muelle_num || ''}">
+                <input type="number" id="otro_muelle_${vIndex}" class="otro-input" placeholder="N° muelle" min="1" max="999" value="${datos.otro_muelle_num || ''}">
 
                 <label>Placa:</label>
-                <input type="text" name="vehiculo_${vIndex}_placa" required placeholder="Ej: ABC123, 123ABC o A12345" maxlength="6"
+                <input type="text" required placeholder="Ej: ABC123, 123ABC o A12345" maxlength="6"
                     value="${datos.placa || ''}"
                     oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0,6); guardarProgreso();">
 
                 <label>Tipo De Vehiculo:</label>
-                <select name="vehiculo_${vIndex}_tipo_vehi" required id="tipo_vehi_${vIndex}" onchange="guardarProgreso()">
+                <select required id="tipo_vehi_${vIndex}" onchange="guardarProgreso()">
                     <option value="">Seleccione</option>
                     <option value="Van extralargo" ${datos.tipo_vehi === 'Van extralargo' ? 'selected' : ''}>Van extralargo</option>
                     <option value="Camion sencillo furgonado" ${datos.tipo_vehi === 'Camion sencillo furgonado' ? 'selected' : ''}>Camión sencillo furgonado</option>
@@ -400,11 +494,11 @@
                     <option value="Camabaja estandar" ${datos.tipo_vehi === 'Camabaja estandar' ? 'selected' : ''}>Camabaja estandar</option>
                     <option value="otro" ${datos.tipo_vehi === 'otro' ? 'selected' : ''}>Otro</option>
                 </select>
-                <input type="text" name="vehiculo_${vIndex}_otro_tipo" id="otro_tipo_${vIndex}" class="otro-input" placeholder="Especifique tipo" value="${datos.otro_tipo || ''}">
+                <input type="text" id="otro_tipo_${vIndex}" class="otro-input" placeholder="Especifique tipo" value="${datos.otro_tipo || ''}">
 
                 <div class="form-group-custom" id="destino-group-${vIndex}" style="${(datos.motivo === 'cargue') ? 'display:block;' : 'display:none;'}">
                     <label style="margin-top:0;">Destino:</label>
-                    <select id="destino-select-${vIndex}" name="vehiculo_${vIndex}_destino" onchange="guardarProgreso()">
+                    <select id="destino-select-${vIndex}" onchange="guardarProgreso()">
                         <option value="">Seleccione Destino</option>
                         <option value="guarner_medellin" ${datos.destino === 'guarner_medellin' ? 'selected' : ''}>Guarne/Medellin</option>
                         <option value="cali" ${datos.destino === 'cali' ? 'selected' : ''}>Cali</option>
@@ -415,34 +509,34 @@
                         <option value="peru" ${datos.destino === 'peru' ? 'selected' : ''}>Perú</option>
                         <option value="otro" ${datos.destino === 'otro' ? 'selected' : ''}>Otro</option>
                     </select>
-                    <input type="text" name="vehiculo_${vIndex}_otro_destino" id="otro_destino_${vIndex}" class="otro-input" placeholder="Especifique otro destino" value="${datos.otro_destino || ''}">
+                    <input type="text" id="otro_destino_${vIndex}" class="otro-input" placeholder="Especifique otro destino" value="${datos.otro_destino || ''}">
                 </div>
 
                 <div class="form-group-custom" id="remitente-group-${vIndex}" style="${(datos.motivo === 'descargue') ? 'display:block;' : 'display:none;'}">
                     <label style="margin-top:0;">Origen / Remitente:</label>
-                    <input type="text" id="remitente-input-${vIndex}" name="vehiculo_${vIndex}_origen" placeholder="Ej: Zona Franca" value="${datos.origen || ''}" oninput="guardarProgreso()">
+                    <input type="text" id="remitente-input-${vIndex}" placeholder="Ej: Zona Franca" value="${datos.origen || ''}" oninput="guardarProgreso()">
                 </div>
 
                 <label>Total De Personas:</label>
-                <input type="number" name="vehiculo_${vIndex}_personas" min="1" required value="${datos.personas || ''}" oninput="guardarProgreso()">
+                <input type="number" min="1" required value="${datos.personas || ''}" oninput="guardarProgreso()">
 
                 <label>Cajas Movidas:</label>
-                <input type="number" name="vehiculo_${vIndex}_cajas" class="cajas-input-js" min="0" required 
+                <input type="number" class="cajas-input-js" min="0" required 
                     value="${datos.cajas || ''}"
                     oninput="actualizarTotalCajas(); guardarProgreso();">
 
                 <label>Justificación del retraso o incidencia:</label>
-                <select name="vehiculo_${vIndex}_justificacion" onchange="guardarProgreso()">
+                <select onchange="guardarProgreso()">
                     <option value="">Seleccione motivo</option>
                     <option value="faltante_producto" ${datos.justificacion === 'faltante_producto' ? 'selected' : ''}>Faltante de producto</option>
                     <option value="otro" ${datos.justificacion === 'otro' ? 'selected' : ''}>Otro</option>
                 </select>
-                <input type="text" name="vehiculo_${vIndex}_otro_justificacion" id="otro_justificacion_${vIndex}" class="otro-input" placeholder="Especifique la incidencia" value="${datos.otro_justificacion || ''}">
+                <input type="text" id="otro_justificacion_${vIndex}" class="otro-input" placeholder="Especifique la incidencia" value="${datos.otro_justificacion || ''}">
 
                 <label>Foto De vehiculo:</label>
-                <input type="file" name="vehiculo_${vIndex}_foto" id="${fotoInputId}" accept="image/*" capture="environment">
+                <input type="file" accept="image/*" capture="environment">
                 <div class="preview-foto" id="${previewFotoId}"></div>
-                <input type="hidden" name="vehiculo_${vIndex}_foto_url" id="foto_url_${vIndex}" value="${datos.foto_url || ''}">
+                <input type="hidden" value="${datos.foto_url || ''}">
 
                 <p style="font-size:0.85em; color:#6c757d; margin-top:5px;">
                     📸 <strong>La foto se sube automáticamente.</strong> No necesita hacer nada más.
@@ -451,6 +545,7 @@
             registro.innerHTML = html;
             contenedor.appendChild(registro);
 
+            // Re-aplicar visibilidad de campos "otro"
             if (datos.muelle === 'otro') document.getElementById(`otro_muelle_${vIndex}`).style.display = 'block';
             if (datos.tipo_vehi === 'otro') document.getElementById(`otro_tipo_${vIndex}`).style.display = 'block';
             if (datos.destino === 'otro') document.getElementById(`otro_destino_${vIndex}`).style.display = 'block';
@@ -503,21 +598,21 @@
                 <div class="time-row">
                     <div>
                         <label class="time-label">Hora Inicio (HH:MM):</label>
-                        <input type="tel" name="parada_inicio_operacion_${index}" class="time-input-masked" 
+                        <input type="tel" class="time-input-masked" 
                             placeholder="HH:MM" maxlength="5"
                             onblur="applyTimeMask(this, '${dInicio}')">
                         <span id="${dInicio}" class="time-display"></span>
                     </div>
                     <div>
                         <label class="time-label">Hora Final (HH:MM):</label>
-                        <input type="tel" name="parada_fin_operacion_${index}" class="time-input-masked" 
+                        <input type="tel" class="time-input-masked" 
                             placeholder="HH:MM" maxlength="5"
                             onblur="applyTimeMask(this, '${dFin}')">
                         <span id="${dFin}" class="time-display"></span>
                     </div>
                 </div>
                 <label style="margin-top:5px;">Motivo:</label>
-                <select name="parada_motivo_operacion_${index}" onchange="manejarOtroCampo(this); guardarProgreso();">
+                <select onchange="manejarOtroCampo(this); guardarProgreso();">
                     <option value="">Seleccione</option>
                     <option value="pausas_activas">Pausas Activas y/o Charla</option>
                     <option value="liberacion_calidad">Liberacion De Calidad</option>
@@ -527,7 +622,7 @@
                     <option value="danos_equipo">Daños (Electricos, montacargas, etc)</option>
                     <option value="otro">Otro</option>
                 </select>
-                <input type="text" name="parada_otro_motivo_operacion_${index}" placeholder="Especifique" class="otro-input" oninput="guardarProgreso()">
+                <input type="text" placeholder="Especifique" class="otro-input" oninput="guardarProgreso()">
             `;
             div.appendChild(botonEliminar);
             contenedor.appendChild(div);
@@ -564,8 +659,10 @@
                     if (data.success) {
                         const imageUrl = data.data.url;
                         const vIdx = nombrePersonalizado.split('.').pop().replace('vehiculo_', '');
-                        const urlInput = document.getElementById(`foto_url_${vIdx}`);
-                        if (urlInput) urlInput.value = imageUrl;
+                        const urlInputs = document.querySelectorAll(`input[type="hidden"]`);
+                        // Actualizamos el campo oculto correspondiente
+                        const hiddenInput = document.querySelector(`input[name="vehiculo_${vIdx}_foto_url"]`);
+                        if (hiddenInput) hiddenInput.value = imageUrl;
                         alert(`✅ Foto subida: ${nombrePersonalizado}`);
                         guardarProgreso();
                     } else {
@@ -700,7 +797,7 @@
             }
         }
 
-        // ✅ NUEVA FUNCIÓN MODIFICADA PARA ENVIAR A NETLIFY
+        // ✅ FUNCIÓN DE ENVÍO ACTUALIZADA: llena campos ocultos predefinidos
         function enviarFormulario(event) {
             event.preventDefault();
             const camposObligatorios = [
@@ -721,48 +818,50 @@
             }
             if (!validarSolapamientoVehiculos() || !validarSolapamientoParadas()) return;
 
-            // ✅ Serializar datos dinámicos a los campos ocultos
-            const vehiculosForm = [];
-            for (let i = 0; i < vehiculosData.length; i++) {
-                const data = {
-                    inicio: vehiculosData[i].inicio || '',
-                    fin: vehiculosData[i].fin || '',
-                    motivo: vehiculosData[i].motivo || '',
-                    otro_motivo: vehiculosData[i].otro_motivo || '',
-                    muelle: vehiculosData[i].muelle || '',
-                    otro_muelle_num: vehiculosData[i].otro_muelle_num || '',
-                    placa: vehiculosData[i].placa || '',
-                    tipo_vehi: vehiculosData[i].tipo_vehi || '',
-                    otro_tipo: vehiculosData[i].otro_tipo || '',
-                    destino: vehiculosData[i].destino || '',
-                    otro_destino: vehiculosData[i].otro_destino || '',
-                    origen: vehiculosData[i].origen || '',
-                    personas: vehiculosData[i].personas || '',
-                    cajas: vehiculosData[i].cajas || '',
-                    justificacion: vehiculosData[i].justificacion || '',
-                    otro_justificacion: vehiculosData[i].otro_justificacion || '',
-                    foto_url: vehiculosData[i].foto_url || ''
-                };
-                vehiculosForm.push(data);
+            // ✅ Llenar campos ocultos predefinidos (hasta 5 vehículos)
+            for (let i = 0; i < Math.min(5, vehiculosData.length); i++) {
+                const data = vehiculosData[i];
+                document.querySelector(`input[name="vehiculo_${i}_muelle"]`).value = data.muelle || '';
+                document.querySelector(`input[name="vehiculo_${i}_placa"]`).value = data.placa || '';
+                document.querySelector(`input[name="vehiculo_${i}_tipo_vehi"]`).value = data.tipo_vehi || '';
+                document.querySelector(`input[name="vehiculo_${i}_destino"]`).value = data.destino || '';
+                document.querySelector(`input[name="vehiculo_${i}_origen"]`).value = data.origen || '';
+                document.querySelector(`input[name="vehiculo_${i}_personas"]`).value = data.personas || '';
+                document.querySelector(`input[name="vehiculo_${i}_cajas_movidas"]`).value = data.cajas || '';
+                document.querySelector(`input[name="vehiculo_${i}_foto_url"]`).value = data.foto_url || '';
+                document.querySelector(`input[name="parada_cargue_${i}_hora_inicio"]`).value = data.inicio || '';
+                document.querySelector(`input[name="parada_cargue_${i}_hora_fin"]`).value = data.fin || '';
+                document.querySelector(`input[name="parada_cargue_${i}_motivo"]`).value = data.motivo || '';
+                document.querySelector(`input[name="parada_cargue_${i}_otro_motivo"]`).value = data.otro_motivo || '';
             }
 
-            const paradasForm = [];
-            const cont = document.getElementById('operacion-contenedor');
-            const grupos = cont.querySelectorAll('.parada-group');
-            grupos.forEach((grupo, idx) => {
-                const inicio = grupo.querySelector(`input[name="parada_inicio_operacion_${idx}"]`).value || '';
-                const fin = grupo.querySelector(`input[name="parada_fin_operacion_${idx}"]`).value || '';
-                const motivo = grupo.querySelector(`select[name="parada_motivo_operacion_${idx}"]`).value || '';
-                const otro_motivo = grupo.querySelector(`input[name="parada_otro_motivo_operacion_${idx}"]`).value || '';
-                paradasForm.push({ inicio, fin, motivo, otro_motivo });
-            });
+            // ✅ Llenar paradas de operación
+            const contenedorOperacion = document.getElementById('operacion-contenedor');
+            const grupos = contenedorOperacion.querySelectorAll('.parada-group');
+            for (let i = 0; i < Math.min(5, grupos.length); i++) {
+                const grupo = grupos[i];
+                const inputs = grupo.querySelectorAll('input, select');
+                let inicio = '', fin = '', motivo = '', otro_motivo = '';
+                inputs.forEach(el => {
+                    if (el.type === 'tel' && el.placeholder === 'HH:MM') {
+                        if (!inicio) inicio = el.value;
+                        else fin = el.value;
+                    } else if (el.tagName === 'SELECT') {
+                        motivo = el.value;
+                    } else if (el.type === 'text' && el.classList.contains('otro-input') && el.style.display !== 'none') {
+                        otro_motivo = el.value;
+                    }
+                });
 
-            document.getElementById('datos_vehiculos').value = JSON.stringify(vehiculosForm);
-            document.getElementById('datos_paradas_operacion').value = JSON.stringify(paradasForm);
+                document.querySelector(`input[name="parada_operacion_${i}_hora_inicio"]`).value = inicio;
+                document.querySelector(`input[name="parada_operacion_${i}_hora_fin"]`).value = fin;
+                document.querySelector(`input[name="parada_operacion_${i}_motivo"]`).value = motivo;
+                document.querySelector(`input[name="parada_operacion_${i}_otro_motivo"]`).value = otro_motivo;
+            }
 
             convertirATextoMayusculas();
             localStorage.removeItem('pepsico_data');
-            event.target.submit(); // ✅ Netlify recibirá los datos
+            event.target.submit(); // ✅ Netlify recibirá datos limpios
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -777,23 +876,23 @@
                 vehiculosData = [];
                 for(let i=0; i<nVehiculos; i++) {
                     vehiculosData.push({
-                        inicio: data[`vehiculo_${i}_inicio`],
-                        fin: data[`vehiculo_${i}_fin`],
-                        motivo: data[`vehiculo_${i}_motivo`],
-                        otro_motivo: data[`vehiculo_${i}_otro_motivo`] || '',
-                        muelle: data[`vehiculo_${i}_muelle`],
+                        inicio: data[`parada_cargue_${i}_hora_inicio`] || '',
+                        fin: data[`parada_cargue_${i}_hora_fin`] || '',
+                        motivo: data[`parada_cargue_${i}_motivo`] || '',
+                        otro_motivo: data[`parada_cargue_${i}_otro_motivo`] || '',
+                        muelle: data[`vehiculo_${i}_muelle`] || '',
                         otro_muelle_num: data[`vehiculo_${i}_otro_muelle_num`] || '',
-                        placa: data[`vehiculo_${i}_placa`],
-                        tipo_vehi: data[`vehiculo_${i}_tipo_vehi`],
+                        placa: data[`vehiculo_${i}_placa`] || '',
+                        tipo_vehi: data[`vehiculo_${i}_tipo_vehi`] || '',
                         otro_tipo: data[`vehiculo_${i}_otro_tipo`] || '',
                         destino: data[`vehiculo_${i}_destino`] || '',
                         otro_destino: data[`vehiculo_${i}_otro_destino`] || '',
                         origen: data[`vehiculo_${i}_origen`] || '',
-                        personas: data[`vehiculo_${i}_personas`],
-                        cajas: data[`vehiculo_${i}_cajas`],
-                        justificacion: data[`vehiculo_${i}_justificacion`],
+                        personas: data[`vehiculo_${i}_personas`] || '',
+                        cajas: data[`vehiculo_${i}_cajas_movidas`] || '',
+                        justificacion: data[`vehiculo_${i}_justificacion`] || '',
                         otro_justificacion: data[`vehiculo_${i}_otro_justificacion`] || '',
-                        foto_url: data[`vehiculo_${i}_foto_url`]
+                        foto_url: data[`vehiculo_${i}_foto_url`] || ''
                     });
                     crearVehiculoHTML(document.getElementById('vehiculos-contenedor'), i, vehiculosData[i]);
                 }
