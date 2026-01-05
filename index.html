@@ -216,7 +216,7 @@
         <input type="number" name="cajas_totales" id="cajas_totales" min="0" required
             placeholder="Cantidad total de cajas movidas" oninput="actualizarTotalCajas()">
 
-        <!-- ✅ CAMPOS OCULTOS PREDEFINIDOS -->
+        <!-- ✅ CAMPOS OCULTOS PREDEFINIDOS (Netlify los reconoce) -->
         <!-- Vehículo 0 -->
         <input type="hidden" name="vehiculo_0_muelle" value="">
         <input type="hidden" name="vehiculo_0_placa" value="">
@@ -367,8 +367,9 @@
             const cont = document.getElementById('operacion-contenedor');
             const grupos = cont.querySelectorAll('.parada-group');
             grupos.forEach((grupo, idx) => {
-                const inicio = grupo.querySelector(`input[name="parada_operacion_${idx}_hora_inicio"]`).value;
-                const fin = grupo.querySelector(`input[name="parada_operacion_${idx}_hora_fin"]`).value;
+                const telInputs = grupo.querySelectorAll('input[type="tel"]');
+                const inicio = telInputs[0]?.value || '';
+                const fin = telInputs[1]?.value || '';
                 if (inicio && fin) paradas.push({ inicio, fin, idx });
             });
             for (let i = 0; i < paradas.length; i++) {
@@ -437,7 +438,7 @@
                 const yyyy = hoy.getFullYear();
                 fechaFormateada = `${dd}.${mm}.${yyyy}`;
             }
-            const tipoVehiculo = document.getElementById(`tipo_vehi_${vIndex}`)?.value?.replace(/ /g, '_') || 'vehiculo';
+            const tipoVehiculo = datos.tipo_vehi?.replace(/ /g, '_') || 'vehiculo';
             const nombrePersonalizado = `${fechaFormateada}.${tipoVehiculo}.vehiculo_${vIndex}`;
 
             const html = `
@@ -561,7 +562,7 @@
             registro.innerHTML = html;
             contenedor.appendChild(registro);
 
-            // Re-aplicar visibilidad de campos "otro"
+            // Mostrar campos "otro" si es necesario
             if (datos.muelle === 'otro') document.getElementById(`otro_muelle_${vIndex}`).style.display = 'block';
             if (datos.tipo_vehi === 'otro') document.getElementById(`otro_tipo_${vIndex}`).style.display = 'block';
             if (datos.destino === 'otro') document.getElementById(`otro_destino_${vIndex}`).style.display = 'block';
@@ -575,10 +576,10 @@
             });
             alternarDestinoRemitente(motivoSelect, vIndex);
             
-            // ✅ Asociar preview y upload
+            // ✅ Asociar foto
             setupFotoPreview(fotoInputId, previewFotoId, nombrePersonalizado);
 
-            // ✅ Mostrar la foto si existe
+            // ✅ Mostrar previsualización si ya hay foto
             if (datos.foto_url) {
                 const preview = document.getElementById(previewFotoId);
                 if (preview) preview.innerHTML = `<img src="${datos.foto_url}" alt="Vista previa">`;
@@ -605,8 +606,6 @@
                 }
                 guardarProgreso();
             };
-            const dInicio = `operacion-inicio-${index}`;
-            const dFin = `operacion-fin-${index}`;
 
             div.innerHTML = `
                 <p style="font-weight:bold; margin-top:0; color:#555;">🛑 Parada #<span class="numero-parada">${index + 1}</span> (Operación)</p>
@@ -615,15 +614,15 @@
                         <label class="time-label">Hora Inicio (HH:MM):</label>
                         <input type="tel" class="time-input-masked" 
                             placeholder="HH:MM" maxlength="5"
-                            onblur="applyTimeMask(this, '${dInicio}')">
-                        <span id="${dInicio}" class="time-display"></span>
+                            onblur="applyTimeMask(this);">
+                        <span class="time-display"></span>
                     </div>
                     <div>
                         <label class="time-label">Hora Final (HH:MM):</label>
                         <input type="tel" class="time-input-masked" 
                             placeholder="HH:MM" maxlength="5"
-                            onblur="applyTimeMask(this, '${dFin}')">
-                        <span id="${dFin}" class="time-display"></span>
+                            onblur="applyTimeMask(this);">
+                        <span class="time-display"></span>
                     </div>
                 </div>
                 <label style="margin-top:5px;">Motivo:</label>
@@ -644,7 +643,7 @@
             guardarProgreso();
         }
 
-        // ✅ FUNCIÓN CORREGIDA: guarda foto_url en vehiculosData
+        // ✅ Función corregida para subir foto y guardar en vehiculosData
         function setupFotoPreview(inputId, previewId, nombrePersonalizado) {
             const input = document.getElementById(inputId);
             const preview = document.getElementById(previewId);
@@ -676,12 +675,10 @@
                         const imageUrl = data.data.url;
                         const vIdx = parseInt(nombrePersonalizado.split('.').pop().replace('vehiculo_', ''), 10);
                         
-                        // ✅ Guardar en vehiculosData
                         if (vehiculosData[vIdx]) {
                             vehiculosData[vIdx].foto_url = imageUrl;
                         }
                         
-                        // ✅ Actualizar campo oculto
                         const hiddenInput = document.querySelector(`input[name="vehiculo_${vIdx}_foto_url"]`);
                         if (hiddenInput) hiddenInput.value = imageUrl;
 
@@ -819,7 +816,7 @@
             }
         }
 
-        // ✅ FUNCIÓN DE ENVÍO ACTUALIZADA
+        // ✅ FUNCIÓN DE ENVÍO CORREGIDA Y ROBUSTA
         function enviarFormulario(event) {
             event.preventDefault();
             const camposObligatorios = [
@@ -840,52 +837,78 @@
             }
             if (!validarSolapamientoVehiculos() || !validarSolapamientoParadas()) return;
 
-            // ✅ Llenar campos ocultos predefinidos
-            for (let i = 0; i < Math.min(5, vehiculosData.length); i++) {
-                const data = vehiculosData[i];
-                document.querySelector(`input[name="vehiculo_${i}_muelle"]`).value = data.muelle || '';
-                document.querySelector(`input[name="vehiculo_${i}_placa"]`).value = data.placa || '';
-                document.querySelector(`input[name="vehiculo_${i}_tipo_vehi"]`).value = data.tipo_vehi || '';
-                document.querySelector(`input[name="vehiculo_${i}_destino"]`).value = data.destino || '';
-                document.querySelector(`input[name="vehiculo_${i}_origen"]`).value = data.origen || '';
-                document.querySelector(`input[name="vehiculo_${i}_personas"]`).value = data.personas || '';
-                document.querySelector(`input[name="vehiculo_${i}_cajas_movidas"]`).value = data.cajas || '';
-                document.querySelector(`input[name="vehiculo_${i}_foto_url"]`).value = data.foto_url || '';
-                document.querySelector(`input[name="parada_cargue_${i}_hora_inicio"]`).value = data.inicio || '';
-                document.querySelector(`input[name="parada_cargue_${i}_hora_fin"]`).value = data.fin || '';
-                document.querySelector(`input[name="parada_cargue_${i}_motivo"]`).value = data.motivo || '';
-                document.querySelector(`input[name="parada_cargue_${i}_otro_motivo"]`).value = data.otro_motivo || '';
-            }
+            // ✅ Llenar campos ocultos de vehículos
+            for (let i = 0; i < 5; i++) {
+                const prefixV = `vehiculo_${i}_`;
+                const prefixP = `parada_cargue_${i}_`;
+                const mapeo = {
+                    muelle: 'muelle',
+                    placa: 'placa',
+                    tipo_vehi: 'tipo_vehi',
+                    destino: 'destino',
+                    origen: 'origen',
+                    personas: 'personas',
+                    cajas_movidas: 'cajas',
+                    foto_url: 'foto_url',
+                    hora_inicio: 'inicio',
+                    hora_fin: 'fin',
+                    motivo: 'motivo',
+                    otro_motivo: 'otro_motivo'
+                };
 
-            // ✅ Llenar paradas de operación
-            const contenedorOperacion = document.getElementById('operacion-contenedor');
-            const grupos = contenedorOperacion.querySelectorAll('.parada-group');
-            for (let i = 0; i < Math.min(5, grupos.length); i++) {
-                const grupo = grupos[i];
-                const inputs = grupo.querySelectorAll('input, select');
-                let inicio = '', fin = '', motivo = '', otro_motivo = '';
-                inputs.forEach(el => {
-                    if (el.type === 'tel' && el.placeholder === 'HH:MM') {
-                        if (!inicio) inicio = el.value;
-                        else fin = el.value;
-                    } else if (el.tagName === 'SELECT') {
-                        motivo = el.value;
-                    } else if (el.type === 'text' && el.classList.contains('otro-input') && el.style.display !== 'none') {
-                        otro_motivo = el.value;
+                Object.keys(mapeo).forEach(campoNetlify => {
+                    const campoData = mapeo[campoNetlify];
+                    const input = document.querySelector(`input[name="${prefixV}${campoNetlify}"]`);
+                    if (input) {
+                        input.value = (vehiculosData[i] && vehiculosData[i][campoData]) || '';
                     }
                 });
 
-                document.querySelector(`input[name="parada_operacion_${i}_hora_inicio"]`).value = inicio;
-                document.querySelector(`input[name="parada_operacion_${i}_hora_fin"]`).value = fin;
-                document.querySelector(`input[name="parada_operacion_${i}_motivo"]`).value = motivo;
-                document.querySelector(`input[name="parada_operacion_${i}_otro_motivo"]`).value = otro_motivo;
+                // Campos de parada de cargue
+                ['hora_inicio', 'hora_fin', 'motivo', 'otro_motivo'].forEach(campo => {
+                    const input = document.querySelector(`input[name="${prefixP}${campo}"]`);
+                    if (input) {
+                        const campoData = campo === 'hora_inicio' ? 'inicio' : 
+                                         campo === 'hora_fin' ? 'fin' : 
+                                         campo === 'motivo' ? 'motivo' : 'otro_motivo';
+                        input.value = (vehiculosData[i] && vehiculosData[i][campoData]) || '';
+                    }
+                });
+            }
+
+            // ✅ Llenar paradas de operación
+            const grupos = document.querySelectorAll('.parada-group');
+            for (let i = 0; i < 5; i++) {
+                const prefix = `parada_operacion_${i}_`;
+                const grupo = grupos[i];
+
+                if (grupo) {
+                    const telInputs = grupo.querySelectorAll('input[type="tel"]');
+                    const select = grupo.querySelector('select');
+                    const otroInput = grupo.querySelector('.otro-input');
+
+                    document.querySelector(`input[name="${prefix}hora_inicio"]`).value = telInputs[0]?.value || '';
+                    document.querySelector(`input[name="${prefix}hora_fin"]`).value = telInputs[1]?.value || '';
+                    document.querySelector(`input[name="${prefix}motivo"]`).value = select?.value || '';
+                    document.querySelector(`input[name="${prefix}otro_motivo"]`).value = otroInput?.value || '';
+                } else {
+                    // Limpiar si no hay grupo
+                    ['hora_inicio', 'hora_fin', 'motivo', 'otro_motivo'].forEach(campo => {
+                        const input = document.querySelector(`input[name="${prefix}${campo}"]`);
+                        if (input) input.value = '';
+                    });
+                }
             }
 
             convertirATextoMayusculas();
             localStorage.removeItem('pepsico_data');
+
+            // ✅ Mensaje de éxito y envío
+            alert('✅ ¡Formulario enviado correctamente!');
             event.target.submit();
         }
 
+        // ✅ CARGA INICIAL CORREGIDA
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.querySelector('form');
             const savedData = localStorage.getItem('pepsico_data');
@@ -893,10 +916,17 @@
             if (savedData) {
                 const data = JSON.parse(savedData);
                 
+                // Restaurar campos generales
+                ['lugar', 'lider', 'coordinador', 'lider_pepsico', 'fecha', 'turno', 'total_personas', 'cajas_totales'].forEach(key => {
+                    const el = document.getElementById(key);
+                    if (el && data[key]) el.value = data[key];
+                });
+
+                // Restaurar vehículos
                 const nVehiculos = data._numVehiculos || 1;
                 document.getElementById('vehiculos-contenedor').innerHTML = '';
                 vehiculosData = [];
-                for(let i=0; i<nVehiculos; i++) {
+                for(let i = 0; i < nVehiculos; i++) {
                     const dataVehiculo = {
                         inicio: data[`parada_cargue_${i}_hora_inicio`] || '',
                         fin: data[`parada_cargue_${i}_hora_fin`] || '',
@@ -920,37 +950,34 @@
                     crearVehiculoHTML(document.getElementById('vehiculos-contenedor'), i, dataVehiculo);
                 }
 
+                // Restaurar paradas de operación
                 const nParadas = data._numParadas || 0;
                 document.getElementById('operacion-contenedor').innerHTML = '';
-                for(let i=0; i<nParadas; i++) {
+                for(let i = 0; i < nParadas; i++) {
                     agregarCampoParada('operacion');
-                    // ✅ Rellenar paradas
                     const grupo = document.querySelectorAll('.parada-group')[i];
                     if (grupo) {
-                        const inicioInput = grupo.querySelector('input[type="tel"]:nth-of-type(1)');
-                        const finInput = grupo.querySelector('input[type="tel"]:nth-of-type(2)');
-                        const motivoSelect = grupo.querySelector('select');
-                        const otroMotivoInput = grupo.querySelector('input[type="text"]');
+                        const telInputs = grupo.querySelectorAll('input[type="tel"]');
+                        const select = grupo.querySelector('select');
+                        const otroInput = grupo.querySelector('.otro-input');
 
-                        if (inicioInput) inicioInput.value = data[`parada_operacion_${i}_hora_inicio`] || '';
-                        if (finInput) finInput.value = data[`parada_operacion_${i}_hora_fin`] || '';
-                        if (motivoSelect) motivoSelect.value = data[`parada_operacion_${i}_motivo`] || '';
-                        if (otroMotivoInput) otroMotivoInput.value = data[`parada_operacion_${i}_otro_motivo`] || '';
-                        if (motivoSelect && motivoSelect.value === 'otro' && otroMotivoInput) {
-                            otroMotivoInput.style.display = 'block';
+                        if (telInputs[0]) telInputs[0].value = data[`parada_operacion_${i}_hora_inicio`] || '';
+                        if (telInputs[1]) telInputs[1].value = data[`parada_operacion_${i}_hora_fin`] || '';
+                        if (select) {
+                            select.value = data[`parada_operacion_${i}_motivo`] || '';
+                            if (select.value === 'otro' && otroInput) {
+                                otroInput.style.display = 'block';
+                                otroInput.value = data[`parada_operacion_${i}_otro_motivo`] || '';
+                            }
                         }
                     }
                 }
 
-                // Rellenar campos generales
-                Object.keys(data).forEach(key => {
-                    const el = form.elements[key];
-                    if (el && !key.startsWith('_') && !key.startsWith('vehiculo_') && !key.startsWith('parada_')) {
-                        el.value = data[key];
-                        if (el.classList.contains('time-input-masked')) {
-                            const spanId = el.nextElementSibling?.id;
-                            if(spanId) applyTimeMask(el, spanId);
-                        }
+                // Aplicar máscaras
+                document.querySelectorAll('.time-input-masked').forEach(input => {
+                    const span = input.nextElementSibling;
+                    if (span && span.classList.contains('time-display')) {
+                        applyTimeMask(input, span.id);
                     }
                 });
             } else {
