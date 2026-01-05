@@ -215,7 +215,6 @@ button[type="submit"]:hover {
 <script>
 let vehiculosData = [];
 
-// === FUNCIONES AUXILIARES ===
 function horaAMinutos(horaStr) {
   if (!horaStr || !horaStr.includes(':')) return null;
   const [h, m] = horaStr.split(':').map(Number);
@@ -231,7 +230,6 @@ function rangosSeSolapan(inicio1, fin1, inicio2, fin2) {
   return i1 < f2 && i2 < f1;
 }
 
-// === VALIDACIONES ===
 function validarSolapamientoVehiculos() {
   const agrupados = {};
   for (let idx = 0; idx < vehiculosData.length; idx++) {
@@ -275,34 +273,21 @@ function validarSolapamientoParadas() {
   return true;
 }
 
-// === MANEJO DE "OTRO" ===
-function manejarOtroCampo(select) {
-  const otro = select.nextElementSibling;
-  if (!otro || !otro.classList.contains('otro-input')) return;
-  if (select.value === 'otro') {
-    otro.style.display = 'block';
-    otro.required = true;
-  } else {
-    otro.style.display = 'none';
-    otro.required = false;
-    otro.value = '';
-  }
-  guardarProgreso();
-}
-
-// === VEHÍCULOS ===
 function eliminarRegistroVehiculo(index) {
   if (vehiculosData.length <= 1) {
     alert("Debe haber al menos un vehículo.");
     return;
   }
-  // Sincronizamos datos del DOM antes de eliminar
+
+  // Sincronizar antes de eliminar
   sincronizarVehiculosDesdeDOM();
+
   vehiculosData.splice(index, 1);
   reindexarVehiculos();
   actualizarTotalCajas();
   guardarProgreso();
 }
+
 function reindexarVehiculos() {
   const contenedor = document.getElementById('vehiculos-contenedor');
   contenedor.innerHTML = '';
@@ -310,6 +295,7 @@ function reindexarVehiculos() {
     crearVehiculoHTML(contenedor, i, vehiculosData[i]);
   }
 }
+
 function agregarRegistroVehiculo() {
   const vIndex = vehiculosData.length;
   vehiculosData.push({});
@@ -319,15 +305,13 @@ function agregarRegistroVehiculo() {
   guardarProgreso();
 }
 
-// === SINCRONIZACIÓN DOM → JS ===
 function sincronizarVehiculosDesdeDOM() {
   const contenedor = document.getElementById('vehiculos-contenedor');
   const registros = contenedor.querySelectorAll('.registro-vehiculo');
   for (let i = 0; i < registros.length; i++) {
     const reg = registros[i];
     if (vehiculosData[i] === undefined) vehiculosData[i] = {};
-    const getVal = (sel) => sel ? sel.value || '' : '';
-    const getValue = (name) => {
+    const getValue = name => {
       const el = reg.querySelector(`[name="${name}"]`);
       return el ? el.value || '' : '';
     };
@@ -353,18 +337,50 @@ function sincronizarVehiculosDesdeDOM() {
   }
 }
 
-// === CREAR VEHÍCULO ===
+function manejarOtroCampo(select) {
+  const otro = select.nextElementSibling;
+  if (!otro || !otro.classList.contains('otro-input')) return;
+  if (select.value === 'otro') {
+    otro.style.display = 'block';
+    otro.required = true;
+  } else {
+    otro.style.display = 'none';
+    otro.required = false;
+    otro.value = '';
+  }
+  guardarProgreso();
+}
+
+function alternarDestinoRemitente(selectMotivo, vIndex) {
+  const motivo = selectMotivo.value;
+  const destinoGroup = document.getElementById(`destino-group-${vIndex}`);
+  const remitenteGroup = document.getElementById(`remitente-group-${vIndex}`);
+  if (destinoGroup) destinoGroup.style.display = motivo === 'cargue' ? 'block' : 'none';
+  if (remitenteGroup) remitenteGroup.style.display = motivo === 'descargue' ? 'block' : 'none';
+  const destinoSelect = document.getElementById(`destino-select-${vIndex}`);
+  const remitenteInput = document.getElementById(`remitente-input-${vIndex}`);
+  if (motivo === 'cargue' && destinoSelect) {
+    destinoSelect.setAttribute('required', 'required');
+  } else if (remitenteInput) {
+    remitenteInput.required = motivo === 'descargue';
+  }
+}
+
 function crearVehiculoHTML(contenedor, vIndex, datos = {}) {
   const inicioId = `cargue-inicio-${vIndex}`;
   const finId = `cargue-fin-${vIndex}`;
   const fotoInputId = `foto_vehiculo_${vIndex}`;
   const previewFotoId = `preview_foto_${vIndex}`;
   const motivoSelectId = `motivo-cargue-descargue-${vIndex}`;
+
   const registro = document.createElement('div');
   registro.className = 'registro-vehiculo';
   registro.dataset.index = vIndex;
+
   const html = `
-    <button type="button" class="btn-eliminar-registro" onclick="eliminarRegistroVehiculo(${vIndex})">Eliminar Vehículo #${vIndex + 1}</button>
+    <button type="button" class="btn-eliminar-registro" onclick="eliminarRegistroVehiculo(${vIndex})">
+      Eliminar Vehículo #${vIndex + 1}
+    </button>
     <hr style="margin-top:25px; border-style:dashed;">
     <h4 style="text-align:center; color:#C76E00;">VEHÍCULO #${vIndex + 1}</h4>
     <h5 style="text-align:center; color:#C76E00;">PARADA DE CARGUE/DESCARGUE</h5>
@@ -470,11 +486,18 @@ function crearVehiculoHTML(contenedor, vIndex, datos = {}) {
       📸 <strong>La foto se sube automáticamente.</strong> No necesita hacer nada más.
     </p>
   `;
+
   registro.innerHTML = html;
   contenedor.appendChild(registro);
 
-  // Activar campos "Otro" si el valor es "otro"
+  // Activar listeners y mostrar campos "Otro"
   const motivoSelect = document.getElementById(motivoSelectId);
+  motivoSelect.addEventListener('change', () => {
+    alternarDestinoRemitente(motivoSelect, vIndex);
+    manejarOtroCampo(motivoSelect);
+    guardarProgreso();
+  });
+
   const selects = registro.querySelectorAll('select');
   selects.forEach(sel => {
     const otro = sel.nextElementSibling;
@@ -486,24 +509,25 @@ function crearVehiculoHTML(contenedor, vIndex, datos = {}) {
 
   alternarDestinoRemitente(motivoSelect, vIndex);
 
-  const fechaInput = document.getElementById('fecha').value;
-  let fechaFormateada = '01.01.1970';
-  if (fechaInput) {
+  // Nombre de foto se generará al subir, usando la fecha ACTUAL del formulario
+  document.getElementById(fotoInputId).addEventListener('change', function() {
+    let fechaInput = document.getElementById('fecha').value;
+    if (!fechaInput) fechaInput = new Date().toISOString().split('T')[0];
     const [yyyy, mm, dd] = fechaInput.split('-');
-    fechaFormateada = `${dd}.${mm}.${yyyy}`;
-  }
-  const tipoVehiculo = (datos.tipo_vehi || 'vehiculo').replace(/ /g, '_');
-  const nombrePersonalizado = `${fechaFormateada}.${tipoVehiculo}.vehiculo_${vIndex}`;
-  setupFotoPreview(fotoInputId, previewFotoId, nombrePersonalizado);
+    const fechaFormateada = `${dd}.${mm}.${yyyy}`;
+    const tipoVehiculo = (datos.tipo_vehi || 'vehiculo').replace(/ /g, '_');
+    const nombrePersonalizado = `${fechaFormateada}.${tipoVehiculo}.vehiculo_${vIndex}`;
+    setupFotoPreview(fotoInputId, previewFotoId, nombrePersonalizado);
+  });
 }
 
-// === PARADAS DE OPERACIÓN ===
 function agregarCampoParada(tipo) {
   const contenedor = document.getElementById('operacion-contenedor');
   const index = contenedor.children.length;
   const div = document.createElement('div');
   div.className = 'parada-group';
   div.dataset.index = index;
+
   const botonEliminar = document.createElement('button');
   botonEliminar.type = 'button';
   botonEliminar.className = 'btn-eliminar';
@@ -517,6 +541,7 @@ function agregarCampoParada(tipo) {
     }
     guardarProgreso();
   };
+
   const dInicio = `operacion-inicio-${index}`;
   const dFin = `operacion-fin-${index}`;
   div.innerHTML = `
@@ -553,59 +578,59 @@ function agregarCampoParada(tipo) {
   div.appendChild(botonEliminar);
   contenedor.appendChild(div);
 
-  // Activar "Otro" en paradas
   const motivoSelect = div.querySelector(`select[name="parada_motivo_operacion_${index}"]`);
-  const otroInput = div.querySelector(`.otro-input`);
-  if (motivoSelect && otroInput) {
+  if (motivoSelect) {
     motivoSelect.addEventListener('change', () => manejarOtroCampo(motivoSelect));
-    // Si se restaura con valor "otro", mostrar
-    if (motivoSelect.value === 'otro') otroInput.style.display = 'block';
+    if (motivoSelect.value === 'otro') {
+      const otroInput = div.querySelector('.otro-input');
+      if (otroInput) otroInput.style.display = 'block';
+    }
   }
   guardarProgreso();
 }
 
-// === FOTOS ===
 function setupFotoPreview(inputId, previewId, nombrePersonalizado) {
   const input = document.getElementById(inputId);
   const preview = document.getElementById(previewId);
   if (!input || !preview) return;
-  input.addEventListener('change', async function() {
-    const file = this.files[0];
-    if (!file || !file.type.match('image.*') || file.size > 5 * 1024 * 1024) {
-      this.value = '';
-      preview.innerHTML = '';
-      if (file && !file.type.match('image.*')) alert('Solo imágenes (JPG/PNG).');
-      if (file && file.size > 5 * 1024 * 1024) alert('Máx. 5 MB.');
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = e => preview.innerHTML = `<img src="${e.target.result}" alt="Vista previa">`;
-    reader.readAsDataURL(file);
-    const formData = new FormData();
-    formData.append('image', file);
-    formData.append('key', '7aa1cd8e8d0a3558833f225cbeba96ac');
-    formData.append('name', nombrePersonalizado);
-    try {
-      const response = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: formData });
-      const data = await response.json();
+
+  const file = input.files[0];
+  if (!file || !file.type.match('image.*') || file.size > 5 * 1024 * 1024) {
+    input.value = '';
+    preview.innerHTML = '';
+    if (file && !file.type.match('image.*')) alert('Solo imágenes (JPG/PNG).');
+    if (file && file.size > 5 * 1024 * 1024) alert('Máx. 5 MB.');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = e => preview.innerHTML = `<img src="${e.target.result}" alt="Vista previa">`;
+  reader.readAsDataURL(file);
+
+  const formData = new FormData();
+  formData.append('image', file);
+  formData.append('key', '7aa1cd8e8d0a3558833f225cbeba96ac');
+  formData.append('name', nombrePersonalizado);
+
+  fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: formData })
+    .then(response => response.json())
+    .then(data => {
       if (data.success) {
-        const imageUrl = data.data.url;
         const vIdx = nombrePersonalizado.split('.').pop().replace('vehiculo_', '');
         const urlInput = document.getElementById(`foto_url_${vIdx}`);
-        if (urlInput) urlInput.value = imageUrl;
+        if (urlInput) urlInput.value = data.data.url;
         alert(`✅ Foto subida: ${nombrePersonalizado}`);
         guardarProgreso();
       } else {
         throw new Error(data.error.message || 'Error al subir la foto');
       }
-    } catch (error) {
+    })
+    .catch(error => {
       alert("❌ No se pudo subir la foto.");
       console.error(error);
-    }
-  });
+    });
 }
 
-// === LÓGICA DEL FORMULARIO ===
 function actualizarCampos() {
   const lugar = document.getElementById("lugar").value;
   const coord = document.getElementById("coordinador");
@@ -626,21 +651,6 @@ function actualizarCampos() {
   if (!fechaInput.value) fechaInput.value = new Date().toISOString().split('T')[0];
   actualizarTotalCajas();
   guardarProgreso();
-}
-
-function alternarDestinoRemitente(selectMotivo, vIndex) {
-  const motivo = selectMotivo.value;
-  const destinoGroup = document.getElementById(`destino-group-${vIndex}`);
-  const remitenteGroup = document.getElementById(`remitente-group-${vIndex}`);
-  if(destinoGroup) destinoGroup.style.display = motivo === 'cargue' ? 'block' : 'none';
-  if(remitenteGroup) remitenteGroup.style.display = motivo === 'descargue' ? 'block' : 'none';
-  const destinoSelect = document.getElementById(`destino-select-${vIndex}`);
-  const remitenteInput = document.getElementById(`remitente-input-${vIndex}`);
-  if (motivo === 'cargue' && destinoSelect) {
-    destinoSelect.setAttribute('required', 'required');
-  } else if (motivo === 'descargue' && remitenteInput) {
-    remitenteInput.setAttribute('required', 'required');
-  }
 }
 
 function applyTimeMask(input, displayId) {
@@ -715,9 +725,9 @@ function limpiarTodo() {
   }
 }
 
-// === ENVIAR ===
 function enviarFormulario(event) {
   event.preventDefault();
+
   const camposObligatorios = [
     { id: 'lugar', nombre: 'Lugar de operación' },
     { id: 'lider', nombre: 'Líder Asignado' },
@@ -736,10 +746,9 @@ function enviarFormulario(event) {
   }
   if (!validarSolapamientoVehiculos() || !validarSolapamientoParadas()) return;
 
-  // Sincronizar antes de enviar
   sincronizarVehiculosDesdeDOM();
 
-  const vehiculosForm = [...vehiculosData]; // Ya está sincronizado
+  const vehiculosForm = [...vehiculosData];
   const paradasForm = [];
   const cont = document.getElementById('operacion-contenedor');
   const grupos = cont.querySelectorAll('.parada-group');
@@ -750,6 +759,7 @@ function enviarFormulario(event) {
     const otro_motivo = grupo.querySelector(`input[name="parada_otro_motivo_operacion_${idx}"]`).value || '';
     paradasForm.push({ inicio, fin, motivo, otro_motivo });
   });
+
   document.getElementById('datos_vehiculos').value = JSON.stringify(vehiculosForm);
   document.getElementById('datos_paradas_operacion').value = JSON.stringify(paradasForm);
   convertirATextoMayusculas();
@@ -757,10 +767,10 @@ function enviarFormulario(event) {
   event.target.submit();
 }
 
-// === CARGA INICIAL ===
 document.addEventListener('DOMContentLoaded', function() {
   const form = document.querySelector('form');
   const savedData = localStorage.getItem('pepsico_data');
+
   if (savedData) {
     const data = JSON.parse(savedData);
     const nVehiculos = data._numVehiculos || 1;
@@ -788,23 +798,21 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       crearVehiculoHTML(document.getElementById('vehiculos-contenedor'), i, vehiculosData[i]);
     }
+
     const nParadas = data._numParadas || 0;
     for(let i=0; i<nParadas; i++) agregarCampoParada('operacion');
-    Object.keys(data).forEach(key => {
+
+    for (const key in data) {
+      if (key.startsWith('_') || key.startsWith('vehiculo_') || key.startsWith('parada_')) continue;
       const el = form.elements[key];
-      if (el && !key.startsWith('_') && !key.startsWith('vehiculo_') && !key.startsWith('parada_')) {
-        el.value = data[key];
-        if (el.classList.contains('time-input-masked')) {
-          const spanId = el.nextElementSibling?.id;
-          if(spanId) applyTimeMask(el, spanId);
-        }
-      }
-    });
+      if (el) el.value = data[key];
+    }
   } else {
     agregarRegistroVehiculo();
     agregarCampoParada('operacion');
     actualizarCampos();
   }
+
   form.addEventListener('submit', enviarFormulario);
   form.addEventListener('input', guardarProgreso);
 });
