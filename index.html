@@ -159,7 +159,6 @@
     </div>
     <h2 style="text-align:center;">FORMULARIO - PEPSICO FUNZA</h2>
 
-    <!-- ✅ Netlify form (sin campos ocultos JSON) -->
     <form name="formulario-pepsico" method="POST" data-netlify="true">
         <input type="hidden" name="form-name" value="formulario-pepsico" />
 
@@ -169,9 +168,8 @@
             <option value="Funza">Pepsico Funza</option>
         </select>
 
-        <!-- ✅ Cambiado: lider_asignado → lider (coincide con MySQL) -->
         <label for="lider">Líder Asignado:</label>
-        <input type="text" name="lider" id="lider" required placeholder="Primer Nombre y Primer Apellido">
+        <input type="text" name="lider_asignado" id="lider" required placeholder="Primer Nombre y Primer Apellido">
 
         <label for="coordinador">Coordinador Asignado:</label>
         <input type="text" name="coordinador" id="coordinador" readonly required>
@@ -218,9 +216,8 @@
         <input type="number" name="cajas_totales" id="cajas_totales" min="0" required
             placeholder="Cantidad total de cajas movidas" oninput="actualizarTotalCajas()">
         
-        <!-- ❌ Eliminados los campos ocultos JSON -->
-        <!-- <input type="hidden" name="datos_vehiculos" id="datos_vehiculos" value=""> -->
-        <!-- <input type="hidden" name="datos_paradas_operacion" id="datos_paradas_operacion" value=""> -->
+        <input type="hidden" name="datos_vehiculos" id="datos_vehiculos" value="">
+        <input type="hidden" name="datos_paradas_operacion" id="datos_paradas_operacion" value="">
 
         <div style="display: flex; gap: 10px;">
             <button type="submit" style="flex: 3;">Enviar</button>
@@ -276,8 +273,8 @@
             const cont = document.getElementById('operacion-contenedor');
             const grupos = cont.querySelectorAll('.parada-group');
             grupos.forEach((grupo, idx) => {
-                const inicio = grupo.querySelector(`input[name="parada_operacion_${idx}_hora_inicio"]`).value;
-                const fin = grupo.querySelector(`input[name="parada_operacion_${idx}_hora_fin"]`).value;
+                const inicio = grupo.querySelector(`input[name="parada_inicio_operacion_${idx}"]`).value;
+                const fin = grupo.querySelector(`input[name="parada_fin_operacion_${idx}"]`).value;
                 if (inicio && fin) paradas.push({ inicio, fin, idx });
             });
             for (let i = 0; i < paradas.length; i++) {
@@ -333,9 +330,6 @@
             registro.className = 'registro-vehiculo';
             registro.dataset.index = vIndex;
 
-            // ✅ Nombres de campos alineados con MySQL:
-            // - vehiculo_X_*
-            // - parada_cargue_X_*
             const html = `
                 <button type="button" class="btn-eliminar-registro" onclick="eliminarRegistroVehiculo(${vIndex})">Eliminar Vehículo #${vIndex + 1}</button>
                 <hr style="margin-top:25px; border-style:dashed;">
@@ -346,36 +340,32 @@
                     <div class="time-row">
                         <div>
                             <label class="time-label">Hora Inicio (HH:MM):</label>
-                            <!-- ✅ Cambiado name -->
-                            <input type="tel" name="parada_cargue_${vIndex}_hora_inicio" class="time-input-masked" required
+                            <input type="tel" name="vehiculo_${vIndex}_inicio" class="time-input-masked" required
                                 placeholder="HH:MM" maxlength="5" value="${datos.inicio || ''}"
                                 onblur="applyTimeMask(this, '${inicioId}');">
                             <span id="${inicioId}" class="time-display"></span>
                         </div>
                         <div>
                             <label class="time-label">Hora Final (HH:MM):</label>
-                            <!-- ✅ Cambiado name -->
-                            <input type="tel" name="parada_cargue_${vIndex}_hora_fin" class="time-input-masked" required
+                            <input type="tel" name="vehiculo_${vIndex}_fin" class="time-input-masked" required
                                 placeholder="HH:MM" maxlength="5" value="${datos.fin || ''}"
                                 onblur="applyTimeMask(this, '${finId}');">
                             <span id="${finId}" class="time-display"></span>
                         </div>
                     </div>
                     <label style="margin-top:5px;">Motivo:</label>
-                    <!-- ✅ Cambiado name -->
-                    <select id="${motivoSelectId}" name="parada_cargue_${vIndex}_motivo" required onchange="guardarProgreso()">
+                    <select id="${motivoSelectId}" name="vehiculo_${vIndex}_motivo" required onchange="guardarProgreso()">
                         <option value="">Seleccione</option>
                         <option value="cargue" ${datos.motivo === 'cargue' ? 'selected' : ''}>Cargue</option>
                         <option value="descargue" ${datos.motivo === 'descargue' ? 'selected' : ''}>Descargue</option>
                         <option value="otro" ${datos.motivo === 'otro' ? 'selected' : ''}>Otro</option>
                     </select>
-                    <input type="text" name="parada_cargue_${vIndex}_otro_motivo" placeholder="Especifique otro motivo" class="otro-input" value="${datos.otro_motivo || ''}">
+                    <input type="text" name="vehiculo_${vIndex}_otro_motivo" placeholder="Especifique otro motivo" class="otro-input" value="${datos.otro_motivo || ''}">
                 </div>
 
                 <hr style="margin-top:25px; border-style:dashed;">
 
                 <label>Muelle:</label>
-                <!-- ✅ name ya coincide: vehiculo_X_muelle -->
                 <select name="vehiculo_${vIndex}_muelle" required onchange="guardarProgreso()">
                     <option value="">Seleccione</option>
                     <option value="3" ${datos.muelle === '3' ? 'selected' : ''}>3</option>
@@ -392,13 +382,11 @@
                 <input type="number" name="vehiculo_${vIndex}_otro_muelle_num" id="otro_muelle_${vIndex}" class="otro-input" placeholder="N° muelle" min="1" max="999" value="${datos.otro_muelle_num || ''}">
 
                 <label>Placa:</label>
-                <!-- ✅ name ya coincide -->
                 <input type="text" name="vehiculo_${vIndex}_placa" required placeholder="Ej: ABC123, 123ABC o A12345" maxlength="6"
                     value="${datos.placa || ''}"
                     oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0,6); guardarProgreso();">
 
                 <label>Tipo De Vehiculo:</label>
-                <!-- ✅ name ya coincide -->
                 <select name="vehiculo_${vIndex}_tipo_vehi" required id="tipo_vehi_${vIndex}" onchange="guardarProgreso()">
                     <option value="">Seleccione</option>
                     <option value="Van extralargo" ${datos.tipo_vehi === 'Van extralargo' ? 'selected' : ''}>Van extralargo</option>
@@ -416,7 +404,6 @@
 
                 <div class="form-group-custom" id="destino-group-${vIndex}" style="${(datos.motivo === 'cargue') ? 'display:block;' : 'display:none;'}">
                     <label style="margin-top:0;">Destino:</label>
-                    <!-- ✅ name ya coincide -->
                     <select id="destino-select-${vIndex}" name="vehiculo_${vIndex}_destino" onchange="guardarProgreso()">
                         <option value="">Seleccione Destino</option>
                         <option value="guarner_medellin" ${datos.destino === 'guarner_medellin' ? 'selected' : ''}>Guarne/Medellin</option>
@@ -433,17 +420,14 @@
 
                 <div class="form-group-custom" id="remitente-group-${vIndex}" style="${(datos.motivo === 'descargue') ? 'display:block;' : 'display:none;'}">
                     <label style="margin-top:0;">Origen / Remitente:</label>
-                    <!-- ✅ name ya coincide -->
                     <input type="text" id="remitente-input-${vIndex}" name="vehiculo_${vIndex}_origen" placeholder="Ej: Zona Franca" value="${datos.origen || ''}" oninput="guardarProgreso()">
                 </div>
 
                 <label>Total De Personas:</label>
-                <!-- ✅ name ya coincide -->
                 <input type="number" name="vehiculo_${vIndex}_personas" min="1" required value="${datos.personas || ''}" oninput="guardarProgreso()">
 
                 <label>Cajas Movidas:</label>
-                <!-- ✅ Cambiado: vehiculo_X_cajas → vehiculo_X_cajas_movidas -->
-                <input type="number" name="vehiculo_${vIndex}_cajas_movidas" class="cajas-input-js" min="0" required 
+                <input type="number" name="vehiculo_${vIndex}_cajas" class="cajas-input-js" min="0" required 
                     value="${datos.cajas || ''}"
                     oninput="actualizarTotalCajas(); guardarProgreso();">
 
@@ -458,7 +442,6 @@
                 <label>Foto De vehiculo:</label>
                 <input type="file" name="vehiculo_${vIndex}_foto" id="${fotoInputId}" accept="image/*" capture="environment">
                 <div class="preview-foto" id="${previewFotoId}"></div>
-                <!-- ✅ name ya coincide -->
                 <input type="hidden" name="vehiculo_${vIndex}_foto_url" id="foto_url_${vIndex}" value="${datos.foto_url || ''}">
 
                 <p style="font-size:0.85em; color:#6c757d; margin-top:5px;">
@@ -468,7 +451,6 @@
             registro.innerHTML = html;
             contenedor.appendChild(registro);
 
-            // Re-aplicar visibilidad de campos "otro"
             if (datos.muelle === 'otro') document.getElementById(`otro_muelle_${vIndex}`).style.display = 'block';
             if (datos.tipo_vehi === 'otro') document.getElementById(`otro_tipo_${vIndex}`).style.display = 'block';
             if (datos.destino === 'otro') document.getElementById(`otro_destino_${vIndex}`).style.display = 'block';
@@ -516,30 +498,26 @@
             const dInicio = `operacion-inicio-${index}`;
             const dFin = `operacion-fin-${index}`;
 
-            // ✅ Nombres alineados con MySQL: parada_operacion_X_*
             div.innerHTML = `
                 <p style="font-weight:bold; margin-top:0; color:#555;">🛑 Parada #<span class="numero-parada">${index + 1}</span> (Operación)</p>
                 <div class="time-row">
                     <div>
                         <label class="time-label">Hora Inicio (HH:MM):</label>
-                        <!-- ✅ Cambiado name -->
-                        <input type="tel" name="parada_operacion_${index}_hora_inicio" class="time-input-masked" 
+                        <input type="tel" name="parada_inicio_operacion_${index}" class="time-input-masked" 
                             placeholder="HH:MM" maxlength="5"
                             onblur="applyTimeMask(this, '${dInicio}')">
                         <span id="${dInicio}" class="time-display"></span>
                     </div>
                     <div>
                         <label class="time-label">Hora Final (HH:MM):</label>
-                        <!-- ✅ Cambiado name -->
-                        <input type="tel" name="parada_operacion_${index}_hora_fin" class="time-input-masked" 
+                        <input type="tel" name="parada_fin_operacion_${index}" class="time-input-masked" 
                             placeholder="HH:MM" maxlength="5"
                             onblur="applyTimeMask(this, '${dFin}')">
                         <span id="${dFin}" class="time-display"></span>
                     </div>
                 </div>
                 <label style="margin-top:5px;">Motivo:</label>
-                <!-- ✅ Cambiado name -->
-                <select name="parada_operacion_${index}_motivo" onchange="manejarOtroCampo(this); guardarProgreso();">
+                <select name="parada_motivo_operacion_${index}" onchange="manejarOtroCampo(this); guardarProgreso();">
                     <option value="">Seleccione</option>
                     <option value="pausas_activas">Pausas Activas y/o Charla</option>
                     <option value="liberacion_calidad">Liberacion De Calidad</option>
@@ -549,7 +527,7 @@
                     <option value="danos_equipo">Daños (Electricos, montacargas, etc)</option>
                     <option value="otro">Otro</option>
                 </select>
-                <input type="text" name="parada_operacion_${index}_otro_motivo" placeholder="Especifique" class="otro-input" oninput="guardarProgreso()">
+                <input type="text" name="parada_otro_motivo_operacion_${index}" placeholder="Especifique" class="otro-input" oninput="guardarProgreso()">
             `;
             div.appendChild(botonEliminar);
             contenedor.appendChild(div);
@@ -722,7 +700,7 @@
             }
         }
 
-        // ✅ NUEVA función de envío: sin JSON, solo campos planos
+        // ✅ NUEVA FUNCIÓN MODIFICADA PARA ENVIAR A NETLIFY
         function enviarFormulario(event) {
             event.preventDefault();
             const camposObligatorios = [
@@ -743,9 +721,48 @@
             }
             if (!validarSolapamientoVehiculos() || !validarSolapamientoParadas()) return;
 
+            // ✅ Serializar datos dinámicos a los campos ocultos
+            const vehiculosForm = [];
+            for (let i = 0; i < vehiculosData.length; i++) {
+                const data = {
+                    inicio: vehiculosData[i].inicio || '',
+                    fin: vehiculosData[i].fin || '',
+                    motivo: vehiculosData[i].motivo || '',
+                    otro_motivo: vehiculosData[i].otro_motivo || '',
+                    muelle: vehiculosData[i].muelle || '',
+                    otro_muelle_num: vehiculosData[i].otro_muelle_num || '',
+                    placa: vehiculosData[i].placa || '',
+                    tipo_vehi: vehiculosData[i].tipo_vehi || '',
+                    otro_tipo: vehiculosData[i].otro_tipo || '',
+                    destino: vehiculosData[i].destino || '',
+                    otro_destino: vehiculosData[i].otro_destino || '',
+                    origen: vehiculosData[i].origen || '',
+                    personas: vehiculosData[i].personas || '',
+                    cajas: vehiculosData[i].cajas || '',
+                    justificacion: vehiculosData[i].justificacion || '',
+                    otro_justificacion: vehiculosData[i].otro_justificacion || '',
+                    foto_url: vehiculosData[i].foto_url || ''
+                };
+                vehiculosForm.push(data);
+            }
+
+            const paradasForm = [];
+            const cont = document.getElementById('operacion-contenedor');
+            const grupos = cont.querySelectorAll('.parada-group');
+            grupos.forEach((grupo, idx) => {
+                const inicio = grupo.querySelector(`input[name="parada_inicio_operacion_${idx}"]`).value || '';
+                const fin = grupo.querySelector(`input[name="parada_fin_operacion_${idx}"]`).value || '';
+                const motivo = grupo.querySelector(`select[name="parada_motivo_operacion_${idx}"]`).value || '';
+                const otro_motivo = grupo.querySelector(`input[name="parada_otro_motivo_operacion_${idx}"]`).value || '';
+                paradasForm.push({ inicio, fin, motivo, otro_motivo });
+            });
+
+            document.getElementById('datos_vehiculos').value = JSON.stringify(vehiculosForm);
+            document.getElementById('datos_paradas_operacion').value = JSON.stringify(paradasForm);
+
             convertirATextoMayusculas();
             localStorage.removeItem('pepsico_data');
-            event.target.submit(); // ✅ Netlify recibirá todos los campos con name correcto
+            event.target.submit(); // ✅ Netlify recibirá los datos
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -760,23 +777,23 @@
                 vehiculosData = [];
                 for(let i=0; i<nVehiculos; i++) {
                     vehiculosData.push({
-                        inicio: data[`parada_cargue_${i}_hora_inicio`] || data[`vehiculo_${i}_inicio`] || '',
-                        fin: data[`parada_cargue_${i}_hora_fin`] || data[`vehiculo_${i}_fin`] || '',
-                        motivo: data[`parada_cargue_${i}_motivo`] || '',
-                        otro_motivo: data[`parada_cargue_${i}_otro_motivo`] || '',
-                        muelle: data[`vehiculo_${i}_muelle`] || '',
+                        inicio: data[`vehiculo_${i}_inicio`],
+                        fin: data[`vehiculo_${i}_fin`],
+                        motivo: data[`vehiculo_${i}_motivo`],
+                        otro_motivo: data[`vehiculo_${i}_otro_motivo`] || '',
+                        muelle: data[`vehiculo_${i}_muelle`],
                         otro_muelle_num: data[`vehiculo_${i}_otro_muelle_num`] || '',
-                        placa: data[`vehiculo_${i}_placa`] || '',
-                        tipo_vehi: data[`vehiculo_${i}_tipo_vehi`] || '',
+                        placa: data[`vehiculo_${i}_placa`],
+                        tipo_vehi: data[`vehiculo_${i}_tipo_vehi`],
                         otro_tipo: data[`vehiculo_${i}_otro_tipo`] || '',
                         destino: data[`vehiculo_${i}_destino`] || '',
                         otro_destino: data[`vehiculo_${i}_otro_destino`] || '',
                         origen: data[`vehiculo_${i}_origen`] || '',
-                        personas: data[`vehiculo_${i}_personas`] || '',
-                        cajas: data[`vehiculo_${i}_cajas_movidas`] || data[`vehiculo_${i}_cajas`] || '',
-                        justificacion: data[`vehiculo_${i}_justificacion`] || '',
+                        personas: data[`vehiculo_${i}_personas`],
+                        cajas: data[`vehiculo_${i}_cajas`],
+                        justificacion: data[`vehiculo_${i}_justificacion`],
                         otro_justificacion: data[`vehiculo_${i}_otro_justificacion`] || '',
-                        foto_url: data[`vehiculo_${i}_foto_url`] || ''
+                        foto_url: data[`vehiculo_${i}_foto_url`]
                     });
                     crearVehiculoHTML(document.getElementById('vehiculos-contenedor'), i, vehiculosData[i]);
                 }
