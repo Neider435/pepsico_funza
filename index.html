@@ -721,7 +721,7 @@ function limpiarTodo() {
 }
 
 function enviarFormulario(event) {
-  event.preventDefault();
+  event.preventDefault(); // Detenemos el submit por ahora para validar
 
   const camposObligatorios = [
     { id: 'lugar', nombre: 'Lugar de operación' },
@@ -736,11 +736,12 @@ function enviarFormulario(event) {
     const valor = document.getElementById(campo.id).value.trim();
     if (!valor) {
       alert(`❌ Por favor, complete el campo: "${campo.nombre}".`);
-      return;
+      return; // ❌ Sale si hay error
     }
   }
-  if (!validarSolapamientoVehiculos() || !validarSolapamientoParadas()) return;
+  if (!validarSolapamientoVehiculos() || !validarSolapamientoParadas()) return; // ❌ Sale si hay error
 
+  // ✅ Si llegamos aquí, todo es válido → sincronizamos y enviamos
   sincronizarVehiculosDesdeDOM();
 
   const vehiculosForm = [...vehiculosData];
@@ -748,7 +749,6 @@ function enviarFormulario(event) {
   const cont = document.getElementById('operacion-contenedor');
   const grupos = cont.querySelectorAll('.parada-group');
 
-  // ✅ CORRECCIÓN CLAVE: Usar dataset.index para obtener el índice real
   grupos.forEach(grupo => {
     const idx = grupo.dataset.index;
     const inicio = grupo.querySelector(`input[name="parada_inicio_operacion_${idx}"]`)?.value || '';
@@ -758,11 +758,14 @@ function enviarFormulario(event) {
     paradasForm.push({ inicio, fin, motivo, otro_motivo });
   });
 
+  // ✅ Llenar campos ocultos con JSON
   document.getElementById('datos_vehiculos').value = JSON.stringify(vehiculosForm);
   document.getElementById('datos_paradas_operacion').value = JSON.stringify(paradasForm);
   convertirATextoMayusculas();
   localStorage.removeItem('pepsico_data');
-  event.target.submit();
+
+  // ✅ ¡ESTA LÍNEA ES CLAVE! → envía el formulario como HTML normal
+  event.target.submit(); // ← Sin esto, Netlify no recibe los datos ni redirige
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -817,5 +820,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
+
 
 
