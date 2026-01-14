@@ -329,6 +329,8 @@ function sincronizarVehiculosDesdeDOM() {
       cajas: getValue(`vehiculo_${i}_cajas`),
       justificacion: getValue(`vehiculo_${i}_justificacion`),
       otro_justificacion: getValue(`vehiculo_${i}_otro_justificacion`),
+      tiempo_muerto_inicio: getValue(`vehiculo_${i}_tiempo_muerto_inicio`),
+      tiempo_muerto_final: getValue(`vehiculo_${i}_tiempo_muerto_final`),
       foto_url: getValue(`vehiculo_${i}_foto_url`)
     };
   }
@@ -361,6 +363,22 @@ function alternarDestinoRemitente(selectMotivo, vIndex) {
   } else if (remitenteInput) {
     remitenteInput.required = motivo === 'descargue';
   }
+}
+
+// ✅ FUNCIÓN ACTUALIZADA: muestra tiempo muerto para CUALQUIER opción seleccionada
+function mostrarTiempoMuerto(select, vIndex) {
+  const div = document.getElementById(`tiempo-muerto-${vIndex}`);
+  if (select.value !== "") {
+    div.style.display = 'flex';
+  } else {
+    div.style.display = 'none';
+    // Limpiar valores
+    const inicio = document.querySelector(`input[name="vehiculo_${vIndex}_tiempo_muerto_inicio"]`);
+    const fin = document.querySelector(`input[name="vehiculo_${vIndex}_tiempo_muerto_final"]`);
+    if (inicio) inicio.value = '';
+    if (fin) fin.value = '';
+  }
+  guardarProgreso();
 }
 
 function crearVehiculoHTML(contenedor, vIndex, datos = {}) {
@@ -469,12 +487,31 @@ function crearVehiculoHTML(contenedor, vIndex, datos = {}) {
       value="${datos.cajas || ''}"
       oninput="actualizarTotalCajas(); guardarProgreso();">
     <label>Justificación del retraso o incidencia:</label>
-    <select name="vehiculo_${vIndex}_justificacion">
+    <select name="vehiculo_${vIndex}_justificacion" onchange="mostrarTiempoMuerto(this, ${vIndex})">
       <option value="">Seleccione motivo</option>
       <option value="faltante_producto" ${datos.justificacion === 'faltante_producto' ? 'selected' : ''}>Faltante de producto</option>
       <option value="otro" ${datos.justificacion === 'otro' ? 'selected' : ''}>Otro</option>
     </select>
     <input type="text" name="vehiculo_${vIndex}_otro_justificacion" id="otro_justificacion_${vIndex}" class="otro-input" placeholder="Especifique la incidencia" value="${datos.otro_justificacion || ''}">
+    
+    <!-- NUEVO: Tiempo Muerto (siempre visible si hay justificación) -->
+    <div class="time-row" id="tiempo-muerto-${vIndex}" style="display:${datos.justificacion ? 'flex' : 'none'};">
+      <div>
+        <label class="time-label">Tiempo Muerto Inicio:</label>
+        <input type="tel" name="vehiculo_${vIndex}_tiempo_muerto_inicio" class="time-input-masked"
+          placeholder="HH:MM" maxlength="5" value="${datos.tiempo_muerto_inicio || ''}"
+          onblur="applyTimeMask(this, 'muerto-inicio-${vIndex}')">
+        <span id="muerto-inicio-${vIndex}" class="time-display"></span>
+      </div>
+      <div>
+        <label class="time-label">Tiempo Muerto Final:</label>
+        <input type="tel" name="vehiculo_${vIndex}_tiempo_muerto_final" class="time-input-masked"
+          placeholder="HH:MM" maxlength="5" value="${datos.tiempo_muerto_final || ''}"
+          onblur="applyTimeMask(this, 'muerto-final-${vIndex}')">
+        <span id="muerto-final-${vIndex}" class="time-display"></span>
+      </div>
+    </div>
+    
     <label>Foto De vehiculo:</label>
     <input type="file" name="vehiculo_${vIndex}_foto" id="${fotoInputId}" accept="image/*" capture="environment">
     <div class="preview-foto" id="${previewFotoId}"></div>
@@ -504,6 +541,12 @@ function crearVehiculoHTML(contenedor, vIndex, datos = {}) {
   });
 
   alternarDestinoRemitente(motivoSelect, vIndex);
+
+  // 👇 Activar tiempo muerto si ya había justificación
+  const justificacionSelect = registro.querySelector(`select[name="vehiculo_${vIndex}_justificacion"]`);
+  if (justificacionSelect) {
+    justificacionSelect.addEventListener('change', () => mostrarTiempoMuerto(justificacionSelect, vIndex));
+  }
 
   document.getElementById(fotoInputId).addEventListener('change', function() {
     let fechaInput = document.getElementById('fecha').value;
@@ -748,7 +791,6 @@ function enviarFormulario(event) {
   const cont = document.getElementById('operacion-contenedor');
   const grupos = cont.querySelectorAll('.parada-group');
 
-  // ✅ CORRECCIÓN CLAVE: Usar dataset.index para obtener el índice real
   grupos.forEach(grupo => {
     const idx = grupo.dataset.index;
     const inicio = grupo.querySelector(`input[name="parada_inicio_operacion_${idx}"]`)?.value || '';
@@ -792,6 +834,8 @@ document.addEventListener('DOMContentLoaded', function() {
         cajas: data[`vehiculo_${i}_cajas`],
         justificacion: data[`vehiculo_${i}_justificacion`],
         otro_justificacion: data[`vehiculo_${i}_otro_justificacion`] || '',
+        tiempo_muerto_inicio: data[`vehiculo_${i}_tiempo_muerto_inicio`] || '',
+        tiempo_muerto_final: data[`vehiculo_${i}_tiempo_muerto_final`] || '',
         foto_url: data[`vehiculo_${i}_foto_url`]
       });
       crearVehiculoHTML(document.getElementById('vehiculos-contenedor'), i, vehiculosData[i]);
