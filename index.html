@@ -168,7 +168,13 @@ button[type="submit"]:hover {
   <label for="lider">Líder Asignado:</label>
   <input type="text" name="lider_asignado" id="lider" required placeholder="Primer Nombre y Primer Apellido">
   <label for="coordinador">Coordinador Asignado:</label>
-  <input type="text" name="coordinador" id="coordinador" readonly required>
+  <select name="coordinador" id="coordinador" required onchange="manejarOtroCoordinador()">
+    <option value="">Seleccione coordinador</option>
+    <option value="Jeison Aranda">Jeison Aranda</option>
+    <option value="Julian Espitia">Julian Espitia</option>
+    <option value="otro">Otro</option>
+  </select>
+  <input type="text" name="coordinador_otro" id="coordinador_otro" class="otro-input" placeholder="Especifique el coordinador">
   <label for="lider_pepsico">Líder De Pepsico:</label>
   <select name="lider_pepsico" id="lider_pepsico" required>
     <option value="">Seleccione un líder</option>
@@ -346,6 +352,20 @@ function manejarOtroCampo(select) {
     otro.style.display = 'none';
     otro.required = false;
     otro.value = '';
+  }
+  guardarProgreso();
+}
+
+// ✅ NUEVA FUNCIÓN: Manejar coordinador "Otro"
+function manejarOtroCoordinador() {
+  const otroInput = document.getElementById('coordinador_otro');
+  if (document.getElementById('coordinador').value === 'otro') {
+    otroInput.style.display = 'block';
+    otroInput.required = true;
+  } else {
+    otroInput.style.display = 'none';
+    otroInput.required = false;
+    otroInput.value = '';
   }
   guardarProgreso();
 }
@@ -650,7 +670,7 @@ function setupFotoPreview(inputId, previewId, nombrePersonalizado) {
   formData.append('key', 'e1d938a9ff4815f178c880552cd33a34');
   formData.append('name', nombrePersonalizado);
 
-  fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: formData })
+  fetch('https://api.imgbb.com/1/upload  ', { method: 'POST', body: formData })
     .then(response => response.json())
     .then(data => {
       if (data.success) {
@@ -671,21 +691,28 @@ function setupFotoPreview(inputId, previewId, nombrePersonalizado) {
 
 function actualizarCampos() {
   const lugar = document.getElementById("lugar").value;
-  const coord = document.getElementById("coordinador");
   const turno = document.getElementById("turno");
   const liderPepsico = document.getElementById("lider_pepsico");
   const fechaInput = document.getElementById("fecha");
+  
   if (lugar === "Funza") {
-    coord.value = "Jeison Aranda";
+    // Establecer Jeison Aranda como predeterminado
+    const coordSelect = document.getElementById("coordinador");
+    if (!coordSelect.dataset.manualChange) {
+      coordSelect.value = "Jeison Aranda";
+      manejarOtroCoordinador();
+    }
     const h = new Date().getHours();
     turno.value = (h >= 6 && h < 14) ? "Manana" : (h >= 14 && h < 22) ? "Tarde" : "Noche";
     if (!liderPepsico.dataset.manualChange) {
       liderPepsico.value = "Alejandro Monroy";
     }
   } else {
-    coord.value = "";
+    document.getElementById("coordinador").value = "";
+    document.getElementById("coordinador_otro").style.display = 'none';
     if (!liderPepsico.dataset.manualChange) liderPepsico.value = "";
   }
+  
   if (!fechaInput.value) fechaInput.value = new Date().toISOString().split('T')[0];
   actualizarTotalCajas();
   guardarProgreso();
@@ -861,4 +888,3 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
-
