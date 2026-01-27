@@ -218,6 +218,7 @@ button[type="submit"]:hover {
     <button type="button" class="btn-borrar-todo" style="flex: 1;" onclick="limpiarTodo()">Borrar Todo</button>
   </div>
 </form>
+
 <script>
 let vehiculosData = [];
 
@@ -227,6 +228,7 @@ function horaAMinutos(horaStr) {
   if (isNaN(h) || isNaN(m) || h < 0 || h > 23 || m < 0 || m > 59) return null;
   return h * 60 + m;
 }
+
 function rangosSeSolapan(inicio1, fin1, inicio2, fin2) {
   const i1 = horaAMinutos(inicio1);
   const f1 = horaAMinutos(fin1);
@@ -259,6 +261,7 @@ function validarSolapamientoVehiculos() {
   }
   return true;
 }
+
 function validarSolapamientoParadas() {
   const paradas = [];
   const cont = document.getElementById('operacion-contenedor');
@@ -356,7 +359,6 @@ function manejarOtroCampo(select) {
   guardarProgreso();
 }
 
-// ✅ NUEVA FUNCIÓN: Manejar coordinador "Otro"
 function manejarOtroCoordinador() {
   const otroInput = document.getElementById('coordinador_otro');
   if (document.getElementById('coordinador').value === 'otro') {
@@ -385,14 +387,12 @@ function alternarDestinoRemitente(selectMotivo, vIndex) {
   }
 }
 
-// ✅ FUNCIÓN ACTUALIZADA: muestra tiempo muerto para CUALQUIER opción seleccionada
 function mostrarTiempoMuerto(select, vIndex) {
   const div = document.getElementById(`tiempo-muerto-${vIndex}`);
   if (select.value !== "") {
     div.style.display = 'flex';
   } else {
     div.style.display = 'none';
-    // Limpiar valores
     const inicio = document.querySelector(`input[name="vehiculo_${vIndex}_tiempo_muerto_inicio"]`);
     const fin = document.querySelector(`input[name="vehiculo_${vIndex}_tiempo_muerto_final"]`);
     if (inicio) inicio.value = '';
@@ -514,7 +514,6 @@ function crearVehiculoHTML(contenedor, vIndex, datos = {}) {
     </select>
     <input type="text" name="vehiculo_${vIndex}_otro_justificacion" id="otro_justificacion_${vIndex}" class="otro-input" placeholder="Especifique la incidencia" value="${datos.otro_justificacion || ''}">
     
-    <!-- NUEVO: Tiempo Muerto (siempre visible si hay justificación) -->
     <div class="time-row" id="tiempo-muerto-${vIndex}" style="display:${datos.justificacion ? 'flex' : 'none'};">
       <div>
         <label class="time-label">Tiempo Muerto Inicio:</label>
@@ -562,7 +561,6 @@ function crearVehiculoHTML(contenedor, vIndex, datos = {}) {
 
   alternarDestinoRemitente(motivoSelect, vIndex);
 
-  // 👇 Activar tiempo muerto si ya había justificación
   const justificacionSelect = registro.querySelector(`select[name="vehiculo_${vIndex}_justificacion"]`);
   if (justificacionSelect) {
     justificacionSelect.addEventListener('change', () => mostrarTiempoMuerto(justificacionSelect, vIndex));
@@ -579,7 +577,7 @@ function crearVehiculoHTML(contenedor, vIndex, datos = {}) {
   });
 }
 
-function agregarCampoParada(tipo) {
+function agregarCampoParada(tipo, datos = {}) {
   const contenedor = document.getElementById('operacion-contenedor');
   const index = contenedor.children.length;
   const div = document.createElement('div');
@@ -608,14 +606,14 @@ function agregarCampoParada(tipo) {
       <div>
         <label class="time-label">Hora Inicio (HH:MM):</label>
         <input type="tel" name="parada_inicio_operacion_${index}" class="time-input-masked"
-          placeholder="HH:MM" maxlength="5"
+          placeholder="HH:MM" maxlength="5" value="${datos.inicio || ''}"
           onblur="applyTimeMask(this, '${dInicio}')">
         <span id="${dInicio}" class="time-display"></span>
       </div>
       <div>
         <label class="time-label">Hora Final (HH:MM):</label>
         <input type="tel" name="parada_fin_operacion_${index}" class="time-input-masked"
-          placeholder="HH:MM" maxlength="5"
+          placeholder="HH:MM" maxlength="5" value="${datos.fin || ''}"
           onblur="applyTimeMask(this, '${dFin}')">
         <span id="${dFin}" class="time-display"></span>
       </div>
@@ -623,15 +621,15 @@ function agregarCampoParada(tipo) {
     <label style="margin-top:5px;">Motivo:</label>
     <select name="parada_motivo_operacion_${index}">
       <option value="">Seleccione</option>
-      <option value="pausas_activas">Pausas Activas y/o Charla</option>
-      <option value="liberacion_calidad">Liberacion De Calidad</option>
-      <option value="desayuno_almuerzo_cena">Desayuno/Almuerzo/Cena</option>
-      <option value="aseo">Aseo</option>
-      <option value="faltante_insumos">Faltante (Canastillas, vinipel, estibas, etc)</option>
-      <option value="danos_equipo">Daños (Electricos, montacargas, etc)</option>
-      <option value="otro">Otro</option>
+      <option value="pausas_activas" ${datos.motivo === 'pausas_activas' ? 'selected' : ''}>Pausas Activas y/o Charla</option>
+      <option value="liberacion_calidad" ${datos.motivo === 'liberacion_calidad' ? 'selected' : ''}>Liberacion De Calidad</option>
+      <option value="desayuno_almuerzo_cena" ${datos.motivo === 'desayuno_almuerzo_cena' ? 'selected' : ''}>Desayuno/Almuerzo/Cena</option>
+      <option value="aseo" ${datos.motivo === 'aseo' ? 'selected' : ''}>Aseo</option>
+      <option value="faltante_insumos" ${datos.motivo === 'faltante_insumos' ? 'selected' : ''}>Faltante (Canastillas, vinipel, estibas, etc)</option>
+      <option value="danos_equipo" ${datos.motivo === 'danos_equipo' ? 'selected' : ''}>Daños (Electricos, montacargas, etc)</option>
+      <option value="otro" ${datos.motivo === 'otro' ? 'selected' : ''}>Otro</option>
     </select>
-    <input type="text" name="parada_otro_motivo_operacion_${index}" placeholder="Especifique" class="otro-input">
+    <input type="text" name="parada_otro_motivo_operacion_${index}" placeholder="Especifique" class="otro-input" value="${datos.otro_motivo || ''}">
   `;
   div.appendChild(botonEliminar);
   contenedor.appendChild(div);
@@ -644,7 +642,6 @@ function agregarCampoParada(tipo) {
       if (otroInput) otroInput.style.display = 'block';
     }
   }
-  guardarProgreso();
 }
 
 function setupFotoPreview(inputId, previewId, nombrePersonalizado) {
@@ -664,13 +661,11 @@ function setupFotoPreview(inputId, previewId, nombrePersonalizado) {
   const reader = new FileReader();
   reader.onload = e => preview.innerHTML = `<img src="${e.target.result}" alt="Vista previa">`;
   reader.readAsDataURL(file);
-
   const formData = new FormData();
   formData.append('image', file);
   formData.append('key', 'e1d938a9ff4815f178c880552cd33a34');
   formData.append('name', nombrePersonalizado);
-
-  fetch('https://api.imgbb.com/1/upload  ', { method: 'POST', body: formData })
+  fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: formData })
     .then(response => response.json())
     .then(data => {
       if (data.success) {
@@ -694,23 +689,21 @@ function actualizarCampos() {
   const turno = document.getElementById("turno");
   const liderPepsico = document.getElementById("lider_pepsico");
   const fechaInput = document.getElementById("fecha");
-  
   if (lugar === "Funza") {
-    // ✅ Solo establecer valores si NO han sido modificados manualmente
     const coordSelect = document.getElementById("coordinador");
-    if (!coordSelect.dataset.manualChange && !coordSelect.value) {
+    if (!coordSelect.dataset.manualChange) {
       coordSelect.value = "Jeison Aranda";
       manejarOtroCoordinador();
     }
-    
     const h = new Date().getHours();
-    if (!turno.dataset.manualChange && !turno.value) {
-      turno.value = (h >= 6 && h < 14) ? "Manana" : (h >= 14 && h < 22) ? "Tarde" : "Noche";
-    }
-    
-    if (!liderPepsico.dataset.manualChange && !liderPepsico.value) {
+    turno.value = (h >= 6 && h < 14) ? "Manana" : (h >= 14 && h < 22) ? "Tarde" : "Noche";
+    if (!liderPepsico.dataset.manualChange) {
       liderPepsico.value = "Alejandro Monroy";
     }
+  } else {
+    document.getElementById("coordinador").value = "";
+    document.getElementById("coordinador_otro").style.display = 'none';
+    if (!liderPepsico.dataset.manualChange) liderPepsico.value = "";
   }
   
   if (!fechaInput.value) fechaInput.value = new Date().toISOString().split('T')[0];
@@ -778,8 +771,21 @@ function guardarProgreso() {
   formData.forEach((value, key) => {
     if (!(value instanceof File) && key !== 'form-name') data[key] = value;
   });
+
+  // Guardar estructura de campos dinámicos
+  const paradasData = [];
+  document.querySelectorAll('#operacion-contenedor .parada-group').forEach(grupo => {
+    const idx = grupo.dataset.index;
+    paradasData.push({
+      inicio: grupo.querySelector(`input[name="parada_inicio_operacion_${idx}"]`).value,
+      fin: grupo.querySelector(`input[name="parada_fin_operacion_${idx}"]`).value,
+      motivo: grupo.querySelector(`select[name="parada_motivo_operacion_${idx}"]`).value,
+      otro_motivo: grupo.querySelector(`input[name="parada_otro_motivo_operacion_${idx}"]`).value
+    });
+  });
+
   data._numVehiculos = vehiculosData.length;
-  data._numParadas = document.getElementById('operacion-contenedor').children.length;
+  data._paradasDetalle = paradasData; 
   localStorage.setItem('pepsico_data', JSON.stringify(data));
 }
 
@@ -792,7 +798,6 @@ function limpiarTodo() {
 
 function enviarFormulario(event) {
   event.preventDefault();
-
   const camposObligatorios = [
     { id: 'lugar', nombre: 'Lugar de operación' },
     { id: 'lider', nombre: 'Líder Asignado' },
@@ -810,14 +815,11 @@ function enviarFormulario(event) {
     }
   }
   if (!validarSolapamientoVehiculos() || !validarSolapamientoParadas()) return;
-
   sincronizarVehiculosDesdeDOM();
-
   const vehiculosForm = [...vehiculosData];
   const paradasForm = [];
   const cont = document.getElementById('operacion-contenedor');
   const grupos = cont.querySelectorAll('.parada-group');
-
   grupos.forEach(grupo => {
     const idx = grupo.dataset.index;
     const inicio = grupo.querySelector(`input[name="parada_inicio_operacion_${idx}"]`)?.value || '';
@@ -826,7 +828,6 @@ function enviarFormulario(event) {
     const otro_motivo = grupo.querySelector(`input[name="parada_otro_motivo_operacion_${idx}"]`)?.value || '';
     paradasForm.push({ inicio, fin, motivo, otro_motivo });
   });
-
   document.getElementById('datos_vehiculos').value = JSON.stringify(vehiculosForm);
   document.getElementById('datos_paradas_operacion').value = JSON.stringify(paradasForm);
   convertirATextoMayusculas();
@@ -840,73 +841,63 @@ document.addEventListener('DOMContentLoaded', function() {
 
   if (savedData) {
     const data = JSON.parse(savedData);
+    
+    // 1. Reconstruir Vehículos
     const nVehiculos = data._numVehiculos || 1;
     document.getElementById('vehiculos-contenedor').innerHTML = '';
     vehiculosData = [];
     for(let i=0; i<nVehiculos; i++) {
-      vehiculosData.push({
-        inicio: data[`vehiculo_${i}_inicio`],
-        fin: data[`vehiculo_${i}_fin`],
-        motivo: data[`vehiculo_${i}_motivo`],
+      const vObj = {
+        inicio: data[`vehiculo_${i}_inicio`] || '',
+        fin: data[`vehiculo_${i}_fin`] || '',
+        motivo: data[`vehiculo_${i}_motivo`] || '',
         otro_motivo: data[`vehiculo_${i}_otro_motivo`] || '',
-        muelle: data[`vehiculo_${i}_muelle`],
+        muelle: data[`vehiculo_${i}_muelle`] || '',
         otro_muelle_num: data[`vehiculo_${i}_otro_muelle_num`] || '',
-        placa: data[`vehiculo_${i}_placa`],
-        tipo_vehi: data[`vehiculo_${i}_tipo_vehi`],
+        placa: data[`vehiculo_${i}_placa`] || '',
+        tipo_vehi: data[`vehiculo_${i}_tipo_vehi`] || '',
         otro_tipo: data[`vehiculo_${i}_otro_tipo`] || '',
         destino: data[`vehiculo_${i}_destino`] || '',
         otro_destino: data[`vehiculo_${i}_otro_destino`] || '',
         origen: data[`vehiculo_${i}_origen`] || '',
-        personas: data[`vehiculo_${i}_personas`],
-        cajas: data[`vehiculo_${i}_cajas`],
-        justificacion: data[`vehiculo_${i}_justificacion`],
+        personas: data[`vehiculo_${i}_personas`] || '',
+        cajas: data[`vehiculo_${i}_cajas`] || '',
+        justificacion: data[`vehiculo_${i}_justificacion`] || '',
         otro_justificacion: data[`vehiculo_${i}_otro_justificacion`] || '',
         tiempo_muerto_inicio: data[`vehiculo_${i}_tiempo_muerto_inicio`] || '',
         tiempo_muerto_final: data[`vehiculo_${i}_tiempo_muerto_final`] || '',
-        foto_url: data[`vehiculo_${i}_foto_url`]
-      });
-      crearVehiculoHTML(document.getElementById('vehiculos-contenedor'), i, vehiculosData[i]);
+        foto_url: data[`vehiculo_${i}_foto_url`] || ''
+      };
+      vehiculosData.push(vObj);
+      crearVehiculoHTML(document.getElementById('vehiculos-contenedor'), i, vObj);
     }
 
-    const nParadas = data._numParadas || 0;
-    for(let i=0; i<nParadas; i++) agregarCampoParada('operacion');
+    // 2. Reconstruir Paradas
+    document.getElementById('operacion-contenedor').innerHTML = '';
+    if (data._paradasDetalle) {
+      data._paradasDetalle.forEach(p => agregarCampoParada('operacion', p));
+    }
 
-    // Restaurar todos los campos del formulario
+    // 3. Poblar campos estáticos
     for (const key in data) {
       if (key.startsWith('_') || key.startsWith('vehiculo_') || key.startsWith('parada_')) continue;
       const el = form.elements[key];
       if (el) {
         el.value = data[key];
-        // Marcar como cambio manual para evitar sobrescritura
-        if (el.dataset) el.dataset.manualChange = 'true';
+        if (el.id === 'coordinador') manejarOtroCoordinador();
       }
     }
+    actualizarTotalCajas();
   } else {
-    // ✅ Solo inicializar, no llamar a actualizarCampos()
     agregarRegistroVehiculo();
     agregarCampoParada('operacion');
-    // Establecer fecha actual
-    if (!document.getElementById('fecha').value) {
-      document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
-    }
+    actualizarCampos();
   }
 
   form.addEventListener('submit', enviarFormulario);
+  // Escuchar cambios en todo el formulario para guardar
   form.addEventListener('input', guardarProgreso);
-  
-  // ✅ Añadir eventos para detectar cambios manuales
-  document.getElementById('lugar').addEventListener('change', function() {
-    this.dataset.manualChange = 'true';
-  });
-  document.getElementById('coordinador').addEventListener('change', function() {
-    this.dataset.manualChange = 'true';
-  });
-  document.getElementById('lider_pepsico').addEventListener('change', function() {
-    this.dataset.manualChange = 'true';
-  });
-  document.getElementById('turno').addEventListener('change', function() {
-    this.dataset.manualChange = 'true';
-  });
+  form.addEventListener('change', guardarProgreso);
 });
 </script>
 </body>
