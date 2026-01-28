@@ -160,13 +160,16 @@ button[type="submit"]:hover {
 <h2 style="text-align:center;">FORMULARIO - PEPSICO FUNZA</h2>
 <form name="formulario-pepsico" method="POST" data-netlify="true">
   <input type="hidden" name="form-name" value="formulario-pepsico" />
+  
   <label for="lugar">Lugar de operación:</label>
   <select name="lugar" id="lugar" required onchange="actualizarCampos()">
     <option value="">Seleccione una opción</option>
     <option value="Funza">Pepsico Funza</option>
   </select>
+  
   <label for="lider">Líder Asignado:</label>
   <input type="text" name="lider_asignado" id="lider" required placeholder="Primer Nombre y Primer Apellido">
+  
   <label for="coordinador">Coordinador Asignado:</label>
   <select name="coordinador" id="coordinador" required onchange="manejarOtroCoordinador()">
     <option value="">Seleccione coordinador</option>
@@ -175,6 +178,7 @@ button[type="submit"]:hover {
     <option value="otro">Otro</option>
   </select>
   <input type="text" name="coordinador_otro" id="coordinador_otro" class="otro-input" placeholder="Especifique el coordinador">
+  
   <label for="lider_pepsico">Líder De Pepsico:</label>
   <select name="lider_pepsico" id="lider_pepsico" required>
     <option value="">Seleccione un líder</option>
@@ -182,8 +186,10 @@ button[type="submit"]:hover {
     <option value="Alejandro Monroy">Alejandro Monroy</option>
     <option value="Carlos Ruiz">Carlos Ruiz</option>
   </select>
+  
   <label for="fecha">Fecha:</label>
   <input type="date" name="fecha" id="fecha" required>
+  
   <label for="turno">Turno Asignado:</label>
   <select name="turno" id="turno" required>
     <option value="">Seleccione un turno</option>
@@ -191,28 +197,32 @@ button[type="submit"]:hover {
     <option value="Tarde">Tarde</option>
     <option value="Noche">Noche</option>
   </select>
+
   <hr style="margin-top: 25px; border-style: dotted;">
   <h3 style="text-align:center; font-size:1.3em; color:#C76E00;">REGISTRO DE VEHÍCULOS</h3>
   <div id="vehiculos-contenedor"></div>
   <button type="button" class="btn-agregar-registro" onclick="agregarRegistroVehiculo()">
     + Registrar Nuevo Vehículo
   </button>
+
   <hr style="margin-top: 25px; border-style: dotted;">
   <h3 style="text-align:center; font-size:1.3em; color:#001855;">PARADAS DE OPERACIÓN</h3>
   <div id="operacion-contenedor"></div>
   <button type="button" class="btn-agregar-parada-op" onclick="agregarCampoParada('operacion')">
     + Agregar Parada
   </button>
+
   <hr style="margin-top: 25px; border-style: dotted;">
   <h3 style="text-align:center; font-size:1.1em; color:#296097;">TOTALES DE TURNO</h3>
   <label for="total_personas">Total Personas En El Turno:</label>
-  <input type="number" name="total_personas" id="total_personas" min="1" required
-    placeholder="Total de empleados en el turno">
+  <input type="number" name="total_personas" id="total_personas" min="1" required placeholder="Total de empleados en el turno">
+  
   <label for="cajas_totales">Total Cajas Movidas:</label>
-  <input type="number" name="cajas_totales" id="cajas_totales" min="0" required
-    placeholder="Cantidad total de cajas movidas" oninput="actualizarTotalCajas()">
+  <input type="number" name="cajas_totales" id="cajas_totales" min="0" required placeholder="Cantidad total de cajas movidas" oninput="actualizarTotalCajas()">
+
   <input type="hidden" name="datos_vehiculos" id="datos_vehiculos" value="">
   <input type="hidden" name="datos_paradas_operacion" id="datos_paradas_operacion" value="">
+
   <div style="display: flex; gap: 10px;">
     <button type="submit" style="flex: 3;">Enviar</button>
     <button type="button" class="btn-borrar-todo" style="flex: 1;" onclick="limpiarTodo()">Borrar Todo</button>
@@ -253,7 +263,7 @@ function validarSolapamientoVehiculos() {
     for (let i = 0; i < regs.length; i++) {
       for (let j = i + 1; j < regs.length; j++) {
         if (rangosSeSolapan(regs[i].inicio, regs[i].fin, regs[j].inicio, regs[j].fin)) {
-          alert(`¡Conflicto en muelle ${muelle}! Vehículos #${regs[i].idx + 1} y #${regs[j].idx + 1} se superponen.`);
+          alert(`¡Conflicto en muelle ${muelle}! Los vehículos #${regs[i].idx + 1} y #${regs[j].idx + 1} se superponen en el tiempo.`);
           return false;
         }
       }
@@ -274,7 +284,7 @@ function validarSolapamientoParadas() {
   for (let i = 0; i < paradas.length; i++) {
     for (let j = i + 1; j < paradas.length; j++) {
       if (rangosSeSolapan(paradas[i].inicio, paradas[i].fin, paradas[j].inicio, paradas[j].fin)) {
-        alert(`¡Las paradas de operación #${i + 1} y #${j + 1} se superponen!`);
+        alert(`¡Las paradas de operación #${i + 1} y #${j + 1} se superponen en el tiempo!`);
         return false;
       }
     }
@@ -284,7 +294,7 @@ function validarSolapamientoParadas() {
 
 function eliminarRegistroVehiculo(index) {
   if (vehiculosData.length <= 1) {
-    alert("Debe haber al menos un vehículo.");
+    alert("Debe haber al menos un vehículo registrado.");
     return;
   }
   sincronizarVehiculosDesdeDOM();
@@ -360,31 +370,29 @@ function manejarOtroCampo(select) {
 }
 
 function manejarOtroCoordinador() {
-  const otroInput = document.getElementById('coordinador_otro');
-  if (document.getElementById('coordinador').value === 'otro') {
-    otroInput.style.display = 'block';
-    otroInput.required = true;
+  const s = document.getElementById('coordinador');
+  const o = document.getElementById('coordinador_otro');
+  if (s.value === 'otro') {
+    o.style.display = 'block';
+    o.required = true;
   } else {
-    otroInput.style.display = 'none';
-    otroInput.required = false;
-    otroInput.value = '';
+    o.style.display = 'none';
+    o.required = false;
+    o.value = '';
   }
   guardarProgreso();
 }
 
 function alternarDestinoRemitente(selectMotivo, vIndex) {
   const motivo = selectMotivo.value;
-  const destinoGroup = document.getElementById(`destino-group-${vIndex}`);
-  const remitenteGroup = document.getElementById(`remitente-group-${vIndex}`);
-  if (destinoGroup) destinoGroup.style.display = motivo === 'cargue' ? 'block' : 'none';
-  if (remitenteGroup) remitenteGroup.style.display = motivo === 'descargue' ? 'block' : 'none';
-  const destinoSelect = document.getElementById(`destino-select-${vIndex}`);
-  const remitenteInput = document.getElementById(`remitente-input-${vIndex}`);
-  if (motivo === 'cargue' && destinoSelect) {
-    destinoSelect.setAttribute('required', 'required');
-  } else if (remitenteInput) {
-    remitenteInput.required = motivo === 'descargue';
-  }
+  const dGroup = document.getElementById(`destino-group-${vIndex}`);
+  const rGroup = document.getElementById(`remitente-group-${vIndex}`);
+  if (dGroup) dGroup.style.display = (motivo === 'cargue') ? 'block' : 'none';
+  if (rGroup) rGroup.style.display = (motivo === 'descargue') ? 'block' : 'none';
+  const dSelect = document.getElementById(`destino-select-${vIndex}`);
+  const rInput = document.getElementById(`remitente-input-${vIndex}`);
+  if (motivo === 'cargue' && dSelect) dSelect.setAttribute('required', 'required');
+  else if (rInput) rInput.required = (motivo === 'descargue');
 }
 
 function mostrarTiempoMuerto(select, vIndex) {
@@ -393,9 +401,9 @@ function mostrarTiempoMuerto(select, vIndex) {
     div.style.display = 'flex';
   } else {
     div.style.display = 'none';
-    const inicio = document.querySelector(`input[name="vehiculo_${vIndex}_tiempo_muerto_inicio"]`);
+    const ini = document.querySelector(`input[name="vehiculo_${vIndex}_tiempo_muerto_inicio"]`);
     const fin = document.querySelector(`input[name="vehiculo_${vIndex}_tiempo_muerto_final"]`);
-    if (inicio) inicio.value = '';
+    if (ini) ini.value = '';
     if (fin) fin.value = '';
   }
   guardarProgreso();
@@ -412,28 +420,20 @@ function crearVehiculoHTML(contenedor, vIndex, datos = {}) {
   registro.className = 'registro-vehiculo';
   registro.dataset.index = vIndex;
 
-  const html = `
-    <button type="button" class="btn-eliminar-registro" onclick="eliminarRegistroVehiculo(${vIndex})">
-      Eliminar Vehículo #${vIndex + 1}
-    </button>
-    <hr style="margin-top:25px; border-style:dashed;">
+  registro.innerHTML = `
+    <button type="button" class="btn-eliminar-registro" onclick="eliminarRegistroVehiculo(${vIndex})">Eliminar Vehículo #${vIndex + 1}</button>
     <h4 style="text-align:center; color:#C76E00;">VEHÍCULO #${vIndex + 1}</h4>
-    <h5 style="text-align:center; color:#C76E00;">PARADA DE CARGUE/DESCARGUE</h5>
     <div class="parada-group">
       <p style="font-weight:bold; margin-top:0; color:#555;">🛑 Parada #1 (Cargue/Descargue)</p>
       <div class="time-row">
         <div>
-          <label class="time-label">Hora Inicio (HH:MM):</label>
-          <input type="tel" name="vehiculo_${vIndex}_inicio" class="time-input-masked" required
-            placeholder="HH:MM" maxlength="5" value="${datos.inicio || ''}"
-            onblur="applyTimeMask(this, '${inicioId}');">
+          <label class="time-label">Hora Inicio:</label>
+          <input type="tel" name="vehiculo_${vIndex}_inicio" class="time-input-masked" required placeholder="HH:MM" maxlength="5" value="${datos.inicio || ''}" onblur="applyTimeMask(this, '${inicioId}');">
           <span id="${inicioId}" class="time-display"></span>
         </div>
         <div>
-          <label class="time-label">Hora Final (HH:MM):</label>
-          <input type="tel" name="vehiculo_${vIndex}_fin" class="time-input-masked" required
-            placeholder="HH:MM" maxlength="5" value="${datos.fin || ''}"
-            onblur="applyTimeMask(this, '${finId}');">
+          <label class="time-label">Hora Final:</label>
+          <input type="tel" name="vehiculo_${vIndex}_fin" class="time-input-masked" required placeholder="HH:MM" maxlength="5" value="${datos.fin || ''}" onblur="applyTimeMask(this, '${finId}');">
           <span id="${finId}" class="time-display"></span>
         </div>
       </div>
@@ -444,30 +444,19 @@ function crearVehiculoHTML(contenedor, vIndex, datos = {}) {
         <option value="descargue" ${datos.motivo === 'descargue' ? 'selected' : ''}>Descargue</option>
         <option value="otro" ${datos.motivo === 'otro' ? 'selected' : ''}>Otro</option>
       </select>
-      <input type="text" name="vehiculo_${vIndex}_otro_motivo" placeholder="Especifique otro motivo" class="otro-input" value="${datos.otro_motivo || ''}">
+      <input type="text" name="vehiculo_${vIndex}_otro_motivo" class="otro-input" placeholder="Especifique" value="${datos.otro_motivo || ''}">
     </div>
-    <hr style="margin-top:25px; border-style:dashed;">
     <label>Muelle:</label>
     <select name="vehiculo_${vIndex}_muelle" required>
       <option value="">Seleccione</option>
-      <option value="3" ${datos.muelle === '3' ? 'selected' : ''}>3</option>
-      <option value="11" ${datos.muelle === '11' ? 'selected' : ''}>11</option>
-      <option value="12" ${datos.muelle === '12' ? 'selected' : ''}>12</option>
-      <option value="13" ${datos.muelle === '13' ? 'selected' : ''}>13</option>
-      <option value="14" ${datos.muelle === '14' ? 'selected' : ''}>14</option>
-      <option value="17" ${datos.muelle === '17' ? 'selected' : ''}>17</option>
-      <option value="18" ${datos.muelle === '18' ? 'selected' : ''}>18</option>
-      <option value="19" ${datos.muelle === '19' ? 'selected' : ''}>19</option>
-      <option value="20" ${datos.muelle === '20' ? 'selected' : ''}>20</option>
+      ${[3,11,12,13,14,17,18,19,20].map(m => `<option value="${m}" ${datos.muelle == m ? 'selected' : ''}>${m}</option>`).join('')}
       <option value="otro" ${datos.muelle === 'otro' ? 'selected' : ''}>Otro</option>
     </select>
-    <input type="number" name="vehiculo_${vIndex}_otro_muelle_num" id="otro_muelle_${vIndex}" class="otro-input" placeholder="N° muelle" min="1" max="999" value="${datos.otro_muelle_num || ''}">
+    <input type="number" name="vehiculo_${vIndex}_otro_muelle_num" class="otro-input" placeholder="N° muelle" value="${datos.otro_muelle_num || ''}">
     <label>Placa:</label>
-    <input type="text" name="vehiculo_${vIndex}_placa" required placeholder="Ej: ABC123, 123ABC o A12345" maxlength="6"
-      value="${datos.placa || ''}"
-      oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0,6); guardarProgreso();">
-    <label>Tipo De Vehiculo:</label>
-    <select name="vehiculo_${vIndex}_tipo_vehi" required id="tipo_vehi_${vIndex}">
+    <input type="text" name="vehiculo_${vIndex}_placa" required placeholder="Ej: ABC123" maxlength="6" value="${datos.placa || ''}" oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); guardarProgreso();">
+    <label>Tipo Vehículo:</label>
+    <select name="vehiculo_${vIndex}_tipo_vehi" required>
       <option value="">Seleccione</option>
       <option value="Van extralargo" ${datos.tipo_vehi === 'Van extralargo' ? 'selected' : ''}>Van extralargo</option>
       <option value="Camion sencillo furgonado" ${datos.tipo_vehi === 'Camion sencillo furgonado' ? 'selected' : ''}>Camión sencillo furgonado</option>
@@ -480,11 +469,11 @@ function crearVehiculoHTML(contenedor, vIndex, datos = {}) {
       <option value="Camabaja estandar" ${datos.tipo_vehi === 'Camabaja estandar' ? 'selected' : ''}>Camabaja estandar</option>
       <option value="otro" ${datos.tipo_vehi === 'otro' ? 'selected' : ''}>Otro</option>
     </select>
-    <input type="text" name="vehiculo_${vIndex}_otro_tipo" id="otro_tipo_${vIndex}" class="otro-input" placeholder="Especifique tipo" value="${datos.otro_tipo || ''}">
-    <div class="form-group-custom" id="destino-group-${vIndex}" style="${(datos.motivo === 'cargue') ? 'display:block;' : 'display:none;'}">
-      <label style="margin-top:0;">Destino:</label>
+    <input type="text" name="vehiculo_${vIndex}_otro_tipo" class="otro-input" value="${datos.otro_tipo || ''}">
+    <div class="form-group-custom" id="destino-group-${vIndex}" style="${datos.motivo === 'cargue' ? 'block' : 'none'}">
+      <label>Destino:</label>
       <select id="destino-select-${vIndex}" name="vehiculo_${vIndex}_destino">
-        <option value="">Seleccione Destino</option>
+        <option value="">Seleccione</option>
         <option value="guarner_medellin" ${datos.destino === 'guarner_medellin' ? 'selected' : ''}>Guarne/Medellin</option>
         <option value="cali" ${datos.destino === 'cali' ? 'selected' : ''}>Cali</option>
         <option value="barranquilla" ${datos.destino === 'barranquilla' ? 'selected' : ''}>Barranquilla</option>
@@ -494,220 +483,112 @@ function crearVehiculoHTML(contenedor, vIndex, datos = {}) {
         <option value="peru" ${datos.destino === 'peru' ? 'selected' : ''}>Perú</option>
         <option value="otro" ${datos.destino === 'otro' ? 'selected' : ''}>Otro</option>
       </select>
-      <input type="text" name="vehiculo_${vIndex}_otro_destino" id="otro_destino_${vIndex}" class="otro-input" placeholder="Especifique otro destino" value="${datos.otro_destino || ''}">
+      <input type="text" name="vehiculo_${vIndex}_otro_destino" class="otro-input" value="${datos.otro_destino || ''}">
     </div>
-    <div class="form-group-custom" id="remitente-group-${vIndex}" style="${(datos.motivo === 'descargue') ? 'display:block;' : 'display:none;'}">
-      <label style="margin-top:0;">Origen / Remitente:</label>
-      <input type="text" id="remitente-input-${vIndex}" name="vehiculo_${vIndex}_origen" placeholder="Ej: Zona Franca" value="${datos.origen || ''}" oninput="guardarProgreso()">
+    <div class="form-group-custom" id="remitente-group-${vIndex}" style="${datos.motivo === 'descargue' ? 'block' : 'none'}">
+      <label>Origen / Remitente:</label>
+      <input type="text" id="remitente-input-${vIndex}" name="vehiculo_${vIndex}_origen" value="${datos.origen || ''}">
     </div>
-    <label>Total De Personas:</label>
-    <input type="number" name="vehiculo_${vIndex}_personas" min="1" required value="${datos.personas || ''}" oninput="guardarProgreso()">
+    <label>Total Personas:</label>
+    <input type="number" name="vehiculo_${vIndex}_personas" min="1" required value="${datos.personas || ''}">
     <label>Cajas Movidas:</label>
-    <input type="number" name="vehiculo_${vIndex}_cajas" class="cajas-input-js" min="0" required
-      value="${datos.cajas || ''}"
-      oninput="actualizarTotalCajas(); guardarProgreso();">
-    <label>Justificación del retraso o incidencia:</label>
+    <input type="number" name="vehiculo_${vIndex}_cajas" class="cajas-input-js" min="0" required value="${datos.cajas || ''}" oninput="actualizarTotalCajas(); guardarProgreso();">
+    <label>Justificación incidencia:</label>
     <select name="vehiculo_${vIndex}_justificacion" onchange="mostrarTiempoMuerto(this, ${vIndex})">
       <option value="">Seleccione motivo</option>
       <option value="faltante_producto" ${datos.justificacion === 'faltante_producto' ? 'selected' : ''}>Faltante de producto</option>
       <option value="otro" ${datos.justificacion === 'otro' ? 'selected' : ''}>Otro</option>
     </select>
-    <input type="text" name="vehiculo_${vIndex}_otro_justificacion" id="otro_justificacion_${vIndex}" class="otro-input" placeholder="Especifique la incidencia" value="${datos.otro_justificacion || ''}">
-    
+    <input type="text" name="vehiculo_${vIndex}_otro_justificacion" class="otro-input" value="${datos.otro_justificacion || ''}">
     <div class="time-row" id="tiempo-muerto-${vIndex}" style="display:${datos.justificacion ? 'flex' : 'none'};">
       <div>
-        <label class="time-label">Tiempo Muerto Inicio:</label>
-        <input type="tel" name="vehiculo_${vIndex}_tiempo_muerto_inicio" class="time-input-masked"
-          placeholder="HH:MM" maxlength="5" value="${datos.tiempo_muerto_inicio || ''}"
-          onblur="applyTimeMask(this, 'muerto-inicio-${vIndex}')">
+        <label class="time-label">T. Muerto Inicio:</label>
+        <input type="tel" name="vehiculo_${vIndex}_tiempo_muerto_inicio" class="time-input-masked" placeholder="HH:MM" maxlength="5" value="${datos.tiempo_muerto_inicio || ''}" onblur="applyTimeMask(this, 'muerto-inicio-${vIndex}');">
         <span id="muerto-inicio-${vIndex}" class="time-display"></span>
       </div>
       <div>
-        <label class="time-label">Tiempo Muerto Final:</label>
-        <input type="tel" name="vehiculo_${vIndex}_tiempo_muerto_final" class="time-input-masked"
-          placeholder="HH:MM" maxlength="5" value="${datos.tiempo_muerto_final || ''}"
-          onblur="applyTimeMask(this, 'muerto-final-${vIndex}')">
+        <label class="time-label">T. Muerto Final:</label>
+        <input type="tel" name="vehiculo_${vIndex}_tiempo_muerto_final" class="time-input-masked" placeholder="HH:MM" maxlength="5" value="${datos.tiempo_muerto_final || ''}" onblur="applyTimeMask(this, 'muerto-final-${vIndex}');">
         <span id="muerto-final-${vIndex}" class="time-display"></span>
       </div>
     </div>
-    
-    <label>Foto De vehiculo:</label>
-    <input type="file" name="vehiculo_${vIndex}_foto" id="${fotoInputId}" accept="image/*" capture="environment">
+    <label>Foto:</label>
+    <input type="file" id="${fotoInputId}" accept="image/*" capture="environment">
     <div class="preview-foto" id="${previewFotoId}"></div>
-    <input type="hidden" name="vehiculo_${vIndex}_foto_url" id="foto_url_${vIndex}" value="${datos.foto_url || ''}">
-    <p style="font-size:0.85em; color:#6c757d; margin-top:5px;">
-      📸 <strong>La foto se sube automáticamente.</strong> No necesita hacer nada más.
-    </p>
+    <input type="hidden" name="vehiculo_${vIndex}_foto_url" value="${datos.foto_url || ''}">
   `;
 
-  registro.innerHTML = html;
   contenedor.appendChild(registro);
-
-  const motivoSelect = document.getElementById(motivoSelectId);
-  motivoSelect.addEventListener('change', () => {
-    alternarDestinoRemitente(motivoSelect, vIndex);
-    manejarOtroCampo(motivoSelect);
-    guardarProgreso();
+  
+  const mSelect = registro.querySelector(`#${motivoSelectId}`);
+  mSelect.addEventListener('change', () => {
+    alternarDestinoRemitente(mSelect, vIndex);
+    manejarOtroCampo(mSelect);
   });
 
-  const selects = registro.querySelectorAll('select');
-  selects.forEach(sel => {
-    const otro = sel.nextElementSibling;
-    if (otro && otro.classList.contains('otro-input')) {
-      if (sel.value === 'otro') otro.style.display = 'block';
-      sel.addEventListener('change', () => manejarOtroCampo(sel));
-    }
+  registro.querySelectorAll('select').forEach(sel => {
+    sel.addEventListener('change', () => manejarOtroCampo(sel));
+    manejarOtroCampo(sel);
   });
 
-  alternarDestinoRemitente(motivoSelect, vIndex);
-
-  const justificacionSelect = registro.querySelector(`select[name="vehiculo_${vIndex}_justificacion"]`);
-  if (justificacionSelect) {
-    justificacionSelect.addEventListener('change', () => mostrarTiempoMuerto(justificacionSelect, vIndex));
-  }
-
-  document.getElementById(fotoInputId).addEventListener('change', function() {
-    let fechaInput = document.getElementById('fecha').value;
-    if (!fechaInput) fechaInput = new Date().toISOString().split('T')[0];
-    const [yyyy, mm, dd] = fechaInput.split('-');
-    const fechaFormateada = `${dd}.${mm}.${yyyy}`;
-    const tipoVehiculo = (datos.tipo_vehi || 'vehiculo').replace(/ /g, '_');
-    const nombrePersonalizado = `${fechaFormateada}.${tipoVehiculo}.vehiculo_${vIndex}`;
-    setupFotoPreview(fotoInputId, previewFotoId, nombrePersonalizado);
-  });
+  const fInput = registro.querySelector(`#${fotoInputId}`);
+  fInput.addEventListener('change', () => setupFotoPreview(fotoInputId, previewFotoId));
 }
 
 function agregarCampoParada(tipo, datos = {}) {
-  const contenedor = document.getElementById('operacion-contenedor');
-  const index = contenedor.children.length;
+  const cont = document.getElementById('operacion-contenedor');
+  const index = cont.children.length;
   const div = document.createElement('div');
   div.className = 'parada-group';
   div.dataset.index = index;
-
-  const botonEliminar = document.createElement('button');
-  botonEliminar.type = 'button';
-  botonEliminar.className = 'btn-eliminar';
-  botonEliminar.textContent = 'Eliminar';
-  botonEliminar.onclick = function() {
-    div.remove();
-    const paradas = contenedor.getElementsByClassName('parada-group');
-    for (let i = 0; i < paradas.length; i++) {
-      const span = paradas[i].querySelector('.numero-parada');
-      if (span) span.textContent = i + 1;
-    }
-    guardarProgreso();
-  };
-
-  const dInicio = `operacion-inicio-${index}`;
-  const dFin = `operacion-fin-${index}`;
   div.innerHTML = `
-    <p style="font-weight:bold; margin-top:0; color:#555;">🛑 Parada #<span class="numero-parada">${index + 1}</span> (Operación)</p>
+    <p>🛑 Parada #<span class="numero-parada">${index + 1}</span> (Operación)</p>
     <div class="time-row">
       <div>
-        <label class="time-label">Hora Inicio (HH:MM):</label>
-        <input type="tel" name="parada_inicio_operacion_${index}" class="time-input-masked"
-          placeholder="HH:MM" maxlength="5" value="${datos.inicio || ''}"
-          onblur="applyTimeMask(this, '${dInicio}')">
-        <span id="${dInicio}" class="time-display"></span>
+        <input type="tel" name="parada_inicio_operacion_${index}" class="time-input-masked" placeholder="HH:MM" value="${datos.inicio || ''}" onblur="applyTimeMask(this, 'op-ini-${index}')">
+        <span id="op-ini-${index}" class="time-display"></span>
       </div>
       <div>
-        <label class="time-label">Hora Final (HH:MM):</label>
-        <input type="tel" name="parada_fin_operacion_${index}" class="time-input-masked"
-          placeholder="HH:MM" maxlength="5" value="${datos.fin || ''}"
-          onblur="applyTimeMask(this, '${dFin}')">
-        <span id="${dFin}" class="time-display"></span>
+        <input type="tel" name="parada_fin_operacion_${index}" class="time-input-masked" placeholder="HH:MM" value="${datos.fin || ''}" onblur="applyTimeMask(this, 'op-fin-${index}')">
+        <span id="op-fin-${index}" class="time-display"></span>
       </div>
     </div>
-    <label style="margin-top:5px;">Motivo:</label>
     <select name="parada_motivo_operacion_${index}">
       <option value="">Seleccione</option>
-      <option value="pausas_activas" ${datos.motivo === 'pausas_activas' ? 'selected' : ''}>Pausas Activas y/o Charla</option>
-      <option value="liberacion_calidad" ${datos.motivo === 'liberacion_calidad' ? 'selected' : ''}>Liberacion De Calidad</option>
-      <option value="desayuno_almuerzo_cena" ${datos.motivo === 'desayuno_almuerzo_cena' ? 'selected' : ''}>Desayuno/Almuerzo/Cena</option>
+      <option value="pausas_activas" ${datos.motivo === 'pausas_activas' ? 'selected' : ''}>Pausas Activas</option>
       <option value="aseo" ${datos.motivo === 'aseo' ? 'selected' : ''}>Aseo</option>
-      <option value="faltante_insumos" ${datos.motivo === 'faltante_insumos' ? 'selected' : ''}>Faltante (Canastillas, vinipel, estibas, etc)</option>
-      <option value="danos_equipo" ${datos.motivo === 'danos_equipo' ? 'selected' : ''}>Daños (Electricos, montacargas, etc)</option>
       <option value="otro" ${datos.motivo === 'otro' ? 'selected' : ''}>Otro</option>
     </select>
-    <input type="text" name="parada_otro_motivo_operacion_${index}" placeholder="Especifique" class="otro-input" value="${datos.otro_motivo || ''}">
+    <input type="text" name="parada_otro_motivo_operacion_${index}" class="otro-input" value="${datos.otro_motivo || ''}">
+    <button type="button" class="btn-eliminar" onclick="this.parentElement.remove(); guardarProgreso();">Eliminar</button>
   `;
-  div.appendChild(botonEliminar);
-  contenedor.appendChild(div);
-
-  const motivoSelect = div.querySelector(`select[name="parada_motivo_operacion_${index}"]`);
-  if (motivoSelect) {
-    motivoSelect.addEventListener('change', () => manejarOtroCampo(motivoSelect));
-    if (motivoSelect.value === 'otro') {
-      const otroInput = div.querySelector('.otro-input');
-      if (otroInput) otroInput.style.display = 'block';
-    }
-  }
+  cont.appendChild(div);
+  const sel = div.querySelector('select');
+  sel.addEventListener('change', () => manejarOtroCampo(sel));
+  guardarProgreso();
 }
 
-function setupFotoPreview(inputId, previewId, nombrePersonalizado) {
+function setupFotoPreview(inputId, previewId) {
   const input = document.getElementById(inputId);
   const preview = document.getElementById(previewId);
-  if (!input || !preview) return;
-
-  const file = input.files[0];
-  if (!file || !file.type.match('image.*') || file.size > 5 * 1024 * 1024) {
-    input.value = '';
-    preview.innerHTML = '';
-    if (file && !file.type.match('image.*')) alert('Solo imágenes (JPG/PNG).');
-    if (file && file.size > 5 * 1024 * 1024) alert('Máx. 5 MB.');
-    return;
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => preview.innerHTML = `<img src="${e.target.result}">`;
+    reader.readAsDataURL(input.files[0]);
   }
-
-  const reader = new FileReader();
-  reader.onload = e => preview.innerHTML = `<img src="${e.target.result}" alt="Vista previa">`;
-  reader.readAsDataURL(file);
-  const formData = new FormData();
-  formData.append('image', file);
-  formData.append('key', 'e1d938a9ff4815f178c880552cd33a34');
-  formData.append('name', nombrePersonalizado);
-  fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: formData })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        const vIdx = nombrePersonalizado.split('.').pop().replace('vehiculo_', '');
-        const urlInput = document.getElementById(`foto_url_${vIdx}`);
-        if (urlInput) urlInput.value = data.data.url;
-        alert(`✅ Foto subida: ${nombrePersonalizado}`);
-        guardarProgreso();
-      } else {
-        throw new Error(data.error.message || 'Error al subir la foto');
-      }
-    })
-    .catch(error => {
-      alert("❌ No se pudo subir la foto.");
-      console.error(error);
-    });
 }
 
 function actualizarCampos() {
   const lugar = document.getElementById("lugar").value;
-  const turno = document.getElementById("turno");
-  const liderPepsico = document.getElementById("lider_pepsico");
-  const fechaInput = document.getElementById("fecha");
   if (lugar === "Funza") {
-    const coordSelect = document.getElementById("coordinador");
-    if (!coordSelect.dataset.manualChange) {
-      coordSelect.value = "Jeison Aranda";
-      manejarOtroCoordinador();
-    }
+    document.getElementById("coordinador").value = "Jeison Aranda";
+    document.getElementById("lider_pepsico").value = "Alejandro Monroy";
     const h = new Date().getHours();
-    turno.value = (h >= 6 && h < 14) ? "Manana" : (h >= 14 && h < 22) ? "Tarde" : "Noche";
-    if (!liderPepsico.dataset.manualChange) {
-      liderPepsico.value = "Alejandro Monroy";
-    }
-  } else {
-    document.getElementById("coordinador").value = "";
-    document.getElementById("coordinador_otro").style.display = 'none';
-    if (!liderPepsico.dataset.manualChange) liderPepsico.value = "";
+    document.getElementById("turno").value = (h >= 6 && h < 14) ? "Manana" : (h >= 14 && h < 22) ? "Tarde" : "Noche";
   }
-  
-  if (!fechaInput.value) fechaInput.value = new Date().toISOString().split('T')[0];
-  actualizarTotalCajas();
+  if (!document.getElementById("fecha").value) {
+    document.getElementById("fecha").value = new Date().toISOString().split('T')[0];
+  }
   guardarProgreso();
 }
 
@@ -729,156 +610,92 @@ function applyTimeMask(input, displayId) {
 }
 
 function convertirHoraMilitar(input, displayId) {
-  const value = input.value;
-  const display = document.getElementById(displayId);
-  if (!display) return;
-  if (value.length === 5 && value.includes(':')) {
-    const [h, m] = value.split(':').map(Number);
-    if (h >= 0 && h <= 23 && m >= 0 && m <= 59) {
-      const ampm = h >= 12 ? 'P.M.' : 'A.M.';
-      const h12 = (h % 12) || 12;
-      display.style.color = '#155724';
-      display.innerHTML = `Hora Normal: ${String(h12).padStart(2,'0')}:${String(m).padStart(2,'0')} ${ampm}`;
-      return;
-    }
+  const v = input.value;
+  const d = document.getElementById(displayId);
+  if (!d) return;
+  if (v.length === 5 && v.includes(':')) {
+    const [h, m] = v.split(':').map(Number);
+    const ampm = h >= 12 ? 'P.M.' : 'A.M.';
+    const h12 = (h % 12) || 12;
+    d.innerHTML = `Normal: ${String(h12).padStart(2,'0')}:${String(m).padStart(2,'0')} ${ampm}`;
   }
-  display.style.color = value.length > 0 && value.length < 5 ? '#dc3545' : '#155724';
-  display.innerHTML = value.length > 0 && value.length < 5 ? '❌ Formato incompleto. HH:MM' : '';
 }
 
 function actualizarTotalCajas() {
-  const camposCajas = document.querySelectorAll('.cajas-input-js');
-  const totalCajasInput = document.getElementById('cajas_totales');
-  let total = 0;
-  camposCajas.forEach(input => {
-    const valor = parseInt(input.value, 10);
-    if (!isNaN(valor)) total += valor;
-  });
-  if(totalCajasInput) totalCajasInput.value = total;
-}
-
-function convertirATextoMayusculas() {
-  const textInputs = document.querySelectorAll('input[type="text"], textarea');
-  textInputs.forEach(input => {
-    if (input.value.trim() !== '') input.value = input.value.toUpperCase();
-  });
+  let t = 0;
+  document.querySelectorAll('.cajas-input-js').forEach(i => t += parseInt(i.value || 0));
+  document.getElementById('cajas_totales').value = t;
 }
 
 function guardarProgreso() {
   const form = document.forms['formulario-pepsico'];
-  const formData = new FormData(form);
   const data = {};
-  formData.forEach((value, key) => {
+  new FormData(form).forEach((value, key) => {
     if (!(value instanceof File) && key !== 'form-name') data[key] = value;
   });
-
-  // Guardar estructura de campos dinámicos
-  const paradasData = [];
+  data._numVehiculos = document.getElementById('vehiculos-contenedor').children.length;
+  const paradas = [];
   document.querySelectorAll('#operacion-contenedor .parada-group').forEach(grupo => {
     const idx = grupo.dataset.index;
-    paradasData.push({
+    paradas.push({
       inicio: grupo.querySelector(`input[name="parada_inicio_operacion_${idx}"]`).value,
       fin: grupo.querySelector(`input[name="parada_fin_operacion_${idx}"]`).value,
       motivo: grupo.querySelector(`select[name="parada_motivo_operacion_${idx}"]`).value,
       otro_motivo: grupo.querySelector(`input[name="parada_otro_motivo_operacion_${idx}"]`).value
     });
   });
-
-  data._numVehiculos = vehiculosData.length;
-  data._paradasDetalle = paradasData; 
-  localStorage.setItem('pepsico_data', JSON.stringify(data));
+  data._paradasDetalle = paradas;
+  localStorage.setItem('pepsico_data_final', JSON.stringify(data));
 }
 
 function limpiarTodo() {
-  if (confirm("¿Estás seguro de borrar toda la información?")) {
-    localStorage.removeItem('pepsico_data');
-    location.reload();
-  }
+  if (confirm("¿Borrar todo?")) { localStorage.removeItem('pepsico_data_final'); location.reload(); }
 }
 
 function enviarFormulario(event) {
   event.preventDefault();
-  const camposObligatorios = [
-    { id: 'lugar', nombre: 'Lugar de operación' },
-    { id: 'lider', nombre: 'Líder Asignado' },
-    { id: 'lider_pepsico', nombre: 'Líder De Pepsico' },
-    { id: 'fecha', nombre: 'Fecha' },
-    { id: 'turno', nombre: 'Turno' },
-    { id: 'total_personas', nombre: 'Total Personas En El Turno' },
-    { id: 'cajas_totales', nombre: 'Total Cajas Movidas' }
-  ];
-  for (const campo of camposObligatorios) {
-    const valor = document.getElementById(campo.id).value.trim();
-    if (!valor) {
-      alert(`❌ Por favor, complete el campo: "${campo.nombre}".`);
-      return;
-    }
-  }
   if (!validarSolapamientoVehiculos() || !validarSolapamientoParadas()) return;
   sincronizarVehiculosDesdeDOM();
-  const vehiculosForm = [...vehiculosData];
-  const paradasForm = [];
-  const cont = document.getElementById('operacion-contenedor');
-  const grupos = cont.querySelectorAll('.parada-group');
-  grupos.forEach(grupo => {
-    const idx = grupo.dataset.index;
-    const inicio = grupo.querySelector(`input[name="parada_inicio_operacion_${idx}"]`)?.value || '';
-    const fin = grupo.querySelector(`input[name="parada_fin_operacion_${idx}"]`)?.value || '';
-    const motivo = grupo.querySelector(`select[name="parada_motivo_operacion_${idx}"]`)?.value || '';
-    const otro_motivo = grupo.querySelector(`input[name="parada_otro_motivo_operacion_${idx}"]`)?.value || '';
-    paradasForm.push({ inicio, fin, motivo, otro_motivo });
-  });
-  document.getElementById('datos_vehiculos').value = JSON.stringify(vehiculosForm);
-  document.getElementById('datos_paradas_operacion').value = JSON.stringify(paradasForm);
-  convertirATextoMayusculas();
-  localStorage.removeItem('pepsico_data');
+  document.getElementById('datos_vehiculos').value = JSON.stringify(vehiculosData);
+  localStorage.removeItem('pepsico_data_final');
   event.target.submit();
 }
 
 document.addEventListener('DOMContentLoaded', function() {
   const form = document.querySelector('form');
-  const savedData = localStorage.getItem('pepsico_data');
+  const saved = localStorage.getItem('pepsico_data_final');
 
-  if (savedData) {
-    const data = JSON.parse(savedData);
+  if (saved) {
+    const data = JSON.parse(saved);
     
-    // 1. Reconstruir Vehículos
-    const nVehiculos = data._numVehiculos || 1;
+    // 1. Vehículos
+    const nV = data._numVehiculos || 1;
     document.getElementById('vehiculos-contenedor').innerHTML = '';
     vehiculosData = [];
-    for(let i=0; i<nVehiculos; i++) {
-      const vObj = {
-        inicio: data[`vehiculo_${i}_inicio`] || '',
-        fin: data[`vehiculo_${i}_fin`] || '',
-        motivo: data[`vehiculo_${i}_motivo`] || '',
-        otro_motivo: data[`vehiculo_${i}_otro_motivo`] || '',
-        muelle: data[`vehiculo_${i}_muelle`] || '',
-        otro_muelle_num: data[`vehiculo_${i}_otro_muelle_num`] || '',
-        placa: data[`vehiculo_${i}_placa`] || '',
-        tipo_vehi: data[`vehiculo_${i}_tipo_vehi`] || '',
-        otro_tipo: data[`vehiculo_${i}_otro_tipo`] || '',
-        destino: data[`vehiculo_${i}_destino`] || '',
-        otro_destino: data[`vehiculo_${i}_otro_destino`] || '',
-        origen: data[`vehiculo_${i}_origen`] || '',
-        personas: data[`vehiculo_${i}_personas`] || '',
-        cajas: data[`vehiculo_${i}_cajas`] || '',
-        justificacion: data[`vehiculo_${i}_justificacion`] || '',
-        otro_justificacion: data[`vehiculo_${i}_otro_justificacion`] || '',
-        tiempo_muerto_inicio: data[`vehiculo_${i}_tiempo_muerto_inicio`] || '',
-        tiempo_muerto_final: data[`vehiculo_${i}_tiempo_muerto_final`] || '',
+    for(let i=0; i<nV; i++) {
+      const v = {
+        inicio: data[`vehiculo_${i}_inicio`] || '', fin: data[`vehiculo_${i}_fin`] || '',
+        motivo: data[`vehiculo_${i}_motivo`] || '', otro_motivo: data[`vehiculo_${i}_otro_motivo`] || '',
+        muelle: data[`vehiculo_${i}_muelle`] || '', otro_muelle_num: data[`vehiculo_${i}_otro_muelle_num`] || '',
+        placa: data[`vehiculo_${i}_placa`] || '', tipo_vehi: data[`vehiculo_${i}_tipo_vehi`] || '',
+        otro_tipo: data[`vehiculo_${i}_otro_tipo`] || '', destino: data[`vehiculo_${i}_destino`] || '',
+        otro_destino: data[`vehiculo_${i}_otro_destino`] || '', origen: data[`vehiculo_${i}_origen`] || '',
+        personas: data[`vehiculo_${i}_personas`] || '', cajas: data[`vehiculo_${i}_cajas`] || '',
+        justificacion: data[`vehiculo_${i}_justificacion`] || '', otro_justificacion: data[`vehiculo_${i}_otro_justificacion`] || '',
+        tiempo_muerto_inicio: data[`vehiculo_${i}_tiempo_muerto_inicio`] || '', tiempo_muerto_final: data[`vehiculo_${i}_tiempo_muerto_final`] || '',
         foto_url: data[`vehiculo_${i}_foto_url`] || ''
       };
-      vehiculosData.push(vObj);
-      crearVehiculoHTML(document.getElementById('vehiculos-contenedor'), i, vObj);
+      vehiculosData.push(v);
+      crearVehiculoHTML(document.getElementById('vehiculos-contenedor'), i, v);
     }
 
-    // 2. Reconstruir Paradas
+    // 2. Paradas
     document.getElementById('operacion-contenedor').innerHTML = '';
     if (data._paradasDetalle) {
       data._paradasDetalle.forEach(p => agregarCampoParada('operacion', p));
     }
 
-    // 3. Poblar campos estáticos
+    // 3. Campos estáticos (Lugar, Líder, etc.)
     for (const key in data) {
       if (key.startsWith('_') || key.startsWith('vehiculo_') || key.startsWith('parada_')) continue;
       const el = form.elements[key];
@@ -895,7 +712,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   form.addEventListener('submit', enviarFormulario);
-  // Escuchar cambios en todo el formulario para guardar
   form.addEventListener('input', guardarProgreso);
   form.addEventListener('change', guardarProgreso);
 });
