@@ -253,7 +253,7 @@ function validarSolapamientoVehiculos() {
     for (let i = 0; i < regs.length; i++) {
       for (let j = i + 1; j < regs.length; j++) {
         if (rangosSeSolapan(regs[i].inicio, regs[i].fin, regs[j].inicio, regs[j].fin)) {
-          alert(`¡Conflicto en muelle ${muelle}! Vehículos #${regs[i].idx + 1} y #${regs[j].idx + 1} se superponen.`);
+          alert(`¡Conflicto en muelle ${muelle}! Vehículos #${regs[i].idx + 1} y #${regs[j].idx + 1} se superponen en el mismo horario.`);
           return false;
         }
       }
@@ -267,9 +267,11 @@ function validarSolapamientoParadas() {
   const cont = document.getElementById('operacion-contenedor');
   const grupos = cont.querySelectorAll('.parada-group');
   grupos.forEach((grupo, idx) => {
-    const inicio = grupo.querySelector(`input[name="parada_inicio_operacion_${grupo.dataset.index}"]`).value;
-    const fin = grupo.querySelector(`input[name="parada_fin_operacion_${grupo.dataset.index}"]`).value;
-    if (inicio && fin) paradas.push({ inicio, fin, idx });
+    const inicioInput = grupo.querySelector(`input[name^="parada_inicio_operacion_"]`);
+    const finInput = grupo.querySelector(`input[name^="parada_fin_operacion_"]`);
+    if (inicioInput && finInput && inicioInput.value && finInput.value) {
+      paradas.push({ inicio: inicioInput.value, fin: finInput.value, idx });
+    }
   });
   for (let i = 0; i < paradas.length; i++) {
     for (let j = i + 1; j < paradas.length; j++) {
@@ -726,7 +728,6 @@ function applyTimeMask(input, displayId) {
   let formatted = value.length >= 2 ? value.substring(0,2) + ':' + (value.length > 2 ? value.substring(2,4) : '00') : '';
   input.value = formatted;
   
-  // LOGICA DE SEGURIDAD: Validar Hora Inicio vs Hora Fin
   const parent = input.closest('.time-row');
   if(parent) {
       const inputs = parent.querySelectorAll('input');
@@ -736,7 +737,7 @@ function applyTimeMask(input, displayId) {
           if(hInicio.length === 5 && hFin.length === 5) {
               if(horaAMinutos(hFin) < horaAMinutos(hInicio)) {
                   alert("❌ Error de Seguridad: La Hora Final no puede ser menor que la Hora Inicio.");
-                  input.value = ""; // Limpia el campo erróneo
+                  input.value = ""; 
                   const display = document.getElementById(displayId);
                   if(display) display.innerHTML = "";
                   return;
@@ -779,7 +780,7 @@ function actualizarTotalCajas() {
 }
 
 function convertirATextoMayusculas() {
-  const textInputs = document.querySelectorAll('input[type=\"text\"], textarea');
+  const textInputs = document.querySelectorAll('input[type="text"], textarea');
   textInputs.forEach(input => {
     if (input.value.trim() !== '') input.value = input.value.toUpperCase();
   });
@@ -796,12 +797,11 @@ function guardarProgreso() {
   const paradasData = [];
   document.querySelectorAll('#operacion-contenedor .parada-group').forEach(grupo => {
     const idx = grupo.dataset.index;
-    paradasData.push({
-      inicio: grupo.querySelector(`input[name=\"parada_inicio_operacion_${idx}\"]`).value,
-      fin: grupo.querySelector(`input[name=\"parada_fin_operacion_${idx}\"]`).value,
-      motivo: grupo.querySelector(`select[name=\"parada_motivo_operacion_${idx}\"]`).value,
-      otro_motivo: grupo.querySelector(`input[name=\"parada_otro_motivo_operacion_${idx}\"]`).value
-    });
+    const inicio = grupo.querySelector(`input[name^="parada_inicio_operacion_"]`)?.value || '';
+    const fin = grupo.querySelector(`input[name^="parada_fin_operacion_"]`)?.value || '';
+    const motivo = grupo.querySelector(`select[name^="parada_motivo_operacion_"]`)?.value || '';
+    const otro_motivo = grupo.querySelector(`input[name^="parada_otro_motivo_operacion_"]`)?.value || '';
+    paradasData.push({ inicio, fin, motivo, otro_motivo });
   });
   data._numVehiculos = vehiculosData.length;
   data._paradasDetalle = paradasData; 
@@ -817,6 +817,8 @@ function limpiarTodo() {
 
 function enviarFormulario(event) {
   event.preventDefault();
+  sincronizarVehiculosDesdeDOM();
+  
   const camposObligatorios = [
     { id: 'lugar', nombre: 'Lugar de operación' },
     { id: 'lider', nombre: 'Líder Asignado' },
@@ -827,26 +829,27 @@ function enviarFormulario(event) {
     { id: 'cajas_totales', nombre: 'Total Cajas Movidas' }
   ];
   for (const campo of camposObligatorios) {
-    const valor = document.getElementById(campo.id).value.trim();
-    if (!valor) {
+    const el = document.getElementById(campo.id);
+    if (el && !el.value.trim()) {
       alert(`❌ Por favor, complete el campo: "${campo.nombre}".`);
       return;
     }
   }
+  
   if (!validarSolapamientoVehiculos() || !validarSolapamientoParadas()) return;
-  sincronizarVehiculosDesdeDOM();
+  
   const vehiculosForm = [...vehiculosData];
   const paradasForm = [];
   const cont = document.getElementById('operacion-contenedor');
   const grupos = cont.querySelectorAll('.parada-group');
   grupos.forEach(grupo => {
-    const idx = grupo.dataset.index;
-    const inicio = grupo.querySelector(`input[name=\"parada_inicio_operacion_${idx}\"]`)?.value || '';
-    const fin = grupo.querySelector(`input[name=\"parada_fin_operacion_${idx}\"]`)?.value || '';
-    const motivo = grupo.querySelector(`select[name=\"parada_motivo_operacion_${idx}\"]`)?.value || '';
-    const otro_motivo = grupo.querySelector(`input[name=\"parada_otro_motivo_operacion_${idx}\"]`)?.value || '';
+    const inicio = grupo.querySelector(`input[name^="parada_inicio_operacion_"]`)?.value || '';
+    const fin = grupo.querySelector(`input[name^="parada_fin_operacion_"]`)?.value || '';
+    const motivo = grupo.querySelector(`select[name^="parada_motivo_operacion_"]`)?.value || '';
+    const otro_motivo = grupo.querySelector(`input[name^="parada_otro_motivo_operacion_"]`)?.value || '';
     paradasForm.push({ inicio, fin, motivo, otro_motivo });
   });
+  
   document.getElementById('datos_vehiculos').value = JSON.stringify(vehiculosForm);
   document.getElementById('datos_paradas_operacion').value = JSON.stringify(paradasForm);
   convertirATextoMayusculas();
