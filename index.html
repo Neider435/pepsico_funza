@@ -411,7 +411,6 @@ function crearVehiculoHTML(contenedor, vIndex, datos = {}) {
   const registro = document.createElement('div');
   registro.className = 'registro-vehiculo';
   registro.dataset.index = vIndex;
-
   const html = `
     <button type="button" class="btn-eliminar-registro" onclick="eliminarRegistroVehiculo(${vIndex})">
       Eliminar Vehículo #${vIndex + 1}
@@ -689,21 +688,28 @@ function actualizarCampos() {
   const turno = document.getElementById("turno");
   const liderPepsico = document.getElementById("lider_pepsico");
   const fechaInput = document.getElementById("fecha");
+  const coordSelect = document.getElementById("coordinador");
+
   if (lugar === "Funza") {
-    const coordSelect = document.getElementById("coordinador");
-    if (!coordSelect.dataset.manualChange) {
+    // Solo asignar si están vacíos para no sobreescribir localStorage
+    if (!coordSelect.dataset.manualChange && !coordSelect.value) {
       coordSelect.value = "Jeison Aranda";
       manejarOtroCoordinador();
     }
     const h = new Date().getHours();
-    turno.value = (h >= 6 && h < 14) ? "Manana" : (h >= 14 && h < 22) ? "Tarde" : "Noche";
-    if (!liderPepsico.dataset.manualChange) {
+    if (!turno.value) {
+      turno.value = (h >= 6 && h < 14) ? "Manana" : (h >= 14 && h < 22) ? "Tarde" : "Noche";
+    }
+    if (!liderPepsico.dataset.manualChange && !liderPepsico.value) {
       liderPepsico.value = "Alejandro Monroy";
     }
   } else {
-    document.getElementById("coordinador").value = "";
-    document.getElementById("coordinador_otro").style.display = 'none';
-    if (!liderPepsico.dataset.manualChange) liderPepsico.value = "";
+    // Si no es Funza, limpiar solo si no hay datos guardados
+    if (!coordSelect.value) {
+      coordSelect.value = "";
+      document.getElementById("coordinador_otro").style.display = 'none';
+    }
+    if (!liderPepsico.dataset.manualChange && !liderPepsico.value) liderPepsico.value = "";
   }
   
   if (!fechaInput.value) fechaInput.value = new Date().toISOString().split('T')[0];
@@ -771,8 +777,6 @@ function guardarProgreso() {
   formData.forEach((value, key) => {
     if (!(value instanceof File) && key !== 'form-name') data[key] = value;
   });
-
-  // Guardar estructura de campos dinámicos
   const paradasData = [];
   document.querySelectorAll('#operacion-contenedor .parada-group').forEach(grupo => {
     const idx = grupo.dataset.index;
@@ -783,7 +787,6 @@ function guardarProgreso() {
       otro_motivo: grupo.querySelector(`input[name="parada_otro_motivo_operacion_${idx}"]`).value
     });
   });
-
   data._numVehiculos = vehiculosData.length;
   data._paradasDetalle = paradasData; 
   localStorage.setItem('pepsico_data', JSON.stringify(data));
@@ -895,7 +898,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   form.addEventListener('submit', enviarFormulario);
-  // Escuchar cambios en todo el formulario para guardar
   form.addEventListener('input', guardarProgreso);
   form.addEventListener('change', guardarProgreso);
 });
