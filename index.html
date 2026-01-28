@@ -493,6 +493,11 @@ function crearVehiculoHTML(contenedor, vIndex, datos = {}) {
         <option value="bucaramanga" ${datos.destino === 'bucaramanga' ? 'selected' : ''}>Bucaramanga</option>
         <option value="monteria" ${datos.destino === 'monteria' ? 'selected' : ''}>Montería</option>
         <option value="peru" ${datos.destino === 'peru' ? 'selected' : ''}>Perú</option>
+        <option value="ecuador" ${datos.destino === 'ecuador' ? 'selected' : ''}>Ecuador</option>
+        <option value="funza" ${datos.destino === 'funza' ? 'selected' : ''}>Funza</option>
+        <option value="santo_domingo" ${datos.destino === 'santo_domingo' ? 'selected' : ''}>Santo Domingo</option>
+        <option value="innova" ${datos.destino === 'innova' ? 'selected' : ''}>Innova</option>
+        <option value="villavicencio" ${datos.destino === 'villavicencio' ? 'selected' : ''}>Villavicencio</option>
         <option value="otro" ${datos.destino === 'otro' ? 'selected' : ''}>Otro</option>
       </select>
       <input type="text" name="vehiculo_${vIndex}_otro_destino" id="otro_destino_${vIndex}" class="otro-input" placeholder="Especifique otro destino" value="${datos.otro_destino || ''}">
@@ -780,7 +785,7 @@ function actualizarTotalCajas() {
 }
 
 function convertirATextoMayusculas() {
-  const textInputs = document.querySelectorAll('input[type="text"], textarea');
+  const textInputs = document.querySelectorAll('input[type=\"text\"], textarea');
   textInputs.forEach(input => {
     if (input.value.trim() !== '') input.value = input.value.toUpperCase();
   });
@@ -797,10 +802,10 @@ function guardarProgreso() {
   const paradasData = [];
   document.querySelectorAll('#operacion-contenedor .parada-group').forEach(grupo => {
     const idx = grupo.dataset.index;
-    const inicio = grupo.querySelector(`input[name^="parada_inicio_operacion_"]`)?.value || '';
-    const fin = grupo.querySelector(`input[name^="parada_fin_operacion_"]`)?.value || '';
-    const motivo = grupo.querySelector(`select[name^="parada_motivo_operacion_"]`)?.value || '';
-    const otro_motivo = grupo.querySelector(`input[name^="parada_otro_motivo_operacion_"]`)?.value || '';
+    const inicio = grupo.querySelector(`input[name^=\"parada_inicio_operacion_\"]`)?.value || '';
+    const fin = grupo.querySelector(`input[name^=\"parada_fin_operacion_\"]`)?.value || '';
+    const motivo = grupo.querySelector(`select[name^=\"parada_motivo_operacion_\"]`)?.value || '';
+    const otro_motivo = grupo.querySelector(`input[name^=\"parada_otro_motivo_operacion_\"]`)?.value || '';
     paradasData.push({ inicio, fin, motivo, otro_motivo });
   });
   data._numVehiculos = vehiculosData.length;
@@ -816,16 +821,11 @@ function limpiarTodo() {
 }
 
 function validarPlacas() {
-  // Regla 1: 3 letras y 3 números ([A-Z]{3}[0-9]{3})
-  // Regla 2: 3 números y 3 letras ([0-9]{3}[A-Z]{3})
-  // Regla 3: 1 letra y 5 números ([A-Z]{1}[0-9]{5})
   const regexPlaca = /^([A-Z]{3}[0-9]{3}|[0-9]{3}[A-Z]{3}|[A-Z]{1}[0-9]{5})$/;
-  
   const contenedor = document.getElementById('vehiculos-contenedor');
   const registros = contenedor.querySelectorAll('.registro-vehiculo');
-  
   for (let i = 0; i < registros.length; i++) {
-    const placaInput = registros[i].querySelector(`input[name="vehiculo_${i}_placa"]`);
+    const placaInput = registros[i].querySelector(`input[name=\"vehiculo_${i}_placa\"]`);
     if (placaInput) {
       const valor = placaInput.value.toUpperCase().trim();
       if (!regexPlaca.test(valor)) {
@@ -840,7 +840,6 @@ function validarPlacas() {
 function enviarFormulario(event) {
   event.preventDefault();
   sincronizarVehiculosDesdeDOM();
-  
   const camposObligatorios = [
     { id: 'lugar', nombre: 'Lugar de operación' },
     { id: 'lider', nombre: 'Líder Asignado' },
@@ -853,26 +852,23 @@ function enviarFormulario(event) {
   for (const campo of camposObligatorios) {
     const el = document.getElementById(campo.id);
     if (el && !el.value.trim()) {
-      alert(`❌ Por favor, complete el campo: "${campo.nombre}".`);
+      alert(`❌ Por favor, complete el campo: \"${campo.nombre}\".`);
       return;
     }
   }
-  
   if (!validarPlacas()) return;
   if (!validarSolapamientoVehiculos() || !validarSolapamientoParadas()) return;
-  
   const vehiculosForm = [...vehiculosData];
   const paradasForm = [];
   const cont = document.getElementById('operacion-contenedor');
   const grupos = cont.querySelectorAll('.parada-group');
   grupos.forEach(grupo => {
-    const inicio = grupo.querySelector(`input[name^="parada_inicio_operacion_"]`)?.value || '';
-    const fin = grupo.querySelector(`input[name^="parada_fin_operacion_"]`)?.value || '';
-    const motivo = grupo.querySelector(`select[name^="parada_motivo_operacion_"]`)?.value || '';
-    const otro_motivo = grupo.querySelector(`input[name^="parada_otro_motivo_operacion_"]`)?.value || '';
+    const inicio = grupo.querySelector(`input[name^=\"parada_inicio_operacion_\"]`)?.value || '';
+    const fin = grupo.querySelector(`input[name^=\"parada_fin_operacion_\"]`)?.value || '';
+    const motivo = grupo.querySelector(`select[name^=\"parada_motivo_operacion_\"]`)?.value || '';
+    const otro_motivo = grupo.querySelector(`input[name^=\"parada_otro_motivo_operacion_\"]`)?.value || '';
     paradasForm.push({ inicio, fin, motivo, otro_motivo });
   });
-  
   document.getElementById('datos_vehiculos').value = JSON.stringify(vehiculosForm);
   document.getElementById('datos_paradas_operacion').value = JSON.stringify(paradasForm);
   convertirATextoMayusculas();
@@ -883,7 +879,6 @@ function enviarFormulario(event) {
 document.addEventListener('DOMContentLoaded', function() {
   const form = document.querySelector('form');
   const savedData = localStorage.getItem('pepsico_data');
-
   if (savedData) {
     const data = JSON.parse(savedData);
     const nVehiculos = data._numVehiculos || 1;
