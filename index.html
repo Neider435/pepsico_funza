@@ -691,8 +691,8 @@ function actualizarCampos() {
   const coordSelect = document.getElementById("coordinador");
 
   if (lugar === "Funza") {
-    // Solo asignar si están vacíos para no sobreescribir localStorage
-    if (!coordSelect.dataset.manualChange && !coordSelect.value) {
+    // CAMBIO CLAVE: Solo asignamos si el campo está vacío (no tiene valor recuperado)
+    if (!coordSelect.value) {
       coordSelect.value = "Jeison Aranda";
       manejarOtroCoordinador();
     }
@@ -700,19 +700,15 @@ function actualizarCampos() {
     if (!turno.value) {
       turno.value = (h >= 6 && h < 14) ? "Manana" : (h >= 14 && h < 22) ? "Tarde" : "Noche";
     }
-    if (!liderPepsico.dataset.manualChange && !liderPepsico.value) {
+    if (!liderPepsico.value) {
       liderPepsico.value = "Alejandro Monroy";
     }
-  } else {
-    // Si no es Funza, limpiar solo si no hay datos guardados
-    if (!coordSelect.value) {
-      coordSelect.value = "";
-      document.getElementById("coordinador_otro").style.display = 'none';
-    }
-    if (!liderPepsico.dataset.manualChange && !liderPepsico.value) liderPepsico.value = "";
+  } 
+  
+  if (!fechaInput.value) {
+    fechaInput.value = new Date().toISOString().split('T')[0];
   }
   
-  if (!fechaInput.value) fechaInput.value = new Date().toISOString().split('T')[0];
   actualizarTotalCajas();
   guardarProgreso();
 }
@@ -892,6 +888,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     actualizarTotalCajas();
   } else {
+    // Si no hay datos, inicializamos por defecto
     agregarRegistroVehiculo();
     agregarCampoParada('operacion');
     actualizarCampos();
