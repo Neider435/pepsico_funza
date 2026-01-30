@@ -181,6 +181,7 @@ button[type="submit"]:hover {
     <option value="Alejandro Ariza">Alejandro Ariza</option>
     <option value="Alejandro Monroy">Alejandro Monroy</option>
     <option value="Carlos Ruiz">Carlos Ruiz</option>
+    <option value="otro">Otro</option>
   </select>
   <label for="fecha">Fecha:</label>
   <input type="date" name="fecha" id="fecha" required>
@@ -345,6 +346,18 @@ function sincronizarVehiculosDesdeDOM() {
       foto_url: getValue(`vehiculo_${i}_foto_url`)
     };
   }
+}
+function manejarOtroLiderPepsico() {
+  const otroInput = document.getElementById('lider_pepsico_otro');
+  if (document.getElementById('lider_pepsico').value === 'otro') {
+    otroInput.style.display = 'block';
+    otroInput.required = true;
+  } else {
+    otroInput.style.display = 'none';
+    otroInput.required = false;
+    otroInput.value = '';
+  }
+  guardarProgreso();
 }
 
 function manejarOtroCampo(select) {
@@ -708,6 +721,7 @@ function actualizarCampos() {
     }
     if (!liderPepsico.value) {
       liderPepsico.value = "Alejandro Monroy";
+      manejarOtroLiderPepsico();
     }
   } 
   
@@ -929,7 +943,10 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   form.addEventListener('submit', enviarFormulario);
   form.addEventListener('input', guardarProgreso);
-  form.addEventListener('change', guardarProgreso);
+  form.addEventListener('change', guardarProgreso);ç
+  document.getElementById('lider_pepsico').addEventListener('change', function() {
+  this.dataset.manualChange = 'true';
+});
 });
 </script>
 </body>
